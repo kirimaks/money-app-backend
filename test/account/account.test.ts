@@ -1,7 +1,7 @@
 import {randomBytes} from 'crypto';
 import tap from 'tap';
 
-import {build} from '../helper';
+import {buildApp, getAppConfig} from '../helper';
 import {ACCOUNT_NAME_MIN_LENGTH, ACCOUNT_NAME_MAX_LENGTH} from '../../src/schemas/account';
 
 
@@ -17,29 +17,87 @@ type SchemaType = {
     properties: string[];
 };
 
-tap.test('Query non existing account', async(test) => {
-    const app = await build(test);
+
+tap.test('Get account from wrong/missing db', async (test) => {
+    const appConfig = getAppConfig();
+    appConfig.ACCOUNTS_INDEX_NAME = 'wrong.wrong';
+
+    const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'GET',
-        url: '/account/1234',
+        url: '/account/hello',
+    });
+
+    test.equal(resp.statusCode, 500, 'Query from wrong returns not 500');
+});
+
+tap.test('Query non existing account', async(test) => {
+    const appConfig = getAppConfig();
+
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'GET',
+        url: '/account/da785790-e7d2-45d0-8a76-0ccfb31948f4',
     });
 
     test.equal(resp.statusCode, 404, 'Query for missing account, response is not 404');
 });
 
+tap.test('Fail on account creation', async(test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'POST',
+        url: '/account/create',
+        payload: {
+            account_name: '_failfailfail'
+        }
+    });
+    test.equal(resp.statusCode, 500, 'Account creation fails but response is no 500');
+});
+
+tap.test('Fail on account creation 2', async(test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'POST',
+        url: '/account/create',
+        payload: {
+            account_name: ',failfailfailfail'
+        }
+    });
+    test.equal(resp.statusCode, 500, 'Account creation fails but response is no 500');
+});
+
+
+
 tap.test('Remove non existing account', async(test) => {
-    const app = await build(test);
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'DELETE',
-        url: '/account/1234',
+        url: '/account/da785790-e7d2-45d0-8a76-0ccfb31948f4',
     });
 
     test.equal(resp.statusCode, 404, 'Removing missing account response is not 404');
 });
 
 
+tap.test('Fail on account remove', async (test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'DELETE',
+        url: '/account/failfailfail',
+    });
+
+    test.equal(resp.statusCode, 500, 'Account deletion fails but response is not 500');
+});
+
+
 tap.test('Account no name validation', async (test) => {
-    const app = await build(test);
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'POST',
         url: '/account/create',
@@ -54,7 +112,8 @@ tap.test('Account no name validation', async (test) => {
 });
 
 tap.test('Account short name validation', async (test) => {
-    const app = await build(test);
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
     const resp= await app.inject({
         method: 'POST',
         url: '/account/create',
@@ -71,7 +130,8 @@ tap.test('Account short name validation', async (test) => {
 });
 
 tap.test('Account long name validation', async (test) => {
-    const app = await build(test);
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'POST',
         url: '/account/create',
@@ -87,9 +147,9 @@ tap.test('Account long name validation', async (test) => {
     );
 });
 
-
 tap.test('Create account', async (createAccountTest) => {
-    const app = await build(createAccountTest);
+    const appConfig = getAppConfig();
+    const app = await buildApp(createAccountTest, appConfig);
     const accountName:string = getRandomString(16);
     const respSchema:SchemaType = app.getSchema('createAccountResponse') as SchemaType;
     const respProps:string[] = Object.keys(respSchema.properties);
@@ -132,17 +192,6 @@ tap.test('Create account', async (createAccountTest) => {
 
             removeAccountTest.equal(response.statusCode, 204, 'Cannot remove account, response is not 204');
             removeAccountTest.equal(response.headers['content-type'], JSON_CONTENT_TYPE);
-
-            /*
-            removeAccountTest.test('Query removed account', async (queryRemovedAccountTest) => {
-                const resp = await app.inject({
-                    method: 'GET',
-                    url: `/account/${accountId}`,
-                });
-
-                queryRemovedAccountTest.equal(resp.statusCode, 404, 'Account removed but response code is not 404');
-            });
-            */
         });
     });
 });
