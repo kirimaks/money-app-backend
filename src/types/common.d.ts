@@ -15,3 +15,11 @@ interface ElasticSearchOptionsType {
         rejectUnauthorized: boolean
     }
 }
+
+interface AppConfig {
+    ELASTIC_URL: string;
+    ELASTIC_USER: string;
+    ELASTIC_PASSWORD: string;
+    ACCOUNTS_INDEX_NAME: string;
+    ENV: 'test' | 'dev' | 'prod';
+}

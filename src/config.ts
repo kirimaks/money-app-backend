@@ -3,11 +3,16 @@ import Ajv from "ajv";
 import {envConfigSchema} from './schemas/environment';
 
 
-function validateConfig():boolean {
+function getAppConfig(): AppConfig {
+    return Object.assign({}, process.env);
+}
+
+
+function validateConfig(config:object):boolean {
     const ajv = new Ajv();
     const validate = ajv.compile(envConfigSchema);
 
-    if (validate(process.env)) {
+    if (validate(config)) {
         return true;
     }
 
@@ -17,13 +22,12 @@ function validateConfig():boolean {
     return false;
 }
 
-function getElasticSearchOptions():ElasticSearchOptionsType {
-
+function getElasticSearchOptions(config:AppConfig):ElasticSearchOptionsType {
     return {
-        node: process.env['ELASTIC_URL'],
+        node: config.ELASTIC_URL,
         auth: {
-            username: process.env['ELASTIC_USER'],
-            password: process.env['ELASTIC_PASSWORD'],
+            username: config.ELASTIC_USER,
+            password: config.ELASTIC_PASSWORD,
         },
         tls: {
             rejectUnauthorized: false
@@ -82,10 +86,9 @@ function getSwaggerOptions() {
         //     preHandler: function (request:any, reply:any, next:any) { next() }
         // },
         staticCSP: true,
-        transformStaticCSP: (header:any) => header,
+        // transformStaticCSP: (header:any) => header,
         exposeRoute: true
     }
 }
 
-
-export { validateConfig, getElasticSearchOptions, getSwaggerOptions }
+export { getAppConfig, validateConfig, getElasticSearchOptions, getSwaggerOptions }

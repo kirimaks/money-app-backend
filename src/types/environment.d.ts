@@ -3,7 +3,7 @@ export {};
 
 declare global {
     namespace NodeJS {
-        interface ProcessEnv {
+        interface ProcessEnv { 
             ELASTIC_URL: string;
             ELASTIC_USER: string;
             ELASTIC_PASSWORD: string;

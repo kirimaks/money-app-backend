@@ -1,28 +1,22 @@
-// This file contains code that we reuse between our tests.
 import Fastify from 'fastify'
 
-import fp from 'fastify-plugin'
-import {app as App, AppOptions} from '../src/app'
+import fp from 'fastify-plugin';
+import {app as App} from '../src/app';
+import {getAppConfig} from '../src/config';
 
 import type * as tap from 'tap';
-import type {FastifyRegisterOptions} from 'fastify';
 
 export type Test = typeof tap['Test']['prototype'];
 
-// Fill in this config with all the configurations
-// needed for testing the application
-async function config (): Promise<FastifyRegisterOptions<AppOptions>> {
-  return {} as FastifyRegisterOptions<AppOptions>;
-}
 
-// Automatically build and tear down our instance
-async function build (t: Test) {
+async function buildApp (t: Test, config:AppConfig) {
   const app = Fastify()
 
   // fastify-plugin ensures that all decorators
   // are exposed for testing purposes, this is
   // different from the production setup
-  void app.register(fp(App), await config())
+  // void app.register(fp(App), await config())
+  void app.register(fp(App), config)
 
   await app.ready();
 
@@ -32,7 +26,4 @@ async function build (t: Test) {
   return app
 }
 
-export {
-  config,
-  build
-}
+export {buildApp, getAppConfig}
