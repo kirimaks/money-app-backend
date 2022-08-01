@@ -1,4 +1,4 @@
-import {v4 as uuidv4} from 'uuid';
+import {v4 as uuidv4, validate as isValidUUID} from 'uuid';
 
 import type {FastifyInstance} from 'fastify';
 import type {Client, estypes} from '@elastic/elasticsearch';
@@ -36,6 +36,15 @@ export class AccountModel implements AccountModel {
         }
 
         return new Promise(async (resolve, reject): Promise<any> => {
+            /* TODO: validate special charactes */
+            if (accountName.includes('_')) {
+                resolve(response);
+            }
+
+            if (accountName.includes(',')) {
+                reject('Invalid uuid');
+            }
+
             try {
                 const resp:estypes.CreateResponse = await this.fastify.elastic.index({
                     index: this.accountIndex,
@@ -60,6 +69,10 @@ export class AccountModel implements AccountModel {
         };
 
         return new Promise(async (resolve, reject) => {
+            if (!isValidUUID(accountId)) {
+                reject('Invalid uuid');
+            }
+
             try {
                 const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search({
                     query: {
@@ -91,6 +104,10 @@ export class AccountModel implements AccountModel {
         };
 
         return new Promise(async (resolve, reject) => {
+            if (!isValidUUID(accountId)) {
+                reject('Invalid uuid');
+            }
+
             try {
                 const searchResp:estypes.SearchResponse = await this.fastify.elastic.search({
                     query: {
