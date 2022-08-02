@@ -47,9 +47,11 @@ function createAccountController(fastify:FastifyInstance): CreateAccountRequestH
                 reply.code(500).send({error: 'Cannot create account'});
             }
 
-        } catch(err) {
-            fastify.log.error(`Cannot create account: ${err}`);
-            reply.code(500).send({error: 'Cannot create account'});
+        } catch(error) {
+            fastify.log.error(`Cannot create account: ${error}`);
+
+            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
+            reply.code(500).send({error: errorMessage});
         }
     }
 
@@ -68,13 +70,15 @@ function getAccountController(fastify:FastifyInstance): SearchAccountRequestHand
                 reply.code(200).send({
                     account_name: modelResp.document.account_name
                 });
-            } else {
+            } else { 
                 reply.code(404).send({error: 'Account not found'});
             }
 
-        } catch(err) {
-            fastify.log.error(`Error: ${err}`);
-            reply.code(500).send({error: 'Cannot get account'});
+        } catch(error) {
+            fastify.log.error(`Cannot get account: ${error}`);
+
+            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
+            reply.code(500).send({error: errorMessage});
         }
     }
 
@@ -91,12 +95,15 @@ function deleteAccountController(fastify:FastifyInstance): DeleteAccountRequestH
             const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeAccount(accountId);
             if (modelResp.success) {
                 reply.code(204).send({});
-            } else {
+            } else { 
                 reply.code(404).send({});
             }
-        } catch(err) {
-            fastify.log.error(`Cannot remove account: ${err}`);
-            reply.code(500).send({error: 'Cannot remove account'});
+
+        } catch(error) {
+            fastify.log.error(`Cannot remove account: ${error}`);
+
+            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
+            reply.code(500).send({error: errorMessage});
         }
     }
 

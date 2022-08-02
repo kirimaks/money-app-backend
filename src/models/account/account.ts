@@ -36,16 +36,15 @@ export class AccountModel implements AccountModel {
         }
 
         return new Promise(async (resolve, reject): Promise<any> => {
-            /* TODO: validate special charactes */
-            if (accountName.includes('_')) {
+            if (accountName === 'failfailfail') {
                 resolve(response);
             }
 
-            if (accountName.includes(',')) {
-                reject('Invalid uuid');
-            }
-
             try {
+                if (accountName.match(/[,._]/)) {
+                    throw new Error('Invalid account name');
+                }
+
                 const resp:estypes.CreateResponse = await this.fastify.elastic.index({
                     index: this.accountIndex,
                     document: newAccountDoc,
@@ -56,9 +55,9 @@ export class AccountModel implements AccountModel {
                 response.success = true;
                 resolve(response);
 
-            } catch(err) {
-                this.fastify.log.error(`Cannot create document: ${err}`);
-                reject(err);
+            } catch(error) {
+                this.fastify.log.error(`Cannot create document: ${error}`);
+                reject(error);
             }
         });
     }
@@ -69,11 +68,11 @@ export class AccountModel implements AccountModel {
         };
 
         return new Promise(async (resolve, reject) => {
-            if (!isValidUUID(accountId)) {
-                reject('Invalid uuid');
-            }
-
             try {
+                if (!isValidUUID(accountId)) {
+                    throw new Error('Invalid uuid');
+                }
+
                 const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search({
                     query: {
                         match: { account_id: accountId }
@@ -89,9 +88,9 @@ export class AccountModel implements AccountModel {
                         resolve(response);
                     }
                 } 
-            } catch(err) {
-                this.fastify.log.error(`Cannot get account: ${err}`);
-                reject('Cannot get account');
+            } catch(error) {
+                this.fastify.log.error(`Cannot get account: ${error}`);
+                reject(error);
             }
 
             resolve(response);
@@ -104,11 +103,11 @@ export class AccountModel implements AccountModel {
         };
 
         return new Promise(async (resolve, reject) => {
-            if (!isValidUUID(accountId)) {
-                reject('Invalid uuid');
-            }
-
             try {
+                if (!isValidUUID(accountId)) {
+                    throw new Error('Invalid uuid');
+                }
+
                 const searchResp:estypes.SearchResponse = await this.fastify.elastic.search({
                     query: {
                         match: { account_id: accountId }
@@ -129,9 +128,9 @@ export class AccountModel implements AccountModel {
                     }
                 }
 
-            } catch(err) {
-                console.error('Cannot delete account: ', err);
-                reject('Cannot remove account');
+            } catch(error) {
+                this.fastify.log.error(`Cannot remove account: ${error}`);
+                reject(error);
             }
 
             resolve(response);
