@@ -1,3 +1,5 @@
+import {v4 as uuidv4} from 'uuid';
+
 import {AccountModel} from '../models/account/account';
 
 import type {FastifyRequest, FastifyReply, FastifyInstance} from 'fastify';
@@ -30,13 +32,16 @@ export type SearchAccountRequestHandler = (request:SearchAccountRequest, reply:F
 export type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:FastifyReply) => Promise<void>;
 
 
-function createAccountController(fastify:FastifyInstance): CreateAccountRequestHandler {
+function createAccountController(fastify:FastifyInstance, config:AppConfig): CreateAccountRequestHandler {
     async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<void> {
-        const accountName = request.body.account_name;
-        const account:AccountModel = new AccountModel(fastify);
+        const account = new AccountModel(fastify, config);
+        const newDoc:AccountDocument = {
+            account_name: request.body.account_name,
+            account_id: uuidv4(),
+        }
 
         try {
-            const modelResp:ModelCreateDocResponse<AccountDocument> = await account.createAccount(accountName);
+            const modelResp:ModelCreateDocResponse<AccountDocument> = await account.createDocument(newDoc);
             if (modelResp.success) {
                 reply.code(201).send({
                     account_name: modelResp.document.account_name,
@@ -59,13 +64,13 @@ function createAccountController(fastify:FastifyInstance): CreateAccountRequestH
 }
 
 
-function getAccountController(fastify:FastifyInstance): SearchAccountRequestHandler {
+function getAccountController(fastify:FastifyInstance, config:AppConfig): SearchAccountRequestHandler {
     async function getAccount(request:SearchAccountRequest, reply:FastifyReply): Promise<void> {
         const {account_id: accountId} = request.params;
-        const account:AccountModel = new AccountModel(fastify);
+        const account = new AccountModel(fastify, config);
 
         try {
-            const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getAccount(accountId);
+            const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getDocument(accountId);
             if (modelResp.found && modelResp.document) {
                 reply.code(200).send({
                     account_name: modelResp.document.account_name
@@ -86,13 +91,13 @@ function getAccountController(fastify:FastifyInstance): SearchAccountRequestHand
 }
 
 
-function deleteAccountController(fastify:FastifyInstance): DeleteAccountRequestHandler {
+function deleteAccountController(fastify:FastifyInstance, config:AppConfig): DeleteAccountRequestHandler {
     async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<void> {
         const accountId = request.params.account_id;
-        const account:AccountModel = new AccountModel(fastify);
+        const account = new AccountModel(fastify, config);
 
         try {
-            const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeAccount(accountId);
+            const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeDocument(accountId);
             if (modelResp.success) {
                 reply.code(204).send({});
             } else { 

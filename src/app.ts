@@ -28,7 +28,7 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
 
     void fastify.register(AutoLoad, {
         dir: join(__dirname, 'plugins'),
-        options: opts
+        options: config
     })
 
     // This loads all plugins defined in routes
@@ -36,7 +36,7 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
 
     void fastify.register(AutoLoad, {
         dir: join(__dirname, 'routes'),
-        options: opts
+        options: config
     })
 };
 
