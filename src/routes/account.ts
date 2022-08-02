@@ -8,19 +8,19 @@ import type {
 
 class AccountRoutes {
     fastify: FastifyInstance;
-    opts: object;
+    config: AppConfig;
 
     createAccountController: CreateAccountRequestHandler;
     getAccountController: SearchAccountRequestHandler;
     deleteAccountController: DeleteAccountRequestHandler;
 
-    constructor(fastify:FastifyInstance, opts:object) {
+    constructor(fastify:FastifyInstance, config:AppConfig) {
         this.fastify = fastify;
-        this.opts = opts;
+        this.config = config;
 
-        this.getAccountController = getAccountController(this.fastify);
-        this.createAccountController = createAccountController(this.fastify);
-        this.deleteAccountController = deleteAccountController(this.fastify);
+        this.createAccountController = createAccountController(this.fastify, this.config);
+        this.getAccountController = getAccountController(this.fastify, this.config);
+        this.deleteAccountController = deleteAccountController(this.fastify, this.config);
 
         this.createNewAccountRoute();
         this.createAccountSearchRoute();
@@ -63,8 +63,8 @@ class AccountRoutes {
 }
 
 
-async function createAccountRoutes(fastify:FastifyInstance, opts:object): Promise<void> {
-    new AccountRoutes(fastify, opts);
+async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
+    new AccountRoutes(fastify, config);
 }
 
 

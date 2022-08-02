@@ -1,17 +1,8 @@
-interface ModelType {
-    save: () => number;
-    delete: () => boolean;
-    search: () => any;
+abstract class AbstractModel { 
+    abstract createDocument(document:unknown):Promise<ModelCreateDocResponse<unknown>>;
+    abstract removeDocument(docId:string):Promise<ModelDeleteDocResponse<unknown>>;
+    abstract getDocument(docId:string):Promise<ModelSearchDocResponse<unknown>>;
+    // abstract searchDocument(document:unknown):unknown[];
 }
 
-class Model implements ModelType { 
-    save() {
-        return 0;
-    }
-    delete() {
-        return true;
-    }
-    search() {
-        return {};
-    }
-}
+export {AbstractModel};

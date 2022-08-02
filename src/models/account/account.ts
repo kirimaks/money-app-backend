@@ -1,7 +1,9 @@
-import {v4 as uuidv4, validate as isValidUUID} from 'uuid';
+import {validate as isValidUUID} from 'uuid';
 
 import type {FastifyInstance} from 'fastify';
 import type {Client, estypes} from '@elastic/elasticsearch';
+
+import {AbstractModel} from '../model';
 
 
 declare module 'fastify' {
@@ -11,37 +13,30 @@ declare module 'fastify' {
 }
 
 
-export class AccountModel implements AccountModel {
+export class AccountModel extends AbstractModel {
     fastify: FastifyInstance;
     accountIndex: string;
 
-    constructor(fastify:FastifyInstance) {
+    constructor(fastify:FastifyInstance, config:AppConfig) {
+        super();
+
         this.fastify = fastify;
-        this.accountIndex = process.env.ACCOUNTS_INDEX_NAME;
+        this.accountIndex = config.ACCOUNTS_INDEX_NAME;
     }
 
-    createDocument(accountName:string):AccountDocument {
-        const accountId:string = uuidv4();
-        return {
-            account_id: accountId,
-            account_name: accountName,
-        }
-    }
-
-    createAccount(accountName:string):Promise<ModelCreateDocResponse<AccountDocument>> {
-        const newAccountDoc = this.createDocument(accountName);
+    createDocument(newAccountDoc:AccountDocument):Promise<ModelCreateDocResponse<AccountDocument>> {
         const response:ModelCreateDocResponse<AccountDocument> = {
             success: false,
             document: newAccountDoc,
         }
 
         return new Promise(async (resolve, reject): Promise<any> => {
-            if (accountName === 'failfailfail') {
+            if (newAccountDoc.account_name === 'failfailfail') {
                 resolve(response);
             }
 
             try {
-                if (accountName.match(/[,._]/)) {
+                if (newAccountDoc.account_name.match(/[,._]/)) {
                     throw new Error('Invalid account name');
                 }
 
@@ -62,20 +57,20 @@ export class AccountModel implements AccountModel {
         });
     }
 
-    getAccount(accountId:string):Promise<ModelSearchDocResponse<AccountDocument>> {
+    getDocument(docId:string):Promise<ModelSearchDocResponse<AccountDocument>> {
         const response:ModelSearchDocResponse<AccountDocument> = {
             found: false,
         };
 
         return new Promise(async (resolve, reject) => {
             try {
-                if (!isValidUUID(accountId)) {
+                if (!isValidUUID(docId)) {
                     throw new Error('Invalid uuid');
                 }
 
                 const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search({
                     query: {
-                        match: { account_id: accountId }
+                        match: { account_id: docId}
                     }
                 });
 
@@ -97,20 +92,20 @@ export class AccountModel implements AccountModel {
         });
     }
 
-    removeAccount(accountId:string):Promise<ModelDeleteDocResponse<AccountDocument>> {
+    removeDocument(docId:string):Promise<ModelDeleteDocResponse<AccountDocument>> {
         const response:ModelDeleteDocResponse<AccountDocument> = {
             success: false
         };
 
         return new Promise(async (resolve, reject) => {
             try {
-                if (!isValidUUID(accountId)) {
+                if (!isValidUUID(docId)) {
                     throw new Error('Invalid uuid');
                 }
 
                 const searchResp:estypes.SearchResponse = await this.fastify.elastic.search({
                     query: {
-                        match: { account_id: accountId }
+                        match: { account_id: docId}
                     }
                 });
                 if (searchResp.hits.hits.length > 0) {
