@@ -13,7 +13,7 @@ declare module 'fastify' {
 }
 
 
-export class AccountModel extends AbstractModel {
+class AccountModel extends AbstractModel {
     fastify: FastifyInstance;
     accountIndex: string;
 
@@ -58,7 +58,7 @@ export class AccountModel extends AbstractModel {
     }
 
     getDocument(docId:string):Promise<ModelSearchDocResponse<AccountDocument>> {
-        const response:ModelSearchDocResponse<AccountDocument> = {
+        const response:ModelGetDocResponse<AccountDocument> = {
             found: false,
         };
 
@@ -132,3 +132,6 @@ export class AccountModel extends AbstractModel {
         });
     }
 }
+
+
+export {AccountModel}

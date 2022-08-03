@@ -21,7 +21,9 @@ class AccountRoutes {
         this.createAccountController = createAccountController(this.fastify, this.config);
         this.getAccountController = getAccountController(this.fastify, this.config);
         this.deleteAccountController = deleteAccountController(this.fastify, this.config);
+    }
 
+    createRoutes():void {
         this.createNewAccountRoute();
         this.createAccountSearchRoute();
         this.createRemoveAccountRoute();
@@ -64,7 +66,8 @@ class AccountRoutes {
 
 
 async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
-    new AccountRoutes(fastify, config);
+    const routes = new AccountRoutes(fastify, config);
+    routes.createRoutes();
 }
 
 
