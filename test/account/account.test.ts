@@ -1,16 +1,13 @@
-import {randomBytes} from 'crypto';
 import tap from 'tap';
 
 import {buildApp, getAppConfig} from '../helper';
 import {ACCOUNT_NAME_MIN_LENGTH, ACCOUNT_NAME_MAX_LENGTH} from '../../src/schemas/account';
+import {getRandomString} from '../tools';
 
 
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
 
 
-function getRandomString(length:number):string {
-    return randomBytes(length/2).toString('hex');
-}
 
 
 type SchemaType = {
