@@ -39,7 +39,7 @@ class UserModel extends AbstractModel {
         }
     }
 
-    createUser(requestBody:UserDraft):UserDocument {
+    createDocument(requestBody:UserDraft):UserDocument {
         return {
             record_id: uuidv4(),
             first_name: requestBody.first_name,
@@ -52,7 +52,7 @@ class UserModel extends AbstractModel {
         }
     }
 
-    createDocument(newUserDoc:UserDocument):Promise<ModelCreateDocResponse<UserDocument>> {
+    saveDocument(newUserDoc:UserDocument):Promise<ModelCreateDocResponse<UserDocument>> {
         const response:ModelCreateDocResponse<UserDocument> = {
             success: false,
             document: newUserDoc,
@@ -87,6 +87,7 @@ class UserModel extends AbstractModel {
     getDocument(recordId:string):Promise<ModelSearchDocResponse<UserDocument>> {
         const response:ModelGetDocResponse<UserDocument> = {
             found: false,
+            errorMessage: '',
         };
 
         return new Promise(async (resolve, reject) => {
@@ -116,6 +117,7 @@ class UserModel extends AbstractModel {
     removeDocument(recordId:string):Promise<ModelDeleteDocResponse<UserDocument>> {
         const response:ModelDeleteDocResponse<UserDocument> = {
             success: false,
+            errorMessage: ''
         };
 
         return new Promise(async (resolve, reject) => {

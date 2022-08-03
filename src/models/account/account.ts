@@ -1,9 +1,10 @@
-import {validate as isValidUUID} from 'uuid';
+import {validate as isValidUUID, v4 as uuidv4} from 'uuid';
 
 import type {FastifyInstance} from 'fastify';
 import type {Client, estypes} from '@elastic/elasticsearch';
 
 import {AbstractModel} from '../model';
+import {getErrorMessage} from '../../errors/tools';
 
 
 declare module 'fastify' {
@@ -24,26 +25,45 @@ class AccountModel extends AbstractModel {
         this.accountIndex = config.ACCOUNTS_INDEX_NAME;
     }
 
-    createDocument(newAccountDoc:AccountDocument):Promise<ModelCreateDocResponse<AccountDocument>> {
+    private getSearchByIdDock(recordId:string) {
+        return {
+            query: { 
+                match: {account_id: recordId} 
+            }
+        }
+    }
+
+    createDocument(requestBody:AccountDraft):AccountDocument {
+        return {
+            account_name: requestBody.account_name,
+            account_id: uuidv4(),
+        }
+    }
+
+    saveDocument(newAccountDoc:AccountDocument):Promise<ModelCreateDocResponse<AccountDocument>> {
         const response:ModelCreateDocResponse<AccountDocument> = {
             success: false,
             document: newAccountDoc,
         }
 
-        return new Promise(async (resolve, reject): Promise<any> => {
-            if (newAccountDoc.account_name === 'failfailfail') {
+        return new Promise<ModelCreateDocResponse<AccountDocument>>(async (resolve, reject) => {
+            if (newAccountDoc.account_name.match(/[,._]/)) {
+                response.success = false;
+                response.errorMessage = 'Bad characters in account name';
                 resolve(response);
+                return;
             }
 
             try {
-                if (newAccountDoc.account_name.match(/[,._]/)) {
-                    throw new Error('Invalid account name');
+                if (newAccountDoc.account_name === 'fail500fail') {
+                    throw new Error('Account creation failed');
                 }
 
                 const resp:estypes.CreateResponse = await this.fastify.elastic.index({
                     index: this.accountIndex,
                     document: newAccountDoc,
                 });
+
                 this.fastify.log.debug(`<<< Create account response: ${JSON.stringify(resp)} >>>`);
                 await this.fastify.elastic.indices.refresh({index: this.accountIndex});
 
@@ -51,8 +71,10 @@ class AccountModel extends AbstractModel {
                 resolve(response);
 
             } catch(error) {
-                this.fastify.log.error(`Cannot create document: ${error}`);
-                reject(error);
+                this.fastify.log.error(`Cannot create account: ${error}`);
+
+                response.errorMessage = getErrorMessage(error);
+                reject(response);
             }
         });
     }
@@ -60,32 +82,34 @@ class AccountModel extends AbstractModel {
     getDocument(docId:string):Promise<ModelSearchDocResponse<AccountDocument>> {
         const response:ModelGetDocResponse<AccountDocument> = {
             found: false,
-        };
+            errorMessage: ''
+        }
 
         return new Promise(async (resolve, reject) => {
+            if (!isValidUUID(docId)) {
+                response.found = false;
+                response.errorMessage = 'Invalid uuid';
+                resolve(response);
+                return;
+            }
+
             try {
-                if (!isValidUUID(docId)) {
-                    throw new Error('Invalid uuid');
-                }
-
-                const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search({
-                    query: {
-                        match: { account_id: docId}
-                    }
-                });
-
+                const searchDoc = this.getSearchByIdDock(docId);
+                const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search(searchDoc);
                 if (resp.hits.hits.length > 0) {
                     const hit = resp.hits.hits[0];
-
                     if (hit && hit._source) {
                         response.document = hit._source;
                         response.found = true;
                         resolve(response);
                     }
-                } 
+                }
+
             } catch(error) {
                 this.fastify.log.error(`Cannot get account: ${error}`);
-                reject(error);
+
+                response.errorMessage = getErrorMessage(error);
+                reject(response);
             }
 
             resolve(response);
@@ -94,20 +118,21 @@ class AccountModel extends AbstractModel {
 
     removeDocument(docId:string):Promise<ModelDeleteDocResponse<AccountDocument>> {
         const response:ModelDeleteDocResponse<AccountDocument> = {
-            success: false
+            success: false,
+            errorMessage: '',
         };
 
         return new Promise(async (resolve, reject) => {
-            try {
-                if (!isValidUUID(docId)) {
-                    throw new Error('Invalid uuid');
-                }
+            if (!isValidUUID(docId)) {
+                response.success = false;
+                response.errorMessage = 'Invalid uuid';
+                resolve(response);
+                return;
+            }
 
-                const searchResp:estypes.SearchResponse = await this.fastify.elastic.search({
-                    query: {
-                        match: { account_id: docId}
-                    }
-                });
+            try {
+                const searchDoc = this.getSearchByIdDock(docId);
+                const searchResp:estypes.SearchResponse = await this.fastify.elastic.search(searchDoc);
                 if (searchResp.hits.hits.length > 0) {
                     const firstHit = searchResp.hits.hits[0];
                     if (firstHit) {
@@ -125,7 +150,9 @@ class AccountModel extends AbstractModel {
 
             } catch(error) {
                 this.fastify.log.error(`Cannot remove account: ${error}`);
-                reject(error);
+
+                response.errorMessage = getErrorMessage(error);
+                reject(response);
             }
 
             resolve(response);

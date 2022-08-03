@@ -31,10 +31,10 @@ type RemoveUserRequestHandler = (request:RemoveUserRequest, reply:FastifyReply) 
 function newUserController(fastify:FastifyInstance, config:AppConfig): NewUserRequestHandler {
     async function create(request:CreateUserRequest, reply:FastifyReply): Promise<void> {
         const user = new UserModel(fastify, config);
-        const newDoc:UserDocument = user.createUser(request.body);
+        const newDoc:UserDocument = user.createDocument(request.body);
 
         try {
-            const modelResp:ModelCreateDocResponse<UserDocument> = await user.createDocument(newDoc);
+            const modelResp:ModelCreateDocResponse<UserDocument> = await user.saveDocument(newDoc);
             if (modelResp.success) {
                 reply.code(201).send({
                     record_id: modelResp.document.record_id,

@@ -1,5 +1,3 @@
-import {v4 as uuidv4} from 'uuid';
-
 import {AccountModel} from '../models/account/account';
 
 import type {FastifyRequest, FastifyReply, FastifyInstance} from 'fastify';
@@ -35,13 +33,10 @@ export type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:F
 function createAccountController(fastify:FastifyInstance, config:AppConfig): CreateAccountRequestHandler {
     async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<void> {
         const account = new AccountModel(fastify, config);
-        const newDoc:AccountDocument = {
-            account_name: request.body.account_name,
-            account_id: uuidv4(),
-        }
+        const newDoc:AccountDocument = account.createDocument(request.body);
 
         try {
-            const modelResp:ModelCreateDocResponse<AccountDocument> = await account.createDocument(newDoc);
+            const modelResp:ModelCreateDocResponse<AccountDocument> = await account.saveDocument(newDoc);
             if (modelResp.success) {
                 reply.code(201).send({
                     account_name: modelResp.document.account_name,
@@ -49,14 +44,15 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
                 });
 
             } else {
-                reply.code(500).send({error: 'Cannot create account'});
+                reply.code(400).send({error: modelResp.errorMessage});
             }
 
         } catch(error) {
             fastify.log.error(`Cannot create account: ${error}`);
 
-            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({
+                error: account.getModelResponseError(error),
+            });
         }
     }
 
@@ -71,10 +67,17 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): Search
 
         try {
             const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getDocument(accountId);
-            if (modelResp.found && modelResp.document) {
+
+            if (modelResp.errorMessage.length > 0) {
+                reply.code(400).send({
+                    error: modelResp.errorMessage
+                });
+
+            } else if (modelResp.found && modelResp.document) {
                 reply.code(200).send({
                     account_name: modelResp.document.account_name
                 });
+
             } else { 
                 reply.code(404).send({error: 'Account not found'});
             }
@@ -82,8 +85,9 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): Search
         } catch(error) {
             fastify.log.error(`Cannot get account: ${error}`);
 
-            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({
+                error: account.getModelResponseError(error),
+            });
         }
     }
 
