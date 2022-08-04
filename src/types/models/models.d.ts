@@ -21,3 +21,7 @@ interface ModelGetDocResponse<DocT> extends ModelResponse {
     found: boolean;
     document?: DocT;
 }
+
+interface ModelRequestOptions {
+    controlHeader: string | undefined;
+}

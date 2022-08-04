@@ -8,8 +8,8 @@ function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
 abstract class AbstractModel { 
     abstract createDocument(document:unknown):object;
     abstract saveDocument(document:unknown):Promise<ModelCreateDocResponse<unknown>>;
-    abstract removeDocument(docId:string):Promise<ModelDeleteDocResponse<unknown>>;
-    abstract getDocument(docId:string):Promise<ModelSearchDocResponse<unknown>>;
+    abstract removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<unknown>>;
+    abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
     // abstract searchDocument(document:unknown):unknown[];
 
    
