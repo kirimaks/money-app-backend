@@ -79,7 +79,7 @@ class AccountModel extends AbstractModel {
         });
     }
 
-    getDocument(docId:string):Promise<ModelSearchDocResponse<AccountDocument>> {
+    getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<AccountDocument>> {
         const response:ModelGetDocResponse<AccountDocument> = {
             found: false,
             errorMessage: ''
@@ -94,6 +94,10 @@ class AccountModel extends AbstractModel {
             }
 
             try {
+                if (options.controlHeader === 'fail500fail') {
+                    throw new Error('Cannot create this account');
+                }
+
                 const searchDoc = this.getSearchByIdDock(docId);
                 const resp:estypes.SearchResponse<AccountDocument> = await this.fastify.elastic.search(searchDoc);
                 if (resp.hits.hits.length > 0) {
@@ -116,7 +120,7 @@ class AccountModel extends AbstractModel {
         });
     }
 
-    removeDocument(docId:string):Promise<ModelDeleteDocResponse<AccountDocument>> {
+    removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<AccountDocument>> {
         const response:ModelDeleteDocResponse<AccountDocument> = {
             success: false,
             errorMessage: '',
@@ -131,6 +135,10 @@ class AccountModel extends AbstractModel {
             }
 
             try {
+                if (options.controlHeader === 'fail500fail') {
+                    throw new Error('Cannot remove this account');
+                }
+
                 const searchDoc = this.getSearchByIdDock(docId);
                 const searchResp:estypes.SearchResponse = await this.fastify.elastic.search(searchDoc);
                 if (searchResp.hits.hits.length > 0) {

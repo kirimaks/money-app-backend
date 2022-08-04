@@ -25,7 +25,7 @@ tap.test('Get account by invalid uuid', async (test) => {
         url: '/account/hello',
     });
 
-    test.equal(resp.statusCode, 500, 'Query from wrong returns not 500');
+    test.equal(resp.statusCode, 400, 'Query by wrong uuid returns not 400');
     test.equal(resp.json().error, 'Invalid uuid', 'Wrong error message');
 });
 
@@ -48,25 +48,25 @@ tap.test('Fail on account creation', async(test) => {
         method: 'POST',
         url: '/account/create',
         payload: {
-            account_name: ',._failfailfail'
+            account_name: 'fail500fail'
         }
     });
     test.equal(resp.statusCode, 500, 'Account creation fails but response is no 500');
-    test.equal(resp.json().error, 'Invalid account name', 'Returns wrong error');
+    test.equal(resp.json().error, 'Account creation failed', 'Returns wrong error');
 });
 
-tap.test('Fail on account creation 2', async(test) => {
+tap.test('Create account with bad characters', async(test) => {
     const appConfig = getAppConfig();
     const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'POST',
         url: '/account/create',
         payload: {
-            account_name: 'failfailfail'
+            account_name: 'failfailfail,.'
         }
     });
-    test.equal(resp.statusCode, 500, 'Account creation fails but response is no 500');
-    test.equal(resp.json().error, 'Cannot create account', 'Wrong error returned');
+    test.equal(resp.statusCode, 400, 'Account creation fails but response is no 400');
+    test.equal(resp.json().error, 'Bad characters in account name', 'Wrong error returned');
 });
 
 tap.test('Remove non existing account', async(test) => {
@@ -80,15 +80,45 @@ tap.test('Remove non existing account', async(test) => {
     test.equal(resp.statusCode, 404, 'Removing missing account response is not 404');
 });
 
+tap.test('Search for an account and fail', async(test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'GET',
+        url: '/account/da785790-e7d2-45d0-8a76-0ccfb31948f4',
+        headers: {
+            'X-Control-Header': 'fail500fail'
+        }
+    });
+
+    test.equal(resp.statusCode, 500, 'Response code for failed request is not 500');
+    test.equal(resp.json().error, 'Cannot create this account', 'Wrong error');
+});
+
 tap.test('Fail on account remove', async (test) => {
     const appConfig = getAppConfig();
     const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'DELETE',
-        url: '/account/failfailfail',
+        url: '/account/da785790-e7d2-45d0-8a76-0ccfb31948f4',
+        headers: {
+            'X-Control-Header': 'fail500fail'
+        }
     });
 
     test.equal(resp.statusCode, 500, 'Account deletion fails but response is not 500');
+    test.equal(resp.json().error, 'Cannot remove this account', 'Error message not match');
+});
+
+tap.test('Remove account by wrong uuid', async(test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'DELETE',
+        url: '/account/wrong-uuid',
+    });
+
+    test.equal(resp.statusCode, 400, 'Account deletion fails but response is not 400');
     test.equal(resp.json().error, 'Invalid uuid', 'Error message not match');
 });
 

@@ -6,6 +6,9 @@ import type {FastifyRequest, FastifyReply, FastifyInstance} from 'fastify';
 type SearchAccountProperties = {
     Params: {
         account_id: string;
+    },
+    Headers: {
+        'x-control-header': string;
     }
 };
 
@@ -18,6 +21,9 @@ type CreateAccountProperties = {
 type DeleteRequestProperties = {
     Params: {
         account_id: string;
+    },
+    Headers: {
+        'x-control-header': string;
     }
 };
 
@@ -62,11 +68,16 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
 
 function getAccountController(fastify:FastifyInstance, config:AppConfig): SearchAccountRequestHandler {
     async function getAccount(request:SearchAccountRequest, reply:FastifyReply): Promise<void> {
-        const {account_id: accountId} = request.params;
+        const {account_id} = request.params;
         const account = new AccountModel(fastify, config);
+        const options:ModelRequestOptions = {
+            controlHeader: request.headers['x-control-header'],
+        }
 
         try {
-            const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getDocument(accountId);
+            const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getDocument(
+                account_id, options
+            );
 
             if (modelResp.errorMessage.length > 0) {
                 reply.code(400).send({
@@ -99,11 +110,21 @@ function deleteAccountController(fastify:FastifyInstance, config:AppConfig): Del
     async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<void> {
         const accountId = request.params.account_id;
         const account = new AccountModel(fastify, config);
+        const options:ModelRequestOptions = {
+            controlHeader: request.headers['x-control-header'],
+        }
 
         try {
-            const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeDocument(accountId);
-            if (modelResp.success) {
+            const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeDocument(
+                accountId, options
+            );
+
+            if (modelResp.errorMessage.length > 0) {
+                reply.code(400).send({error: modelResp.errorMessage});
+
+            } else if (modelResp.success) {
                 reply.code(204).send({});
+
             } else { 
                 reply.code(404).send({});
             }
@@ -111,8 +132,9 @@ function deleteAccountController(fastify:FastifyInstance, config:AppConfig): Del
         } catch(error) {
             fastify.log.error(`Cannot remove account: ${error}`);
 
-            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({
+                error: account.getModelResponseError(error),
+            });
         }
     }
 
