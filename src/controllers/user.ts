@@ -10,12 +10,18 @@ type CreateUserProperties = {
 type GetUserProperties = {
     Params: {
         record_id: string;
+    },
+    Headers: {
+        'x-control-header': string;
     }
 }
 
 type RemoveUserProperties = {
     Params: {
         record_id: string;
+    },
+    Headers: {
+        'x-control-header': string;
     }
 }
 
@@ -45,8 +51,7 @@ function newUserController(fastify:FastifyInstance, config:AppConfig): NewUserRe
         } catch(error) {
             fastify.log.error(`Cannot create user: ${error}`);
 
-            const errorMessage = error instanceof Error ? error.message : 'Error not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({error: user.getModelResponseError(error)});
         }
     }
 
@@ -57,19 +62,25 @@ function getUserController(fastify:FastifyInstance, config:AppConfig): GetUserRe
     async function get(request:GetUserRequest, reply:FastifyReply): Promise<void> {
         const {record_id} = request.params;
         const user = new UserModel(fastify, config);
+        const options:ModelRequestOptions = {
+            controlHeader: request.headers['x-control-header'],
+        }
 
         try {
-            const modelResp:ModelSearchDocResponse<UserDocument> = await user.getDocument(record_id);
-            if (modelResp.found) {
+            const modelResp:ModelSearchDocResponse<UserDocument> = await user.getDocument(record_id, options);
+            if (modelResp.errorMessage.length > 0) {
+                reply.code(400).send({error: modelResp.errorMessage});
+
+            } else if (modelResp.found) {
                 reply.code(200).send(modelResp.document);
+
             } else {
                 reply.code(404).send({error: 'User not found'});
+
             }
         } catch(error) {
             fastify.log.error(`Cannot get user: ${error}`);
-
-            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({error: user.getModelResponseError(error)});
         }
     }
 
@@ -80,19 +91,24 @@ function removeUserController(fastify:FastifyInstance, config:AppConfig): Remove
     async function remove(request:RemoveUserRequest, reply:FastifyReply): Promise<void> {
         const {record_id} = request.params;
         const user = new UserModel(fastify, config);
+        const options:ModelRequestOptions = {
+            controlHeader: request.headers['x-control-header'],
+        }
 
         try {
-            const modelResp:ModelDeleteDocResponse<UserDocument> = await user.removeDocument(record_id);
-            if (modelResp.success) {
+            const modelResp:ModelDeleteDocResponse<UserDocument> = await user.removeDocument(record_id, options);
+            if (modelResp.errorMessage.length > 0) {
+                reply.code(400).send({error: modelResp.errorMessage});
+
+            } else if (modelResp.success) {
                 reply.code(204).send({});
+
             } else {
                 reply.code(404).send({error: 'User not found'});
             }
         } catch(error) {
             fastify.log.error(`Cannot remove user ${error}`);
-
-            const errorMessage = error instanceof Error ? error.message : 'Error message not provided';
-            reply.code(500).send({error: errorMessage});
+            reply.code(500).send({error: user.getModelResponseError(error)});
         }
     }
 

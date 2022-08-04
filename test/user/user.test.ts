@@ -19,7 +19,7 @@ function generateNewUserDoc():UserDraft {
 }
 
 
-tap.test('Get missing user', async (test) => {
+tap.test('Get by invalid uuid', async (test) => {
     const appConfig = getAppConfig();
 
     const app = await buildApp(test, appConfig);
@@ -28,9 +28,66 @@ tap.test('Get missing user', async (test) => {
         url: '/user/hello',
     });
 
-    console.log('Get missing user: ', resp.json());
+    test.equal(resp.statusCode, 400, 'Response for missing user is not 400');
+    test.equal(resp.json().error, 'Invalid uuid', 'Wrong error');
+});
+
+tap.test('Get missing user', async (test) => {
+    const appConfig = getAppConfig();
+
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'GET',
+        url: '/user/81e0eae4-95d9-4d27-8be3-eb67f3ccbc3d',
+    });
 
     test.equal(resp.statusCode, 404, 'Response for missing user is not 404');
+    test.equal(resp.json().error, 'User not found', 'Wrong error');
+});
+
+tap.test('Get user and fail', async (test) => {
+    const appConfig = getAppConfig();
+
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'GET',
+        url: '/user/81e0eae4-95d9-4d27-8be3-eb67f3ccbc3d',
+        headers: {
+            'X-Control-Header': 'fail500fail',
+        }
+    });
+
+    test.equal(resp.statusCode, 500, 'Response code failed request is not 500');
+    test.equal(resp.json().error, 'Cannot get this document', 'Wrong error');
+});
+
+tap.test('Remove missing user', async (test) => {
+    const appConfig = getAppConfig();
+
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'DELETE',
+        url: '/user/81e0eae4-95d9-4d27-8be3-eb67f3ccbc3d',
+    });
+
+    test.equal(resp.statusCode, 404, 'Response code for missing user is not 404');
+    test.equal(resp.json().error, 'User not found', 'Wrong error');
+});
+
+tap.test('Remove user and fail', async (test) => {
+    const appConfig = getAppConfig();
+
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'DELETE',
+        url: '/user/81e0eae4-95d9-4d27-8be3-eb67f3ccbc3d',
+        headers: {
+            'X-Control-Header': 'fail500fail'
+        }
+    });
+
+    test.equal(resp.statusCode, 500, 'Response code for failed request is not 500');
+    test.equal(resp.json().error, 'Cannot remove this user', 'Wrong error');
 });
 
 tap.test('Create user with wrong/missing account id', async (test) => {
@@ -50,7 +107,7 @@ tap.test('Create user with wrong/missing account id', async (test) => {
 
 tap.test('Create user and fail', async (test) => {
     const newUserDoc = generateNewUserDoc();
-    newUserDoc.first_name = 'failfailfail';
+    newUserDoc.first_name = 'fail500fail';
 
     const appConfig = getAppConfig();
     const app = await buildApp(test, appConfig);
@@ -64,6 +121,18 @@ tap.test('Create user and fail', async (test) => {
     test.equal(resp.json().error, 'Cannot create this user', 'Wrong message for failed request');
 });
 
+tap.test('Remove user with wrong uuid', async(test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
+    const resp = await app.inject({
+        method: 'DELETE',
+        url: '/user/hello',
+    });
+
+    test.equal(resp.statusCode, 400, 'Response for invalid uuid is not 400');
+    test.equal(resp.json().error, 'Invalid uuid', 'Wrong error');
+});
+
 tap.test('Create user', async (createUserTest) => {
     const appConfig = getAppConfig();
     const newUserDoc = generateNewUserDoc();
@@ -74,11 +143,8 @@ tap.test('Create user', async (createUserTest) => {
         url: '/user/create',
         payload: newUserDoc,
     });
-    console.log(resp.json());
 
     const {record_id} = resp.json();
-
-    console.log('User ID: ', record_id);
 
     createUserTest.equal(resp.statusCode, 201, 'Response for new user is not 201');
     createUserTest.ok(validateUUID(record_id), 'User id is invalid uuid');

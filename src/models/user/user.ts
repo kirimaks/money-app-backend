@@ -4,6 +4,7 @@ import type {FastifyInstance} from 'fastify';
 import type {estypes} from '@elastic/elasticsearch';
 
 import {AbstractModel} from '../model';
+import {getErrorMessage} from '../../errors/tools';
 
 
 class UserModel extends AbstractModel {
@@ -60,12 +61,13 @@ class UserModel extends AbstractModel {
 
         return new Promise(async (resolve, reject) => {
             if (!validateUUID(newUserDoc.account_id)) {
-                response.errorMessage = 'account_id is not uuid';
+                response.errorMessage = 'Invalid uuid';
                 resolve(response);
+                return;
             }
 
             try {
-                if (newUserDoc.first_name === 'failfailfail') {
+                if (newUserDoc.first_name === 'fail500fail') {
                     throw new Error('Cannot create this user');
                 }
 
@@ -79,19 +81,31 @@ class UserModel extends AbstractModel {
 
             } catch(error) {
                 this.fastify.log.error(`Cannot create user: ${error}`);
-                reject(error);
+
+                response.errorMessage = getErrorMessage(error);
+                reject(response);
             }
         });
     }
 
-    getDocument(recordId:string):Promise<ModelSearchDocResponse<UserDocument>> {
+    getDocument(recordId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<UserDocument>> {
         const response:ModelGetDocResponse<UserDocument> = {
             found: false,
             errorMessage: '',
         };
 
         return new Promise(async (resolve, reject) => {
+            if (!validateUUID(recordId)) {
+                response.errorMessage = 'Invalid uuid';
+                resolve(response);
+                return;
+            }
+
             try {
+                if (options.controlHeader === 'fail500fail') {
+                    throw new Error('Cannot get this document');
+                }
+
                 const searchDoc = this.getSearchByIdDock(recordId);
                 const resp:estypes.SearchResponse<UserDocument> = await this.fastify.elastic.search(searchDoc);
 
@@ -114,14 +128,25 @@ class UserModel extends AbstractModel {
         });
     }
 
-    removeDocument(recordId:string):Promise<ModelDeleteDocResponse<UserDocument>> {
+    removeDocument(recordId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<UserDocument>> {
         const response:ModelDeleteDocResponse<UserDocument> = {
             success: false,
             errorMessage: ''
         };
 
         return new Promise(async (resolve, reject) => {
+            if (!validateUUID(recordId)) {
+                response.success = false;
+                response.errorMessage = 'Invalid uuid';
+                resolve(response);
+                return;
+            }
+      
             try {
+                if (options.controlHeader === 'fail500fail') {
+                    throw new Error('Cannot remove this user');
+                }
+
                 const searchDoc = this.getSearchByIdDock(recordId);
                 const searchResp:estypes.SearchResponse = await this.fastify.elastic.search(searchDoc);
 
