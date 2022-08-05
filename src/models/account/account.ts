@@ -166,6 +166,35 @@ class AccountModel extends AbstractModel {
             resolve(response);
         });
     }
+
+    async createIndex() {
+        const indexDoc:estypes.IndicesCreateRequest = {
+            index: this.accountIndex,
+            settings: {
+                number_of_shards: 1,
+                number_of_replicas: 1,
+            },
+            mappings: {
+                properties: {
+                    account_id: {
+                        type: 'text',
+                    },
+                    account_name: {
+                        type: 'text',
+                    },
+                    created_date: {
+                        type: 'date',
+                    },
+                    comment: {
+                        type: 'text',
+                        index: false
+                    }
+                }
+            }
+        };
+
+        return await this.fastify.elastic.indices.create(indexDoc);
+    }
 }
 
 
