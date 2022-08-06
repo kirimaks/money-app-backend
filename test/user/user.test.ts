@@ -4,6 +4,7 @@ import tap from 'tap';
 
 import {buildApp, getAppConfig} from '../helper';
 import {getRandomString} from '../tools';
+import {UserModel} from '../../src/models/user/user';
 
 
 function generateNewUserDoc():UserDraft {
@@ -138,6 +139,12 @@ tap.test('Create user', async (createUserTest) => {
     const newUserDoc = generateNewUserDoc();
 
     const app = await buildApp(createUserTest, appConfig);
+
+    const userModel = new UserModel(app, appConfig);
+    const createIndexResp = await userModel.createIndex();
+
+    createUserTest.ok(createIndexResp.acknowledged, 'Index not acknowledged');
+
     const resp = await app.inject({
         method: 'POST',
         url: '/user/create',
@@ -168,6 +175,9 @@ tap.test('Create user', async (createUserTest) => {
             });
 
             removeUserTest.equal(resp.statusCode, 204, 'Remove user response code is not 204');
+
+            const removeIndexResp = await userModel.deleteIndex();
+            removeUserTest.ok(removeIndexResp.acknowledged, 'Index not acknowledged');
         });
     });
 });
