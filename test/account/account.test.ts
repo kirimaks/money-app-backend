@@ -3,6 +3,7 @@ import tap from 'tap';
 import {buildApp, getAppConfig} from '../helper';
 import {ACCOUNT_NAME_MIN_LENGTH, ACCOUNT_NAME_MAX_LENGTH} from '../../src/schemas/account';
 import {getRandomString} from '../tools';
+import {AccountModel} from '../../src/models/account/account';
 
 
 const JSON_CONTENT_TYPE = 'application/json; charset=utf-8';
@@ -181,6 +182,12 @@ tap.test('Create account', async (createAccountTest) => {
     const respSchema:SchemaType = app.getSchema('createAccountResponse') as SchemaType;
     const respProps:string[] = Object.keys(respSchema.properties);
 
+    const account = new AccountModel(app, appConfig);
+    const indexResp = await account.createIndex();
+
+    createAccountTest.ok(indexResp.acknowledged, 'Indewx not acknowledged');
+    createAccountTest.equal(indexResp.index, account.indexName, 'Index name is not equal');
+
     const response = await app.inject({
         method: 'POST',
         url: '/account/create',
@@ -219,6 +226,9 @@ tap.test('Create account', async (createAccountTest) => {
 
             removeAccountTest.equal(response.statusCode, 204, 'Cannot remove account, response is not 204');
             removeAccountTest.equal(response.headers['content-type'], JSON_CONTENT_TYPE);
+
+            const removeIndexResp = await account.deleteIndex();
+            removeAccountTest.ok(removeIndexResp.acknowledged, 'Index not acknowledged');
         });
     });
 });
