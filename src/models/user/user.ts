@@ -164,6 +164,52 @@ class UserModel extends AbstractModel {
             resolve(response);
         });
     }
+
+    async createIndex() {
+        const indexDoc:estypes.IndicesCreateRequest = {
+            index: this.indexName,
+            settings: {
+                number_of_shards: 1,
+                number_of_replicas: 1,
+            },
+            mappings: {
+                properties: {
+                    user_id: {
+                        type: 'text',
+                    },
+                    first_name: {
+                        type: 'text',
+                    },
+                    last_name: {
+                        type: 'text',
+                    },
+                    email: {
+                        type: 'text',
+                    },
+                    phone_number: {
+                        type: 'text',
+                    },
+                    password: {
+                        type: 'text',
+                        index: false,
+                    },
+                    comment: {
+                        type: 'text',
+                    }
+                }
+            }
+        };
+
+        return await this.fastify.elastic.indices.create(indexDoc);
+    }
+
+    async deleteIndex() {
+        const indexDoc:estypes.IndicesDeleteRequest = {
+            index: this.indexName,
+        };
+
+        return await this.fastify.elastic.indices.delete(indexDoc);
+    }
 }
 
 export {UserModel};

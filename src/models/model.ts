@@ -16,7 +16,8 @@ abstract class AbstractModel {
     abstract saveDocument(document:unknown):Promise<ModelCreateDocResponse<unknown>>;
     abstract removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<unknown>>;
     abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
-    // abstract searchDocument(document:unknown):unknown[];
+    abstract createIndex():void;
+    abstract deleteIndex():void;
 
     constructor(fastify:FastifyInstance, indexName:string) {
         this.fastify = fastify;
