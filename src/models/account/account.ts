@@ -15,14 +15,8 @@ declare module 'fastify' {
 
 
 class AccountModel extends AbstractModel {
-    fastify: FastifyInstance;
-    accountIndex: string;
-
     constructor(fastify:FastifyInstance, config:AppConfig) {
-        super();
-
-        this.fastify = fastify;
-        this.accountIndex = config.ACCOUNTS_INDEX_NAME;
+        super(fastify, config.ACCOUNTS_INDEX_NAME);
     }
 
     private getSearchByIdDock(recordId:string) {
@@ -60,12 +54,12 @@ class AccountModel extends AbstractModel {
                 }
 
                 const resp:estypes.CreateResponse = await this.fastify.elastic.index({
-                    index: this.accountIndex,
+                    index: this.indexName,
                     document: newAccountDoc,
                 });
 
                 this.fastify.log.debug(`<<< Create account response: ${JSON.stringify(resp)} >>>`);
-                await this.fastify.elastic.indices.refresh({index: this.accountIndex});
+                await this.fastify.elastic.indices.refresh({index: this.indexName});
 
                 response.success = true;
                 resolve(response);
@@ -148,7 +142,7 @@ class AccountModel extends AbstractModel {
 
                         const recordId:string = firstHit._id;
                         const deleteResp:estypes.DeleteResponse = await this.fastify.elastic.delete({
-                            index: this.accountIndex,
+                            index: this.indexName,
                             id: recordId, 
                         });
 
@@ -169,7 +163,7 @@ class AccountModel extends AbstractModel {
 
     async createIndex() {
         const indexDoc:estypes.IndicesCreateRequest = {
-            index: this.accountIndex,
+            index: this.indexName,
             settings: {
                 number_of_shards: 1,
                 number_of_replicas: 1,

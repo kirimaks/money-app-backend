@@ -8,26 +8,20 @@ import {getErrorMessage} from '../../errors/tools';
 
 
 class UserModel extends AbstractModel {
-    fastify: FastifyInstance;
-    userIndex: string;
-
     constructor(fastify:FastifyInstance, config:AppConfig) {
-        super();
-    
-        this.fastify = fastify;
-        this.userIndex = config.USERS_INDEX_NAME;
+        super(fastify, config.USERS_INDEX_NAME);
     }
 
     private getIndexDoc(newDocument:UserDocument) {
         return {
-            index: this.userIndex,
+            index: this.indexName,
             document: newDocument,
         }
     }
 
     private getDeleteDoc(dbRecordId:string) {
         return {
-            index: this.userIndex,
+            index: this.indexName,
             id: dbRecordId,
         }
     }
@@ -74,7 +68,7 @@ class UserModel extends AbstractModel {
                 const indexDoc = this.getIndexDoc(newUserDoc);
                 const resp:estypes.CreateResponse = await this.fastify.elastic.index(indexDoc);
                 this.fastify.log.debug(`<<< Create user response: ${JSON.stringify(resp)}`);
-                await this.fastify.elastic.indices.refresh({index: this.userIndex});
+                await this.fastify.elastic.indices.refresh({index: this.indexName});
 
                 response.success = true;
                 resolve(response);
