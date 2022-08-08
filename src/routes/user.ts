@@ -1,7 +1,6 @@
 import type {FastifyInstance} from 'fastify';
 
 import {newUserController, getUserController, removeUserController} from '../controllers/user';
-import type {NewUserRequestHandler, GetUserRequestHandler, RemoveUserRequestHandler} from '../controllers/user';
 
 
 class UserRoutes {

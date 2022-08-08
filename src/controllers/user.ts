@@ -1,37 +1,6 @@
-import type {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify';
+import type {FastifyInstance, FastifyReply} from 'fastify';
 
 import {UserModel} from '../models/user/user';
-
-
-type CreateUserProperties = {
-    Body: UserDraft;
-}
-
-type GetUserProperties = {
-    Params: {
-        record_id: string;
-    },
-    Headers: {
-        'x-control-header': string;
-    }
-}
-
-type RemoveUserProperties = {
-    Params: {
-        record_id: string;
-    },
-    Headers: {
-        'x-control-header': string;
-    }
-}
-
-type CreateUserRequest = FastifyRequest<CreateUserProperties>;
-type GetUserRequest = FastifyRequest<GetUserProperties>;
-type RemoveUserRequest = FastifyRequest<RemoveUserProperties>;
-
-type NewUserRequestHandler = (request:CreateUserRequest, reply:FastifyReply) => Promise<void>;
-type GetUserRequestHandler = (request:GetUserRequest, reply:FastifyReply) => Promise<void>;
-type RemoveUserRequestHandler = (request:RemoveUserRequest, reply:FastifyReply) => Promise<void>;
 
 
 function newUserController(fastify:FastifyInstance, config:AppConfig): NewUserRequestHandler {
@@ -116,6 +85,5 @@ function removeUserController(fastify:FastifyInstance, config:AppConfig): Remove
 }
 
 export {
-    NewUserRequestHandler, GetUserRequestHandler, RemoveUserRequestHandler,
     newUserController, getUserController, removeUserController
 }
