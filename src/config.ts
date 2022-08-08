@@ -16,9 +16,6 @@ function validateConfig(config:object):boolean {
         return true;
     }
 
-    console.error('<<< Config error >>>');
-    console.error(validate.errors);
-
     return false;
 }
 

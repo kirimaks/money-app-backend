@@ -157,14 +157,10 @@ tap.test('Create user', async (createUserTest) => {
     createUserTest.ok(validateUUID(record_id), 'User id is invalid uuid');
 
     createUserTest.test('Get this user', async (getUserTest) => {
-        console.log('User id: ', record_id);
-
         const resp = await app.inject({
             method: 'GET',
             url: `/user/${record_id}`,
         });
-
-        console.log('Get this user: ', resp.json());
 
         getUserTest.equal(resp.statusCode, 200, 'User response code is not 200');
 
