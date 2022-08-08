@@ -1,9 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
 import {createAccountController, getAccountController, deleteAccountController} from '../controllers/account';
-import type { 
-    CreateAccountRequestHandler, SearchAccountRequestHandler, DeleteAccountRequestHandler 
-} from '../controllers/account';
 
 
 class AccountRoutes {
@@ -11,7 +8,7 @@ class AccountRoutes {
     config: AppConfig;
 
     createAccountController: CreateAccountRequestHandler;
-    getAccountController: SearchAccountRequestHandler;
+    getAccountController: GetAccountRequestHandler;
     deleteAccountController: DeleteAccountRequestHandler;
 
     constructor(fastify:FastifyInstance, config:AppConfig) {

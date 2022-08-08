@@ -1,39 +1,6 @@
+import type {FastifyReply, FastifyInstance} from 'fastify';
+
 import {AccountModel} from '../models/account/account';
-
-import type {FastifyRequest, FastifyReply, FastifyInstance} from 'fastify';
-
-
-type SearchAccountProperties = {
-    Params: {
-        account_id: string;
-    },
-    Headers: {
-        'x-control-header': string;
-    }
-};
-
-type CreateAccountProperties = {
-    Body: {
-        account_name: string;
-    }
-};
-
-type DeleteRequestProperties = {
-    Params: {
-        account_id: string;
-    },
-    Headers: {
-        'x-control-header': string;
-    }
-};
-
-type SearchAccountRequest = FastifyRequest<SearchAccountProperties>;
-type CreateAccountRequest = FastifyRequest<CreateAccountProperties>;
-type DeleteAccountRequest = FastifyRequest<DeleteRequestProperties>;
-
-export type CreateAccountRequestHandler = (request:CreateAccountRequest, reply:FastifyReply) => Promise<void>;
-export type SearchAccountRequestHandler = (request:SearchAccountRequest, reply:FastifyReply) => Promise<void>;
-export type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:FastifyReply) => Promise<void>;
 
 
 function createAccountController(fastify:FastifyInstance, config:AppConfig): CreateAccountRequestHandler {
@@ -65,9 +32,8 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
     return create;
 }
 
-
-function getAccountController(fastify:FastifyInstance, config:AppConfig): SearchAccountRequestHandler {
-    async function getAccount(request:SearchAccountRequest, reply:FastifyReply): Promise<void> {
+function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAccountRequestHandler {
+    async function getAccount(request:GetAccountRequest, reply:FastifyReply): Promise<void> {
         const {account_id} = request.params;
         const account = new AccountModel(fastify, config);
         const options:ModelRequestOptions = {
@@ -104,7 +70,6 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): Search
 
     return getAccount;
 }
-
 
 function deleteAccountController(fastify:FastifyInstance, config:AppConfig): DeleteAccountRequestHandler {
     async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<void> {
