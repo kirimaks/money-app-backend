@@ -24,6 +24,14 @@ abstract class AbstractModel {
         this.indexName = indexName;
     }
 
+    getSearchByIdDock(recordId:string) {
+        return {
+            query: { 
+                match: {record_id: recordId} 
+            }
+        }
+    }
+
     getModelResponseError(catchedError:unknown):string {
         if (catchedError instanceof Error) {
             return catchedError.message;
@@ -35,6 +43,7 @@ abstract class AbstractModel {
 
         return 'Cannot parse error message';
     }
+
 }
 
 export {AbstractModel};

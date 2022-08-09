@@ -13,7 +13,7 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
             if (modelResp.success) {
                 reply.code(201).send({
                     account_name: modelResp.document.account_name,
-                    account_id: modelResp.document.account_id,
+                    account_id: modelResp.document.record_id,
                 });
 
             } else {

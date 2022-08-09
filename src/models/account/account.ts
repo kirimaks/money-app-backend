@@ -19,18 +19,10 @@ class AccountModel extends AbstractModel {
         super(fastify, config.ACCOUNTS_INDEX_NAME);
     }
 
-    private getSearchByIdDock(recordId:string) {
-        return {
-            query: { 
-                match: {account_id: recordId} 
-            }
-        }
-    }
-
     createDocument(requestBody:AccountDraft):AccountDocument {
         return {
             account_name: requestBody.account_name,
-            account_id: uuidv4(),
+            record_id: uuidv4(),
         }
     }
 
@@ -169,8 +161,9 @@ class AccountModel extends AbstractModel {
                 number_of_replicas: 1,
             },
             mappings: {
+                dynamic: 'strict',
                 properties: {
-                    account_id: {
+                    record_id: {
                         type: 'text',
                     },
                     account_name: {

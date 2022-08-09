@@ -3,5 +3,5 @@ interface AccountDraft {
 }
 
 interface AccountDocument extends AccountDraft {
-    account_id: string;
+    record_id: string;
 }
