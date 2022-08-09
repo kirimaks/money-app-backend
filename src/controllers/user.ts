@@ -6,9 +6,8 @@ import {UserModel} from '../models/user/user';
 function newUserController(fastify:FastifyInstance, config:AppConfig): NewUserRequestHandler {
     async function create(request:CreateUserRequest, reply:FastifyReply): Promise<void> {
         const user = new UserModel(fastify, config);
-        const newDoc:UserDocument = user.createDocument(request.body);
-
         try {
+            const newDoc:UserDocument = await user.createDocument(request.body);
             const modelResp:ModelCreateDocResponse<UserDocument> = await user.saveDocument(newDoc);
             if (modelResp.success) {
                 reply.code(201).send({

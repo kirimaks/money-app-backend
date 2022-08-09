@@ -10,4 +10,16 @@ interface UserDraft {
 
 interface UserDocument extends UserDraft {
     record_id: string;
+    password: {
+        hash: string;
+        salt: string;
+        expires: number;
+    };
+}
+
+
+interface PasswordInfo {
+    hash: string;
+    salt: string;
+    expires: number;
 }

@@ -1,4 +1,5 @@
 import type {FastifyInstance} from 'fastify';
+import type {estypes} from '@elastic/elasticsearch';
 
 
 function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
@@ -16,8 +17,8 @@ abstract class AbstractModel {
     abstract saveDocument(document:unknown):Promise<ModelCreateDocResponse<unknown>>;
     abstract removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<unknown>>;
     abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
-    abstract createIndex():void;
-    abstract deleteIndex():void;
+    abstract createIndex():Promise<estypes.IndicesCreateResponse>;
+    abstract deleteIndex():Promise<estypes.IndicesDeleteResponse>;
 
     constructor(fastify:FastifyInstance, indexName:string) {
         this.fastify = fastify;

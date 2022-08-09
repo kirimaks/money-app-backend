@@ -1,4 +1,5 @@
 import {v4 as uuidv4, validate as validateUUID} from 'uuid';
+import {scryptSync, randomBytes} from 'crypto';
 
 import type {FastifyInstance} from 'fastify';
 import type {estypes} from '@elastic/elasticsearch';
@@ -8,10 +9,15 @@ import {getErrorMessage} from '../../errors/tools';
 
 
 class UserModel extends AbstractModel {
+    SALT_BYTES_LENGTH: number;
+
     constructor(fastify:FastifyInstance, config:AppConfig) {
         super(fastify, config.USERS_INDEX_NAME);
+
+        this.SALT_BYTES_LENGTH = 16;
     }
 
+    /* TODO: move to base class */
     private getIndexDoc(newDocument:UserDocument) {
         return {
             index: this.indexName,
@@ -19,6 +25,7 @@ class UserModel extends AbstractModel {
         }
     }
 
+    /* TODO: move to base class */
     private getDeleteDoc(dbRecordId:string) {
         return {
             index: this.indexName,
@@ -26,25 +33,77 @@ class UserModel extends AbstractModel {
         }
     }
 
-    private getSearchByIdDock(recordId:string) {
-        return {
-            query: {
-                match: {record_id: recordId}
+    createDocument(requestBody:UserDraft):Promise<UserDocument> {
+        return new Promise(async (resolve, reject) => {
+
+            try {
+                const salt:string = randomBytes(this.SALT_BYTES_LENGTH).toString('hex');
+                const hash:Buffer = scryptSync(requestBody.password, salt, 64);
+
+                const expires = new Date();
+                expires.setMonth(expires.getMonth() + 1);
+
+                const passwordInfo:PasswordInfo = {
+                    hash: hash.toString('hex'),
+                    salt: salt,
+                    expires: expires.getTime(),
+                };
+
+                const document = {
+                    record_id: uuidv4(),
+                    first_name: requestBody.first_name,
+                    last_name: requestBody.last_name, 
+                    phone_number: requestBody.phone_number,
+                    email: requestBody.email,
+                    password: passwordInfo,
+                    account_id: requestBody.account_id,
+                    comment: requestBody.comment,
+                }
+
+                resolve(document);
+
+            } catch(error) {
+                const errorMessage = getErrorMessage(error);
+                this.fastify.log.error(`Cannot create document: ${errorMessage}`);
+                reject(error);
             }
-        }
+        });
     }
 
-    createDocument(requestBody:UserDraft):UserDocument {
-        return {
-            record_id: uuidv4(),
-            first_name: requestBody.first_name,
-            last_name: requestBody.last_name, 
-            phone_number: requestBody.phone_number,
-            email: requestBody.email,
-            password: requestBody.password,
-            account_id: requestBody.account_id,
-            comment: requestBody.comment,
-        }
+    verifyPassword(email:string, password:string): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            const searchDoc:estypes.SearchRequest = {
+                query: {
+                    match: {email: email}
+                }
+            };
+
+            try {
+                const searchResp:estypes.SearchResponseBody<UserDocument> = await this.fastify.elastic.search(
+                    searchDoc
+                );
+
+                if (searchResp.hits.hits.length > 0) {
+                    const firstHit = searchResp.hits.hits[0];
+
+                    if (firstHit && firstHit._source) {
+                        const user:UserDocument = firstHit._source;
+                        const hash:Buffer = scryptSync(password, user.password.salt, 64);
+                        if (hash.toString('hex') === user.password.hash) {
+                            resolve(true);
+                            return;
+                        }
+                    }
+                }
+
+            } catch(error) {
+                const errorMessage = getErrorMessage(error);
+                this.fastify.log.error(`Cannot verify password: ${errorMessage}`);
+                reject(false);
+            }
+
+            resolve(false);
+        });
     }
 
     saveDocument(newUserDoc:UserDocument):Promise<ModelCreateDocResponse<UserDocument>> {
@@ -55,7 +114,7 @@ class UserModel extends AbstractModel {
 
         return new Promise(async (resolve, reject) => {
             if (!validateUUID(newUserDoc.account_id)) {
-                response.errorMessage = 'Invalid uuid';
+                response.errorMessage = 'Invalid account uuid';
                 resolve(response);
                 return;
             }
@@ -100,6 +159,7 @@ class UserModel extends AbstractModel {
                     throw new Error('Cannot get this document');
                 }
 
+                /* TODO: use get() */
                 const searchDoc = this.getSearchByIdDock(recordId);
                 const resp:estypes.SearchResponse<UserDocument> = await this.fastify.elastic.search(searchDoc);
 
@@ -165,7 +225,7 @@ class UserModel extends AbstractModel {
         });
     }
 
-    async createIndex() {
+    async createIndex(): Promise<estypes.IndicesCreateResponse> {
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -173,9 +233,31 @@ class UserModel extends AbstractModel {
                 number_of_replicas: 1,
             },
             mappings: {
+                dynamic: 'strict',
                 properties: {
-                    user_id: {
+                    record_id: {
                         type: 'text',
+                    },
+                    account_id: {
+                        type: 'text',
+                    },
+                    created: {
+                        type: 'date',
+                    },
+                    password: {
+                        type: 'object',
+                        enabled: false,
+                        properties: {
+                            hash: {
+                                type: 'text'
+                            },
+                            salt: {
+                                type: 'text'
+                            },
+                            expires: {
+                                type: 'date'
+                            }
+                        }
                     },
                     first_name: {
                         type: 'text',
@@ -189,10 +271,6 @@ class UserModel extends AbstractModel {
                     phone_number: {
                         type: 'text',
                     },
-                    password: {
-                        type: 'text',
-                        index: false,
-                    },
                     comment: {
                         type: 'text',
                     }
@@ -203,7 +281,8 @@ class UserModel extends AbstractModel {
         return await this.fastify.elastic.indices.create(indexDoc);
     }
 
-    async deleteIndex() {
+    /* TODO: move to base class */
+    async deleteIndex(): Promise<estypes.IndicesDeleteResponse> {
         const indexDoc:estypes.IndicesDeleteRequest = {
             index: this.indexName,
         };
