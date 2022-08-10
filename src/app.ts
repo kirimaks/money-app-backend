@@ -3,7 +3,10 @@ import { join } from 'path';
 import type { FastifyPluginAsync } from 'fastify';
 import AutoLoad from '@fastify/autoload';
 
-import {validateConfig, getElasticSearchOptions, getSwaggerOptions, getAppConfig} from './config';
+import {
+    validateConfig, getElasticSearchOptions, getSwaggerOptions, 
+    getAppConfig, getSessionOptions
+} from './config';
 import {getSchemas} from './schemas/tools';
 
 
@@ -19,6 +22,7 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
 
     fastify.register(require('@fastify/elasticsearch'), getElasticSearchOptions(config));
     fastify.register(require('@fastify/swagger'), getSwaggerOptions());
+    fastify.register(require('@fastify/secure-session'), getSessionOptions(config));
 
     // Do not touch the following lines
 

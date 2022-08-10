@@ -88,4 +88,15 @@ function getSwaggerOptions() {
     }
 }
 
-export { getAppConfig, validateConfig, getElasticSearchOptions, getSwaggerOptions }
+function getSessionOptions(config:AppConfig) {
+    return {
+        cookieName: 'session-id',
+        key: Buffer.from(config.SESSION_SECRET_KEY, 'hex'),
+        cookie: {
+            path: '/',
+            httpOnly: true
+        }
+    }
+}
+
+export { getAppConfig, validateConfig, getElasticSearchOptions, getSwaggerOptions, getSessionOptions }

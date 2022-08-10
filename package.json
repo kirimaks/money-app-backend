@@ -23,6 +23,7 @@
     "@fastify/auth": "^3.0.2",
     "@fastify/autoload": "^5.0.0",
     "@fastify/elasticsearch": "^3.0.0",
+    "@fastify/secure-session": "^5.2.0",
     "@fastify/sensible": "^4.1.0",
     "@fastify/swagger": "^7.4.1",
     "fastify": "^4.0.0",
