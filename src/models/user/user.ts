@@ -70,7 +70,13 @@ class UserModel extends AbstractModel {
         });
     }
 
-    verifyPassword(email:string, password:string): Promise<boolean> {
+    verifyPassword(email:string, password:string): Promise<UserSessionInfo> {
+        const sessionInfo:UserSessionInfo = {
+            anonymous: true,
+            account_id: '',
+            user_id: ''
+        };
+
         return new Promise(async (resolve, reject) => {
             const searchDoc:estypes.SearchRequest = {
                 query: {
@@ -89,8 +95,12 @@ class UserModel extends AbstractModel {
                     if (firstHit && firstHit._source) {
                         const user:UserDocument = firstHit._source;
                         const hash:Buffer = scryptSync(password, user.password.salt, 64);
+
                         if (hash.toString('hex') === user.password.hash) {
-                            resolve(true);
+                            sessionInfo.user_id = user.record_id;
+                            sessionInfo.account_id = user.account_id;
+                            sessionInfo.anonymous = false;
+                            resolve(sessionInfo);
                             return;
                         }
                     }
@@ -99,10 +109,10 @@ class UserModel extends AbstractModel {
             } catch(error) {
                 const errorMessage = getErrorMessage(error);
                 this.fastify.log.error(`Cannot verify password: ${errorMessage}`);
-                reject(false);
+                reject(sessionInfo);
             }
 
-            resolve(false);
+            resolve(sessionInfo);
         });
     }
 

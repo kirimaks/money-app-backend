@@ -17,9 +17,14 @@ interface UserDocument extends UserDraft {
     };
 }
 
-
 interface PasswordInfo {
     hash: string;
     salt: string;
     expires: number;
+}
+
+interface UserSessionInfo {
+    anonymous: boolean;
+    account_id: string;
+    user_id: string;
 }

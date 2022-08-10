@@ -24,6 +24,8 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
     fastify.register(require('@fastify/swagger'), getSwaggerOptions());
     fastify.register(require('@fastify/secure-session'), getSessionOptions(config));
 
+    fastify.decorateRequest('user', undefined);
+
     // Do not touch the following lines
 
     // This loads all plugins defined in plugins
