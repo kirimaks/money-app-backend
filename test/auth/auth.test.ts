@@ -3,7 +3,7 @@ import {v4 as uuidv4} from 'uuid';
 
 import tap from 'tap';
 
-import {buildApp, getAppConfig} from '../helper';
+import {buildApp, getAppConfig, generateModelIndexName} from '../helper';
 import {UserModel} from '../../src/models/user/user';
 
 
@@ -58,71 +58,61 @@ tap.test('Test password hashing', async (test) => {
     test.ok(indexRemovingResp.acknowledged, 'Acknowledged is not true');
 });
 
-tap.test('Log in controller', async(test) => {
-    const appConfig = getAppConfig();
-    const app = await buildApp(test, appConfig);
-
-    const user = new UserModel(app, appConfig);
-    const indexResp = await user.createIndex();
-    test.ok(indexResp.acknowledged, 'Acknowledged is not true');
-
-    const userDraft:UserDraft = generateUser();
-    const docResp = await user.createDocument(userDraft);
-    const savingResp = await user.saveDocument(docResp);
-
-    if (!savingResp.success) {
-        app.log.error(savingResp);
-    }
-
-    test.ok(savingResp.success, 'Response is not successful');
-
-    const resp = await app.inject({
-        method: 'POST',
-        url: '/auth/login',
-        payload: {
-            email: userDraft.email,
-            password: userDraft.password,
-        },
-    });
-
-    test.equal(resp.statusCode, 200, 'Log in failed');
-    test.equal(resp.json().message, 'Logged in, session saved', 'Wrong message');
-
-    const indexRemovingResp = await user.deleteIndex();
-    test.ok(indexRemovingResp.acknowledged, 'Acknowledged is not true');
-});
-
 tap.test('Create user and log in', async (test) => {
     const appConfig = getAppConfig();
+    appConfig.USERS_INDEX_NAME = generateModelIndexName();
+
     const app = await buildApp(test, appConfig);
-
-    const user = new UserModel(app, appConfig);
-    const indexResp = await user.createIndex();
-    test.ok(indexResp.acknowledged, 'Acknowledged is not true');
-
     const userDraft:UserDraft = generateUser();
+    const userModel = new UserModel(app, appConfig);
 
-    const signUpResp = await app.inject({
-        method: 'POST',
-        url: '/auth/signup',
-        payload: userDraft
+    test.before(async () => {
+        await userModel.createIndex();
     });
 
-    test.equal(signUpResp.statusCode, 201, 'Signup response is not 201');
-    test.equal(signUpResp.json().message, 'User created', 'Wrong message');
+    test.teardown(async () => {
+        await userModel.deleteIndex();
+    });
+
+    test.test('Sign up test', async (signUpTest) => {
+        const signUpResp = await app.inject({
+            method: 'POST',
+            url: '/auth/signup',
+            payload: userDraft
+        });
+
+        signUpTest.equal(signUpResp.statusCode, 201, 'Signup response is not 201');
+        signUpTest.equal(signUpResp.json().message, 'User created', 'Wrong message');
+
+        signUpTest.test('Log in tst', async (logInTest) => {
+            const logInResp = await app.inject({
+                method: 'POST',
+                url: '/auth/login',
+                payload: {
+                    email: userDraft.email,
+                    password: userDraft.password
+                }
+            });
+
+            logInTest.equal(logInResp.statusCode, 200, 'Log in response is not 200');
+            logInTest.equal(logInResp.json().message, 'Logged in, session saved', 'Wrong message');
+        });
+    });
+
+});
+
+tap.test('Login with wrong credentials', async (test) => {
+    const appConfig = getAppConfig();
+    const app = await buildApp(test, appConfig);
 
     const logInResp = await app.inject({
         method: 'POST',
         url: '/auth/login',
         payload: {
-            email: userDraft.email,
-            password: userDraft.password
+            email: randomBytes(8).toString('hex'),
+            password: randomBytes(8).toString('hex'),
         }
     });
 
-    test.equal(logInResp.statusCode, 200, 'Log in response is not 200');
-    test.equal(logInResp.json().message, 'Logged in, session saved', 'Wrong message');
-
-    const indexRemovingResp = await user.deleteIndex();
-    test.ok(indexRemovingResp.acknowledged, 'Acknowledged is not true');
+    test.equal(logInResp.statusCode, 400, 'Auth error response code is not 400');
 });

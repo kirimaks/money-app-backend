@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import pino from 'pino';
+import {randomBytes} from 'crypto';
 
 import fp from 'fastify-plugin';
 import {app as App} from '../src/app';
@@ -37,4 +38,9 @@ async function buildApp (t: Test, config:AppConfig) {
     return app
 }
 
-export {buildApp, getAppConfig}
+function generateModelIndexName() {
+    const randomName = randomBytes(8).toString('hex');
+    return `auto-index-${randomName}`;
+}
+
+export {buildApp, getAppConfig, generateModelIndexName}

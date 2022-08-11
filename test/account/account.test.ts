@@ -18,8 +18,6 @@ type SchemaType = {
 
 tap.test('Get account by invalid uuid', async (test) => {
     const appConfig = getAppConfig();
-    appConfig.ACCOUNTS_INDEX_NAME = 'wrong.wrong';
-
     const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'GET',
@@ -32,7 +30,6 @@ tap.test('Get account by invalid uuid', async (test) => {
 
 tap.test('Query non existing account', async(test) => {
     const appConfig = getAppConfig();
-
     const app = await buildApp(test, appConfig);
     const resp = await app.inject({
         method: 'GET',

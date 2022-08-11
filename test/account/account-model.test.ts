@@ -1,11 +1,12 @@
 import tap from 'tap';
 
-import {buildApp, getAppConfig} from '../helper';
+import {buildApp, getAppConfig, generateModelIndexName} from '../helper';
 import {AccountModel} from '../../src/models/account/account';
 
 
 tap.test('Create account index', async (test) => {
     const appConfig = getAppConfig();
+    appConfig.ACCOUNTS_INDEX_NAME = generateModelIndexName();
 
     const app = await buildApp(test, appConfig);
     const account = new AccountModel(app, appConfig);
