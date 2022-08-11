@@ -25,3 +25,8 @@ interface AppConfig {
     ENV: 'test' | 'dev' | 'prod';
     SESSION_SECRET_KEY: string;
 }
+
+enum AppIndex {
+    ACCOUNT = 'ACCOUNT',
+    USER = 'USER',
+}
