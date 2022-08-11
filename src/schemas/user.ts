@@ -64,7 +64,8 @@ const CREATE_USER_REQUEST_SCHEMA = {
     }
 };
 
-const CREATE_USER_RESPONSE_SCHEMA = { $id: 'createUserResponse',
+const CREATE_USER_RESPONSE_SCHEMA = { 
+    $id: 'createUserResponse',
     type: 'object',
     properties: {
         record_id: {

@@ -23,17 +23,6 @@ const LOG_IN_REQUEST_SCHEMA = {
     }
 };
 
-const LOG_IN_OK_RESPONSE_SCHEMA = {
-    $id: 'logInOkResponse',
-    type: 'object',
-    required: ['message'],
-    properties: {
-        message: {
-            type: 'string'
-        }
-    }
-};
-
 const LOG_IN_FAIL_RESPONSE_SCHEMA = {
     $id: 'logInErrorResponse',
     type: 'object',
@@ -45,6 +34,21 @@ const LOG_IN_FAIL_RESPONSE_SCHEMA = {
     }
 };
 
-const AUTH_SCHEMAS = [LOG_IN_REQUEST_SCHEMA, LOG_IN_OK_RESPONSE_SCHEMA, LOG_IN_FAIL_RESPONSE_SCHEMA];
+const SIGN_UP_FAIL_RESPONSE = {
+    $id: 'signUpErrorResponse',
+    type: 'object',
+    required: ['error'],
+    properties: {
+        error: {
+            type: 'string'
+        }
+    }
+};
+
+const AUTH_SCHEMAS = [
+    LOG_IN_REQUEST_SCHEMA, 
+    LOG_IN_FAIL_RESPONSE_SCHEMA,
+    SIGN_UP_FAIL_RESPONSE
+];
 
 export {AUTH_SCHEMAS};

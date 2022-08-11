@@ -18,6 +18,7 @@ function logInController(fastify:FastifyInstance, config:AppConfig): LogInReques
                     account_id: sessionInfo.account_id
                 }
                 request.session.set('user', sessionData);
+
                 reply.code(200).send({message: 'Logged in, session saved'});
 
             } else {
@@ -35,4 +36,27 @@ function logInController(fastify:FastifyInstance, config:AppConfig): LogInReques
     return login;
 }
 
-export {logInController}
+function signUpController(fastify:FastifyInstance, config:AppConfig): SignUpRequestHandler {
+    async function signup(request:SignUpRequest, reply:FastifyReply): Promise<void> {
+        const user = new UserModel(fastify, config);
+        try {
+            const newDoc:UserDocument = await user.createDocument(request.body);
+            const modelResp:ModelCreateDocResponse<UserDocument> = await user.saveDocument(newDoc);
+
+            if (modelResp.success) {
+                reply.code(201).send({message: 'User created'});
+
+            } else {
+                reply.code(400).send({error: modelResp.errorMessage});
+            }
+        } catch(error) {
+            const errorMessage = user.getModelResponseError(error);
+            fastify.log.error(`Sign up error: ${errorMessage}`);
+            reply.code(500).send({error: errorMessage});
+        }
+    }
+
+    return signup;
+}
+
+export {logInController, signUpController}
