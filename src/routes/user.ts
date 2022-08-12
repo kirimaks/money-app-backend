@@ -1,26 +1,13 @@
-import type {FastifyInstance} from 'fastify';
+import type {FastifyInstance, RouteOptions} from 'fastify';
 
 import {newUserController, getUserController, removeUserController} from '../controllers/user';
 
 
-class UserRoutes {
-    fastify: FastifyInstance;
-    config: AppConfig;
-
-    newUserController: NewUserRequestHandler;
-    getUserController: GetUserRequestHandler;
-    removeUserController: RemoveUserRequestHandler;
-
-    constructor(fastify:FastifyInstance, config:AppConfig) {
-        this.fastify = fastify;
-        this.config = config;
-        this.newUserController = newUserController(this.fastify, this.config);
-        this.getUserController = getUserController(this.fastify, this.config);
-        this.removeUserController = removeUserController(this.fastify, this.config);
-    }
-
-    createNewUserRoute() {
-        const requestSchema = {
+async function createUserRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
+    const options:RouteOptions[] = [
+        {
+            method: 'POST',
+            url: '/user/create',
             schema: {
                 body: {
                     $ref: 'createUserRequest',
@@ -30,41 +17,29 @@ class UserRoutes {
                         $ref: 'createUserResponse'
                     }
                 }
-            }
-        }
-        this.fastify.post('/user/create', requestSchema, this.newUserController)
-    }
-
-    createGetUserRoute() {
-        const requestSchema = {
+            },
+            handler: newUserController(fastify, config),
+        },
+        {
+            method: 'GET',
+            url: '/user/:record_id',
             schema: {
                 response: {
                     201: {
                         $ref: 'getUserResponse'
                     }
                 }
-            }
+            },
+            handler: getUserController(fastify, config),
+        },
+        {
+            method: 'DELETE',
+            url: '/user/:record_id',
+            handler: removeUserController(fastify, config)
         }
+    ];
 
-        this.fastify.get('/user/:record_id', requestSchema, this.getUserController);
-    }
-
-    createRemoveUserRoute() {
-        const requestSchema = {};
-
-        this.fastify.delete('/user/:record_id', requestSchema, this.removeUserController);
-    }
-
-    createRoutes():void {
-        this.createNewUserRoute();
-        this.createGetUserRoute();
-        this.createRemoveUserRoute();
-    }
-}
-
-async function createUserRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
-    const routes = new UserRoutes(fastify, config);
-    routes.createRoutes();
+    options.map((route) => fastify.route(route));
 }
 
 export default createUserRoutes;
