@@ -8,6 +8,7 @@ import {
     getAppConfig, getSessionOptions
 } from './config';
 import {getSchemas} from './schemas/tools';
+import {removeAutoIndices} from './models/tools';
 
 
 const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> => {
@@ -15,6 +16,8 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
     if (!validateConfig(config)) {
         throw new Error('Invalid config');
     }
+
+    fastify.decorate('config', config);
 
     for await (const schema of getSchemas()) {
         void fastify.addSchema(schema);
@@ -25,6 +28,9 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
     fastify.register(require('@fastify/secure-session'), getSessionOptions(config));
 
     fastify.decorateRequest('user', undefined);
+    fastify.decorate('removeAutoIndices', async function() {
+        await removeAutoIndices(fastify, config);
+    });
 
     // Do not touch the following lines
 

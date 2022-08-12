@@ -30,3 +30,8 @@ enum AppIndex {
     ACCOUNT = 'ACCOUNT',
     USER = 'USER',
 }
+
+type Cookie = {
+    name: string;
+    value: string;
+};
