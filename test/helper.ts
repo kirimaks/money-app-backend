@@ -52,7 +52,7 @@ async function buildApp (t: Test, config:AppConfig) {
     return app
 }
 
-function generateUser() {
+function generateUser():UserDraft {
     return {
         first_name: randomBytes(12).toString('hex'),
         last_name: randomBytes(12).toString('hex'),
@@ -118,4 +118,4 @@ function getTestAppConfig() {
     return appConfig;
 }
 
-export {buildApp, getAppConfig, generateModelIndexName, getTestAppConfig, generateSession}
+export {buildApp, getAppConfig, generateModelIndexName, getTestAppConfig, generateSession, generateUser}
