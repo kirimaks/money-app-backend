@@ -182,15 +182,6 @@ class AccountModel extends AbstractModel {
 
         return await this.fastify.elastic.indices.create(indexDoc);
     }
-
-    async deleteIndex() {
-        const indexDoc:estypes.IndicesDeleteRequest = {
-            index: this.indexName,
-        };
-
-        return await this.fastify.elastic.indices.delete(indexDoc);
-    }
 }
-
 
 export {AccountModel}

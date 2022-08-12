@@ -8,7 +8,6 @@ function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
     );
 }
  
-
 abstract class AbstractModel { 
     fastify: FastifyInstance;
     indexName: string;
@@ -18,7 +17,6 @@ abstract class AbstractModel {
     abstract removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<unknown>>;
     abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
     abstract createIndex():Promise<estypes.IndicesCreateResponse>;
-    abstract deleteIndex():Promise<estypes.IndicesDeleteResponse>;
 
     constructor(fastify:FastifyInstance, indexName:string) {
         this.fastify = fastify;
@@ -45,6 +43,24 @@ abstract class AbstractModel {
         return 'Cannot parse error message';
     }
 
+    async deleteIndex(): Promise<estypes.IndicesExistsResponse> {
+        const indexExistResp:estypes.IndicesExistsResponse = await this.fastify.elastic.indices.exists({
+            index: this.indexName
+        })
+
+        if (indexExistResp) {
+            this.fastify.log.debug(`<<< Removing index: ${this.indexName} >>>`);
+
+            const deleteResp = await this.fastify.elastic.indices.delete({
+                index: this.indexName
+            });
+            this.fastify.log.debug(`Delete response: ${JSON.stringify(deleteResp)}`);
+        } else {
+            this.fastify.log.debug(`<<< Index: ${this.indexName} not exist >>>`);
+        }
+
+        return indexExistResp;
+    }
 }
 
-export {AbstractModel};
+export {AbstractModel}

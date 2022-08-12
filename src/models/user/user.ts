@@ -236,6 +236,8 @@ class UserModel extends AbstractModel {
     }
 
     async createIndex(): Promise<estypes.IndicesCreateResponse> {
+        this.fastify.log.debug(`<<< Creating index: ${this.indexName} >>>`);
+
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -289,15 +291,6 @@ class UserModel extends AbstractModel {
         };
 
         return await this.fastify.elastic.indices.create(indexDoc);
-    }
-
-    /* TODO: move to base class */
-    async deleteIndex(): Promise<estypes.IndicesDeleteResponse> {
-        const indexDoc:estypes.IndicesDeleteRequest = {
-            index: this.indexName,
-        };
-
-        return await this.fastify.elastic.indices.delete(indexDoc);
     }
 }
 
