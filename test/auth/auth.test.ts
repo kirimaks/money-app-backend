@@ -133,7 +133,7 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
             logInTest.test('Getting user data', async (myDataTest) => {
                 const myAccountResp = await app.inject({
                     method: 'GET',
-                    url: '/profile/',
+                    url: '/profile',
                     cookies: {
                         'session-id': sessionCookie.value,
                     }
