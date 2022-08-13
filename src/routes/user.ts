@@ -15,6 +15,9 @@ async function createUserRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                 response: {
                     201: {
                         $ref: 'createUserResponse'
+                    },
+                    400: {
+                        $ref: 'badRequestResponse'
                     }
                 }
             },
@@ -27,6 +30,9 @@ async function createUserRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                 response: {
                     201: {
                         $ref: 'getUserResponse'
+                    },
+                    400: {
+                        $ref: 'badRequestResponse'
                     }
                 }
             },
@@ -35,7 +41,14 @@ async function createUserRoutes(fastify:FastifyInstance, config:AppConfig): Prom
         {
             method: 'DELETE',
             url: '/user/:record_id',
-            handler: removeUserController(fastify, config)
+            handler: removeUserController(fastify, config),
+            schema: {
+                response: {
+                    400: {
+                        $ref: 'badRequestResponse'
+                    }
+                }
+            }
         }
     ];
 

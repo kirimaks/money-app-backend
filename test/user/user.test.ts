@@ -19,7 +19,7 @@ tap.test('Get by invalid uuid', async (test) => {
     });
 
     test.equal(resp.statusCode, 400, 'Response for missing user is not 400');
-    test.equal(resp.json().error, 'Invalid uuid', 'Wrong error');
+    test.equal(resp.json().message, 'Invalid uuid', 'Wrong error');
 });
 
 
@@ -145,7 +145,7 @@ tap.test('Remove user with wrong uuid', async(test) => {
     });
 
     test.equal(resp.statusCode, 400, 'Response for invalid uuid is not 400');
-    test.equal(resp.json().error, 'Invalid uuid', 'Wrong error');
+    test.equal(resp.json().message, 'Invalid uuid', 'Wrong error');
 });
 
 tap.test('Create user', async (createUserTest) => {

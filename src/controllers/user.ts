@@ -37,7 +37,11 @@ function getUserController(fastify:FastifyInstance, config:AppConfig): GetUserRe
         try {
             const modelResp:ModelSearchDocResponse<UserDocument> = await user.getDocument(record_id, options);
             if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({error: modelResp.errorMessage});
+                reply.code(400).send({
+                    error: 'Bad Request',
+                    message: modelResp.errorMessage,
+                    statusCode: 400,
+                });
 
             } else if (modelResp.found) {
                 reply.code(200).send(modelResp.document);
@@ -66,7 +70,11 @@ function removeUserController(fastify:FastifyInstance, config:AppConfig): Remove
         try {
             const modelResp:ModelDeleteDocResponse<UserDocument> = await user.removeDocument(record_id, options);
             if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({error: modelResp.errorMessage});
+                reply.code(400).send({
+                    error: 'Bad Request',
+                    message: modelResp.errorMessage,
+                    statusCode: 400,
+                });
 
             } else if (modelResp.success) {
                 reply.code(204).send({});
