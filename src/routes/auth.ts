@@ -18,7 +18,7 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                 },
                 response: {
                     400: {
-                        $ref: 'signUpErrorResponse'
+                        $ref: 'badRequestResponse'
                     }
                 },
             },
@@ -33,7 +33,7 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                 },
                 response: {
                     400: {
-                        $ref: 'logInErrorResponse'
+                        $ref: 'badRequestResponse'
                     },
                 }
             },
