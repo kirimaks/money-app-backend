@@ -37,10 +37,16 @@ const LOG_IN_FAIL_RESPONSE_SCHEMA = {
 const SIGN_UP_FAIL_RESPONSE = {
     $id: 'signUpErrorResponse',
     type: 'object',
-    required: ['error'],
+    required: ['error', 'message', 'statusCode'],
     properties: {
         error: {
             type: 'string'
+        }, 
+        message: {
+            type: 'string'
+        },
+        statusCode: {
+            type: 'number'
         }
     }
 };
