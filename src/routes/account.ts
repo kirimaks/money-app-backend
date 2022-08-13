@@ -15,6 +15,9 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 response: {
                     201: {
                         $ref: 'createAccountResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse',
                     }
                 }
             },
@@ -27,6 +30,9 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 response: {
                     200: {
                         $ref: 'getAccountResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse',
                     }
                 }
             },
@@ -35,6 +41,13 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
         {
             method: 'DELETE',
             url: '/account/:account_id',
+            schema: {
+                response: {
+                    400: {
+                        $ref: 'badRequestResponse',
+                    }
+                }
+            },
             handler: deleteAccountController(fastify, config),
         }
     ];

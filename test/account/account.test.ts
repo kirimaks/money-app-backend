@@ -18,7 +18,7 @@ tap.test('Get account by invalid uuid', async (test) => {
         }
     });
     test.equal(resp.statusCode, 400, 'Query by wrong uuid returns not 400');
-    test.equal(resp.json().error, 'Invalid uuid', 'Wrong error message');
+    test.equal(resp.json().message, 'Invalid uuid', 'Wrong error message');
 });
 
 tap.test('Query non existing account', async(test) => {
@@ -68,7 +68,7 @@ tap.test('Create account with bad characters', async(test) => {
         }
     });
     test.equal(resp.statusCode, 400, 'Account creation fails but response is no 400');
-    test.equal(resp.json().error, 'Bad characters in account name', 'Wrong error returned');
+    test.equal(resp.json().message, 'Bad characters in account name', 'Wrong error returned');
 });
 
 tap.test('Remove non existing account', async(test) => {
@@ -133,7 +133,7 @@ tap.test('Remove account by wrong uuid', async(test) => {
         }
     });
     test.equal(resp.statusCode, 400, 'Account deletion fails but response is not 400');
-    test.equal(resp.json().error, 'Invalid uuid', 'Error message not match');
+    test.equal(resp.json().message, 'Invalid uuid', 'Error message not match');
 });
 
 tap.test('Account no name validation', async (test) => {

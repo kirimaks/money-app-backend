@@ -17,7 +17,11 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
                 });
 
             } else {
-                reply.code(400).send({error: modelResp.errorMessage});
+                reply.code(400).send({
+                    error: 'Bad Request',
+                    message: modelResp.errorMessage,
+                    statusCode: 400,
+                });
             }
 
         } catch(error) {
@@ -47,7 +51,9 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAcc
 
             if (modelResp.errorMessage.length > 0) {
                 reply.code(400).send({
-                    error: modelResp.errorMessage
+                    statusCode: 400,
+                    message: modelResp.errorMessage,
+                    error: 'Bad Request',
                 });
 
             } else if (modelResp.found && modelResp.document) {
@@ -56,7 +62,7 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAcc
                 });
 
             } else { 
-                reply.code(404).send({error: 'Account not found'});
+                reply.code(404).send({error: 'Not Found'});
             }
 
         } catch(error) {
@@ -85,7 +91,11 @@ function deleteAccountController(fastify:FastifyInstance, config:AppConfig): Del
             );
 
             if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({error: modelResp.errorMessage});
+                reply.code(400).send({
+                    error: 'Bad Request',
+                    message: modelResp.errorMessage,
+                    statusCode: 400,
+                });
 
             } else if (modelResp.success) {
                 reply.code(204).send({});
