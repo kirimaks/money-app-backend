@@ -1,15 +1,13 @@
 import type {FastifyReply, FastifyInstance} from 'fastify';
 
-import {AccountModel} from '../models/account/account';
 
 
-function createAccountController(fastify:FastifyInstance, config:AppConfig): CreateAccountRequestHandler {
+function createAccountController(fastify:FastifyInstance, _config:AppConfig): CreateAccountRequestHandler {
     async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<void> {
-        const account = new AccountModel(fastify, config);
-        const newDoc:AccountDocument = account.createDocument(request.body);
+        const newDoc:AccountDocument = fastify.models.account.createDocument(request.body);
 
         try {
-            const modelResp:ModelCreateDocResponse<AccountDocument> = await account.saveDocument(newDoc);
+            const modelResp:ModelCreateDocResponse<AccountDocument> = await fastify.models.account.saveDocument(newDoc);
             if (modelResp.success) {
                 reply.code(201).send({
                     account_name: modelResp.document.account_name,
@@ -28,7 +26,7 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
             fastify.log.error(`Cannot create account: ${error}`);
 
             reply.code(500).send({
-                error: account.getModelResponseError(error),
+                error: fastify.models.account.getModelResponseError(error),
             });
         }
     }
@@ -36,16 +34,15 @@ function createAccountController(fastify:FastifyInstance, config:AppConfig): Cre
     return create;
 }
 
-function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAccountRequestHandler {
+function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAccountRequestHandler {
     async function getAccount(request:GetAccountRequest, reply:FastifyReply): Promise<void> {
         const {account_id} = request.params;
-        const account = new AccountModel(fastify, config);
         const options:ModelRequestOptions = {
             controlHeader: request.headers['x-control-header'],
         }
 
         try {
-            const modelResp:ModelSearchDocResponse<AccountDocument> = await account.getDocument(
+            const modelResp:ModelSearchDocResponse<AccountDocument> = await fastify.models.account.getDocument(
                 account_id, options
             );
 
@@ -69,7 +66,7 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAcc
             fastify.log.error(`Cannot get account: ${error}`);
 
             reply.code(500).send({
-                error: account.getModelResponseError(error),
+                error: fastify.models.account.getModelResponseError(error),
             });
         }
     }
@@ -77,16 +74,15 @@ function getAccountController(fastify:FastifyInstance, config:AppConfig): GetAcc
     return getAccount;
 }
 
-function deleteAccountController(fastify:FastifyInstance, config:AppConfig): DeleteAccountRequestHandler {
+function deleteAccountController(fastify:FastifyInstance, _config:AppConfig): DeleteAccountRequestHandler {
     async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<void> {
         const accountId = request.params.account_id;
-        const account = new AccountModel(fastify, config);
         const options:ModelRequestOptions = {
             controlHeader: request.headers['x-control-header'],
         }
 
         try {
-            const modelResp:ModelDeleteDocResponse<AccountDocument> = await account.removeDocument(
+            const modelResp:ModelDeleteDocResponse<AccountDocument> = await fastify.models.account.removeDocument(
                 accountId, options
             );
 
@@ -108,7 +104,7 @@ function deleteAccountController(fastify:FastifyInstance, config:AppConfig): Del
             fastify.log.error(`Cannot remove account: ${error}`);
 
             reply.code(500).send({
-                error: account.getModelResponseError(error),
+                error: fastify.models.account.getModelResponseError(error),
             });
         }
     }

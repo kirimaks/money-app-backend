@@ -1,16 +1,13 @@
-import {UserModel} from '../models/user/user';
-
 import type {FastifyInstance, FastifyReply} from 'fastify';
 
 
-function logInController(fastify:FastifyInstance, config:AppConfig): LogInRequestHandler {
+function logInController(fastify:FastifyInstance, _config:AppConfig): LogInRequestHandler {
     async function login(request:LogInRequest, reply:FastifyReply): Promise<void> {
-        const user = new UserModel(fastify, config);
         const email = request.body.email;
         const password = request.body.password;
 
         try {
-            const sessionInfo = await user.verifyPassword(email, password);
+            const sessionInfo = await fastify.models.user.verifyPassword(email, password);
 
             if (!sessionInfo.anonymous) {
                 const sessionData = {
@@ -26,7 +23,7 @@ function logInController(fastify:FastifyInstance, config:AppConfig): LogInReques
             }
 
         } catch(error) {
-            const errorMessage = user.getModelResponseError(error);
+            const errorMessage = fastify.models.user.getModelResponseError(error);
             fastify.log.error(`Cannot log user in: ${errorMessage}`);
 
             reply.code(500).send({error: errorMessage});
@@ -36,12 +33,11 @@ function logInController(fastify:FastifyInstance, config:AppConfig): LogInReques
     return login;
 }
 
-function signUpController(fastify:FastifyInstance, config:AppConfig): SignUpRequestHandler {
+function signUpController(fastify:FastifyInstance, _config:AppConfig): SignUpRequestHandler {
     async function signup(request:SignUpRequest, reply:FastifyReply): Promise<void> {
-        const user = new UserModel(fastify, config);
         try {
-            const newDoc:UserDocument = await user.createDocument(request.body);
-            const modelResp:ModelCreateDocResponse<UserDocument> = await user.saveDocument(newDoc);
+            const newDoc:UserDocument = await fastify.models.user.createDocument(request.body);
+            const modelResp:ModelCreateDocResponse<UserDocument> = await fastify.models.user.saveDocument(newDoc);
 
             if (modelResp.success) {
                 reply.code(201).send({message: 'User created'});
@@ -50,7 +46,7 @@ function signUpController(fastify:FastifyInstance, config:AppConfig): SignUpRequ
                 reply.code(400).send({error: modelResp.errorMessage});
             }
         } catch(error) {
-            const errorMessage = user.getModelResponseError(error);
+            const errorMessage = fastify.models.user.getModelResponseError(error);
             fastify.log.error(`Sign up error: ${errorMessage}`);
             reply.code(500).send({error: errorMessage});
         }

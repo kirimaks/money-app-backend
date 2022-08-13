@@ -37,9 +37,7 @@ const SESSION_AUTH_EXCLUDE = [
     '/auth/signup'
 ];
 
-interface AuthOptions {}
-
-const authPlugin:FastifyPluginAsync<AuthOptions> = async (fastify:FastifyInstance, _options) => {
+const authPlugin:FastifyPluginAsync<AppConfig> = async (fastify:FastifyInstance, _options:AppConfig) => {
 
     fastify.decorate('verifyJWTToken', async (_request:FastifyRequest, _reply:FastifyReply) => {
         fastify.log.debug('Calling verifyJWTToken');

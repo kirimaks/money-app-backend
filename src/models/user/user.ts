@@ -7,30 +7,20 @@ import type {estypes} from '@elastic/elasticsearch';
 import {AbstractModel} from '../model';
 import {getErrorMessage} from '../../errors/tools';
 
+declare module 'fastify' {
+    interface FastifyInstance {
+        config:AppConfig;
+    }
+}
+
 
 class UserModel extends AbstractModel {
     SALT_BYTES_LENGTH: number;
 
-    constructor(fastify:FastifyInstance, config:AppConfig) {
-        super(fastify, config.USERS_INDEX_NAME);
+    constructor(fastify:FastifyInstance, _config:AppConfig) {
+        super(fastify, fastify.config.USERS_INDEX_NAME);
 
         this.SALT_BYTES_LENGTH = 16;
-    }
-
-    /* TODO: move to base class */
-    private getIndexDoc(newDocument:UserDocument) {
-        return {
-            index: this.indexName,
-            document: newDocument,
-        }
-    }
-
-    /* TODO: move to base class */
-    private getDeleteDoc(dbRecordId:string) {
-        return {
-            index: this.indexName,
-            id: dbRecordId,
-        }
     }
 
     createDocument(requestBody:UserDraft):Promise<UserDocument> {

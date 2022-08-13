@@ -1,17 +1,15 @@
 import type {FastifyInstance, FastifyReply} from 'fastify';
 
-import {UserModel} from '../models/user/user';
 import {getErrorMessage} from '../errors/tools';
 
 
-function profileController(fastify:FastifyInstance, config:AppConfig): ProfileRequestHandler {
+function profileController(fastify:FastifyInstance, _config:AppConfig): ProfileRequestHandler {
     async function profile(request:ProfileRequest, reply:FastifyReply): Promise<void> {
         const {user_id} = request.user;
-        const user = new UserModel(fastify, config);
         const modelOptions:ModelRequestOptions = {controlHeader: undefined}; /* TODO: remove */
 
         try {
-            const modelResp:ModelSearchDocResponse<UserDocument> = await user.getDocument(
+            const modelResp:ModelSearchDocResponse<UserDocument> = await fastify.models.user.getDocument(
                 user_id, modelOptions
             );
 

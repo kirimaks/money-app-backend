@@ -1,6 +1,18 @@
 import type {FastifyInstance} from 'fastify';
 import type {estypes} from '@elastic/elasticsearch';
 
+import type {AccountModel} from './account/account';
+import type {UserModel} from './user/user';
+
+
+declare module 'fastify' {
+    interface FastifyInstance {
+        models: {
+            account: AccountModel;
+            user: UserModel;
+        }
+    }
+}
 
 function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
     return (
@@ -21,6 +33,20 @@ abstract class AbstractModel {
     constructor(fastify:FastifyInstance, indexName:string) {
         this.fastify = fastify;
         this.indexName = indexName;
+    }
+
+    getIndexDoc(newDocument:UserDocument) {
+        return {
+            index: this.indexName,
+            document: newDocument,
+        }
+    }
+
+    getDeleteDoc(dbRecordId:string) {
+        return {
+            index: this.indexName,
+            id: dbRecordId,
+        }
     }
 
     getSearchByIdDock(recordId:string) {
