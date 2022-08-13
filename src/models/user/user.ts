@@ -1,24 +1,18 @@
 import {v4 as uuidv4, validate as validateUUID} from 'uuid';
 import {scryptSync, randomBytes} from 'crypto';
 
-import type {FastifyInstance} from 'fastify';
-import type {estypes} from '@elastic/elasticsearch';
+import type {FastifyLoggerInstance} from 'fastify';
+import type {Client as ESClient, estypes} from '@elastic/elasticsearch';
 
 import {AbstractModel} from '../model';
 import {getErrorMessage} from '../../errors/tools';
-
-declare module 'fastify' {
-    interface FastifyInstance {
-        config:AppConfig;
-    }
-}
 
 
 class UserModel extends AbstractModel {
     SALT_BYTES_LENGTH: number;
 
-    constructor(fastify:FastifyInstance, _config:AppConfig) {
-        super(fastify, fastify.config.USERS_INDEX_NAME);
+    constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName:string) {
+        super(log, elastic, indexName);
 
         this.SALT_BYTES_LENGTH = 16;
     }
@@ -54,7 +48,7 @@ class UserModel extends AbstractModel {
 
             } catch(error) {
                 const errorMessage = getErrorMessage(error);
-                this.fastify.log.error(`Cannot create document: ${errorMessage}`);
+                this.log.error(`Cannot create document: ${errorMessage}`);
                 reject(error);
             }
         });
@@ -75,7 +69,7 @@ class UserModel extends AbstractModel {
             };
 
             try {
-                const searchResp:estypes.SearchResponseBody<UserDocument> = await this.fastify.elastic.search(
+                const searchResp:estypes.SearchResponseBody<UserDocument> = await this.elastic.search(
                     searchDoc
                 );
 
@@ -98,7 +92,7 @@ class UserModel extends AbstractModel {
 
             } catch(error) {
                 const errorMessage = getErrorMessage(error);
-                this.fastify.log.error(`Cannot verify password: ${errorMessage}`);
+                this.log.error(`Cannot verify password: ${errorMessage}`);
                 reject(sessionInfo);
             }
 
@@ -125,15 +119,15 @@ class UserModel extends AbstractModel {
                 }
 
                 const indexDoc = this.getIndexDoc(newUserDoc);
-                const resp:estypes.CreateResponse = await this.fastify.elastic.index(indexDoc);
-                this.fastify.log.debug(`<<< Create user response: ${JSON.stringify(resp)}`);
-                await this.fastify.elastic.indices.refresh({index: this.indexName});
+                const resp:estypes.CreateResponse = await this.elastic.index(indexDoc);
+                this.log.debug(`<<< Create user response: ${JSON.stringify(resp)}`);
+                await this.elastic.indices.refresh({index: this.indexName});
 
                 response.success = true;
                 resolve(response);
 
             } catch(error) {
-                this.fastify.log.error(`Cannot create user: ${error}`);
+                this.log.error(`Cannot create user: ${error}`);
 
                 response.errorMessage = getErrorMessage(error);
                 reject(response);
@@ -161,7 +155,7 @@ class UserModel extends AbstractModel {
 
                 /* TODO: use get() */
                 const searchDoc = this.getSearchByIdDock(recordId);
-                const resp:estypes.SearchResponse<UserDocument> = await this.fastify.elastic.search(searchDoc);
+                const resp:estypes.SearchResponse<UserDocument> = await this.elastic.search(searchDoc);
 
                 /* TODO: type guards */
 
@@ -174,7 +168,7 @@ class UserModel extends AbstractModel {
                     }
                 }
             } catch(error) {
-                this.fastify.log.error(`Cannot get user: ${error}`);
+                this.log.error(`Cannot get user: ${error}`);
                 reject(error);
             }
 
@@ -202,22 +196,22 @@ class UserModel extends AbstractModel {
                 }
 
                 const searchDoc = this.getSearchByIdDock(recordId);
-                const searchResp:estypes.SearchResponse = await this.fastify.elastic.search(searchDoc);
+                const searchResp:estypes.SearchResponse = await this.elastic.search(searchDoc);
 
                 if (searchResp.hits.hits.length > 0) {
                     const firstHit = searchResp.hits.hits[0];
                     if (firstHit) {
                         const foundRecordId:string = firstHit._id;
                         const deleteDoc = this.getDeleteDoc(foundRecordId);
-                        const deleteResp:estypes.DeleteResponse = await this.fastify.elastic.delete(deleteDoc);
+                        const deleteResp:estypes.DeleteResponse = await this.elastic.delete(deleteDoc);
 
-                        this.fastify.log.debug(deleteResp);
+                        this.log.debug(deleteResp);
                         response.success = true;
                     }
                 }
 
             } catch(error) {
-                this.fastify.log.error(`Cannot remove user: ${error}`);
+                this.log.error(`Cannot remove user: ${error}`);
                 reject(error);
             }
 
@@ -226,7 +220,7 @@ class UserModel extends AbstractModel {
     }
 
     async createIndex(): Promise<estypes.IndicesCreateResponse> {
-        this.fastify.log.debug(`<<< Creating index: ${this.indexName} >>>`);
+        this.log.debug(`<<< Creating index: ${this.indexName} >>>`);
 
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
@@ -280,7 +274,7 @@ class UserModel extends AbstractModel {
             }
         };
 
-        return await this.fastify.elastic.indices.create(indexDoc);
+        return await this.elastic.indices.create(indexDoc);
     }
 }
 

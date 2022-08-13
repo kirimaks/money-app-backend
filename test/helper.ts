@@ -71,7 +71,7 @@ function generateModelIndexName(bytesLength:number) {
 
 async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promise<string> {
     const userDraft:UserDraft = generateUser();
-    const userModel = new UserModel(app, appConfig);
+    const userModel = new UserModel(app.log, app.elastic,  appConfig.USERS_INDEX_NAME);
 
     await userModel.createIndex();
 

@@ -11,7 +11,7 @@ tap.test('Test password hashing', async (test) => {
     const appConfig = getTestAppConfig();
 
     const app = await buildApp(test, appConfig);
-    const user = new UserModel(app, appConfig);
+    const user = new UserModel(app.log, app.elastic, appConfig.USERS_INDEX_NAME);
 
     const createIndexResp = await user.createIndex();
     test.ok(createIndexResp.acknowledged, 'Acknowledged is not true');

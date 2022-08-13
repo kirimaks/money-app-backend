@@ -23,7 +23,7 @@ tap.test('Test regular error handler', async (test) => {
 tap.test('Test model error handler', async (test) => {
     const appConfig = getAppConfig();
     const app = await buildApp(test, appConfig);
-    const account = new AccountModel(app, appConfig);
+    const account = new AccountModel(app.log, app.elastic, appConfig.ACCOUNTS_INDEX_NAME);
 
     try {
         throw new Error('Some error');

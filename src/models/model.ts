@@ -1,5 +1,5 @@
-import type {FastifyInstance} from 'fastify';
-import type {estypes} from '@elastic/elasticsearch';
+import type {FastifyLoggerInstance} from 'fastify';
+import type {Client as ESClient, estypes} from '@elastic/elasticsearch';
 
 import type {AccountModel} from './account/account';
 import type {UserModel} from './user/user';
@@ -7,6 +7,7 @@ import type {UserModel} from './user/user';
 
 declare module 'fastify' {
     interface FastifyInstance {
+        elastic: ESClient;
         models: {
             account: AccountModel;
             user: UserModel;
@@ -21,7 +22,8 @@ function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
 }
  
 abstract class AbstractModel { 
-    fastify: FastifyInstance;
+    log: FastifyLoggerInstance;
+    elastic: ESClient;
     indexName: string;
 
     abstract createDocument(document:unknown):object;
@@ -30,8 +32,9 @@ abstract class AbstractModel {
     abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
     abstract createIndex():Promise<estypes.IndicesCreateResponse>;
 
-    constructor(fastify:FastifyInstance, indexName:string) {
-        this.fastify = fastify;
+    constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName: string) {
+        this.log = log;
+        this.elastic = elastic;
         this.indexName = indexName;
     }
 
@@ -70,19 +73,19 @@ abstract class AbstractModel {
     }
 
     async deleteIndex(): Promise<estypes.IndicesExistsResponse> {
-        const indexExistResp:estypes.IndicesExistsResponse = await this.fastify.elastic.indices.exists({
+        const indexExistResp:estypes.IndicesExistsResponse = await this.elastic.indices.exists({
             index: this.indexName
         })
 
         if (indexExistResp) {
-            this.fastify.log.debug(`<<< Removing index: ${this.indexName} >>>`);
+            this.log.debug(`<<< Removing index: ${this.indexName} >>>`);
 
-            const deleteResp = await this.fastify.elastic.indices.delete({
+            const deleteResp = await this.elastic.indices.delete({
                 index: this.indexName
             });
-            this.fastify.log.debug(`Delete response: ${JSON.stringify(deleteResp)}`);
+            this.log.debug(`Delete response: ${JSON.stringify(deleteResp)}`);
         } else {
-            this.fastify.log.debug(`<<< Index: ${this.indexName} not exist >>>`);
+            this.log.debug(`<<< Index: ${this.indexName} not exist >>>`);
         }
 
         return indexExistResp;

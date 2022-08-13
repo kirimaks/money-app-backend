@@ -8,7 +8,7 @@ tap.test('Create account index', async (test) => {
     const appConfig = getTestAppConfig();
 
     const app = await buildApp(test, appConfig);
-    const account = new AccountModel(app, appConfig);
+    const account = new AccountModel(app.log, app.elastic, appConfig.ACCOUNTS_INDEX_NAME);
 
     const createResp = await account.createIndex();
 
