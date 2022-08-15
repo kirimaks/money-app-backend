@@ -6,4 +6,19 @@ function getErrorMessage(catchedError:unknown):string {
     return 'Error message is not provided';
 }
 
-export {getErrorMessage}
+
+class NotFoundError extends Error {
+    constructor(message:string) {
+        super(message);
+        this.message = 'Not Found';
+    }
+}
+
+
+class AuthError extends Error {
+    constructor(message:string) {
+        super(message);
+    }
+}
+
+export {getErrorMessage, NotFoundError, AuthError}
