@@ -1,33 +1,32 @@
+import {getErrorMessage, NotFoundError} from '../errors/tools';
+import {
+    CreateAccountValidator, GetAccountRequestValidator, RemoveAccountRequestValidator
+} from '../validators/account';
+
+import type {HttpError} from '@fastify/sensible/lib/httpError';
 import type {FastifyReply, FastifyInstance} from 'fastify';
 
 
-
 function createAccountController(fastify:FastifyInstance, _config:AppConfig): CreateAccountRequestHandler {
-    async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<void> {
-        const newDoc:AccountDocument = fastify.models.account.createDocument(request.body);
-
+    async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const modelResp:ModelCreateDocResponse<AccountDocument> = await fastify.models.account.saveDocument(newDoc);
-            if (modelResp.success) {
-                reply.code(201).send({
-                    account_name: modelResp.document.account_name,
-                    account_id: modelResp.document.record_id,
-                });
+            const validator = new CreateAccountValidator(request.body);
 
-            } else {
-                reply.code(400).send({
-                    error: 'Bad Request',
-                    message: modelResp.errorMessage,
-                    statusCode: 400,
+            if (await validator.isValid()) {
+                const account = await fastify.models.account.createDocumentMap(request.body);
+                await account.save();
+
+                return reply.code(201).send({
+                    account_name: account.document.account_name,
+                    account_id: account.document.account_id,
                 });
             }
+            return fastify.httpErrors.badRequest(validator.errorMessage);
 
         } catch(error) {
-            fastify.log.error(`Cannot create account: ${error}`);
-
-            reply.code(500).send({
-                error: fastify.models.account.getModelResponseError(error),
-            });
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot create account: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
@@ -35,39 +34,26 @@ function createAccountController(fastify:FastifyInstance, _config:AppConfig): Cr
 }
 
 function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAccountRequestHandler {
-    async function getAccount(request:GetAccountRequest, reply:FastifyReply): Promise<void> {
-        const {account_id} = request.params;
-        const options:ModelRequestOptions = {
-            controlHeader: request.headers['x-control-header'],
-        }
-
+    async function getAccount(request:GetAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const modelResp:ModelSearchDocResponse<AccountDocument> = await fastify.models.account.getDocument(
-                account_id, options
-            );
+            const validator = new GetAccountRequestValidator(request.params);
 
-            if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({
-                    statusCode: 400,
-                    message: modelResp.errorMessage,
-                    error: 'Bad Request',
+            if (await validator.isValid()) {
+                const {account_id} = request.params;
+                const account = await fastify.models.account.getDocumentMap(account_id);
+                return reply.code(200).send({
+                    account_name: account.document.account_name
                 });
-
-            } else if (modelResp.found && modelResp.document) {
-                reply.code(200).send({
-                    account_name: modelResp.document.account_name
-                });
-
-            } else { 
-                reply.code(404).send({error: 'Not Found'});
             }
+            return fastify.httpErrors.badRequest(validator.errorMessage);
 
         } catch(error) {
-            fastify.log.error(`Cannot get account: ${error}`);
-
-            reply.code(500).send({
-                error: fastify.models.account.getModelResponseError(error),
-            });
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot get account: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
@@ -75,45 +61,32 @@ function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAc
 }
 
 function deleteAccountController(fastify:FastifyInstance, _config:AppConfig): DeleteAccountRequestHandler {
-    async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<void> {
-        const accountId = request.params.account_id;
-        const options:ModelRequestOptions = {
-            controlHeader: request.headers['x-control-header'],
-        }
-
+    async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const modelResp:ModelDeleteDocResponse<AccountDocument> = await fastify.models.account.removeDocument(
-                accountId, options
-            );
+            const validator = new RemoveAccountRequestValidator(request.params);
 
-            if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({
-                    error: 'Bad Request',
-                    message: modelResp.errorMessage,
-                    statusCode: 400,
-                });
-
-            } else if (modelResp.success) {
-                reply.code(204).send({});
-
-            } else { 
-                reply.code(404).send({});
+            if (await validator.isValid()) {
+                const accountId = request.params.account_id;
+                const account = await fastify.models.account.getDocumentMap(accountId);
+                await account.delete();
+                return reply.code(204).send({});
             }
 
-        } catch(error) {
-            fastify.log.error(`Cannot remove account: ${error}`);
+            return fastify.httpErrors.badRequest(validator.errorMessage);
 
-            reply.code(500).send({
-                error: fastify.models.account.getModelResponseError(error),
-            });
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+
+            const errorMessage = getErrorMessage(error);
+
+            fastify.log.error(`Cannot remove account: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
     return deleteAccount;
 }
 
-export {
-    createAccountController,
-    getAccountController,
-    deleteAccountController,
-}
+export {createAccountController, getAccountController, deleteAccountController}

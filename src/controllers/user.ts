@@ -1,22 +1,30 @@
+import {getErrorMessage, NotFoundError} from '../errors/tools';
+import {
+    NewUserRequestValidator, GetUserRequestValidator, RemoveUserRequestValidator
+} from '../validators/user';
+
 import type {FastifyInstance, FastifyReply} from 'fastify';
+import type {HttpError} from '@fastify/sensible/lib/httpError';
 
 
 function newUserController(fastify:FastifyInstance, _config:AppConfig): NewUserRequestHandler {
-    async function create(request:CreateUserRequest, reply:FastifyReply): Promise<void> {
+    async function create(request:CreateUserRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const newDoc:UserDocument = await fastify.models.user.createDocument(request.body);
-            const modelResp:ModelCreateDocResponse<UserDocument> = await fastify.models.user.saveDocument(newDoc);
-            if (modelResp.success) {
-                reply.code(201).send({
-                    record_id: modelResp.document.record_id,
-                });
-            } else {
-                reply.code(400).send({error: modelResp.errorMessage});
-            }
-        } catch(error) {
-            fastify.log.error(`Cannot create user: ${error}`);
+            const validator = new NewUserRequestValidator(fastify.elastic, request.body);
 
-            reply.code(500).send({error: fastify.models.user.getModelResponseError(error)});
+            if (await validator.isValid()) {
+                const newUser = await fastify.models.user.createDocumentMap(request.body);
+                await newUser.save();
+                return reply.code(201).send({record_id: newUser.document.user_id});
+            } 
+
+            return fastify.httpErrors.badRequest(validator.errorMessage);
+
+        } catch(error) {
+            const errorMessage = getErrorMessage(error);
+
+            fastify.log.error(`Cannot create user: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
@@ -24,30 +32,23 @@ function newUserController(fastify:FastifyInstance, _config:AppConfig): NewUserR
 }
 
 function getUserController(fastify:FastifyInstance, _config:AppConfig): GetUserRequestHandler {
-    async function get(request:GetUserRequest, reply:FastifyReply): Promise<void> {
-        const {record_id} = request.params;
-        const options:ModelRequestOptions = {
-            controlHeader: request.headers['x-control-header'],
-        }
+    async function get(request:GetUserRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const modelResp:ModelSearchDocResponse<UserDocument> = await fastify.models.user.getDocument(record_id, options);
-            if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({
-                    error: 'Bad Request',
-                    message: modelResp.errorMessage,
-                    statusCode: 400,
-                });
-
-            } else if (modelResp.found) {
-                reply.code(200).send(modelResp.document);
-
-            } else {
-                reply.code(404).send({error: 'User not found'});
-
+            const validator = new GetUserRequestValidator(request.params);
+            if (await validator.isValid()) {
+                const {record_id} = request.params;
+                const userDoc = await fastify.models.user.getDocumentMap(record_id);
+                return reply.code(200).send(userDoc.document);
             }
+            return fastify.httpErrors.badRequest(validator.errorMessage);
+
         } catch(error) {
-            fastify.log.error(`Cannot get user: ${error}`);
-            reply.code(500).send({error: fastify.models.user.getModelResponseError(error)});
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            } 
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot create user: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
@@ -55,29 +56,25 @@ function getUserController(fastify:FastifyInstance, _config:AppConfig): GetUserR
 }
 
 function removeUserController(fastify:FastifyInstance, _config:AppConfig): RemoveUserRequestHandler {
-    async function remove(request:RemoveUserRequest, reply:FastifyReply): Promise<void> {
-        const {record_id} = request.params;
-        const options:ModelRequestOptions = {
-            controlHeader: request.headers['x-control-header'],
-        }
+    async function remove(request:RemoveUserRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const modelResp:ModelDeleteDocResponse<UserDocument> = await fastify.models.user.removeDocument(record_id, options);
-            if (modelResp.errorMessage.length > 0) {
-                reply.code(400).send({
-                    error: 'Bad Request',
-                    message: modelResp.errorMessage,
-                    statusCode: 400,
-                });
-
-            } else if (modelResp.success) {
-                reply.code(204).send({});
-
-            } else {
-                reply.code(404).send({error: 'User not found'});
+            const validator = new RemoveUserRequestValidator(request.params);
+            if (await validator.isValid()) {
+                const {record_id} = request.params;
+                const userDoc = await fastify.models.user.getDocumentMap(record_id);
+                await userDoc.delete();
+                return reply.code(204).send({});
             }
+
+            return fastify.httpErrors.badRequest(validator.errorMessage);
+
         } catch(error) {
-            fastify.log.error(`Cannot remove user ${error}`);
-            reply.code(500).send({error: fastify.models.user.getModelResponseError(error)});
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            } 
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot create user: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError(errorMessage);
         }
     }
 
