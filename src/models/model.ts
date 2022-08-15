@@ -15,34 +15,40 @@ declare module 'fastify' {
     }
 }
 
-function isModelResponse(catchedError:unknown): catchedError is ModelResponse {
-    return (
-        typeof catchedError === 'object' && catchedError != null && 'errorMessage' in catchedError
-    );
+/* Mapping to concrete document in elastic */
+abstract class AbstractDocMap<DocType> {
+    log: FastifyLoggerInstance;
+    elastic: ESClient;
+    indexName: string;
+    document: DocType;
+
+    abstract save(): Promise<string>;
+    abstract delete(): Promise<void>;
+
+    constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName:string, document:DocType) {
+        this.log = log;
+        this.elastic = elastic;
+        this.indexName = indexName;
+        this.document = document;
+    }
 }
  
-abstract class AbstractModel { 
+abstract class AbstractModel<DocDraftType, DocType> { 
     log: FastifyLoggerInstance;
     elastic: ESClient;
     indexName: string;
 
-    abstract createDocument(document:unknown):object;
-    abstract saveDocument(document:unknown):Promise<ModelCreateDocResponse<unknown>>;
-    abstract removeDocument(docId:string, options:ModelRequestOptions):Promise<ModelDeleteDocResponse<unknown>>;
-    abstract getDocument(docId:string, options:ModelRequestOptions):Promise<ModelSearchDocResponse<unknown>>;
+    /* Creates document mapping */
+    abstract createDocumentMap(document:DocDraftType):Promise<AbstractDocMap<DocType>>;
+
+    /* Getting document mapping */
+    abstract getDocumentMap(record_id:string):Promise<AbstractDocMap<DocType>>;
     abstract createIndex():Promise<estypes.IndicesCreateResponse>;
 
     constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName: string) {
         this.log = log;
         this.elastic = elastic;
         this.indexName = indexName;
-    }
-
-    getIndexDoc(newDocument:UserDocument) {
-        return {
-            index: this.indexName,
-            document: newDocument,
-        }
     }
 
     getDeleteDoc(dbRecordId:string) {
@@ -60,22 +66,10 @@ abstract class AbstractModel {
         }
     }
 
-    getModelResponseError(catchedError:unknown):string {
-        if (catchedError instanceof Error) {
-            return catchedError.message;
-        }
-
-        if (isModelResponse(catchedError)) {
-            return catchedError.errorMessage;
-        }
-
-        return 'Cannot parse error message';
-    }
-
     async deleteIndex(): Promise<estypes.IndicesExistsResponse> {
         const indexExistResp:estypes.IndicesExistsResponse = await this.elastic.indices.exists({
             index: this.indexName
-        })
+        });
 
         if (indexExistResp) {
             this.log.debug(`<<< Removing index: ${this.indexName} >>>`);
@@ -84,7 +78,9 @@ abstract class AbstractModel {
                 index: this.indexName
             });
             this.log.debug(`Delete response: ${JSON.stringify(deleteResp)}`);
+
         } else {
+            /* TODO: throw error? */
             this.log.debug(`<<< Index: ${this.indexName} not exist >>>`);
         }
 
@@ -92,4 +88,4 @@ abstract class AbstractModel {
     }
 }
 
-export {AbstractModel}
+export {AbstractModel, AbstractDocMap}
