@@ -1,10 +1,11 @@
 import {randomBytes} from 'crypto';
+import {validate as validateUUID} from 'uuid';
 
 import tap from 'tap';
 
-import {buildApp, getTestAppConfig, generateUser} from '../helper';
+import {buildApp, getTestAppConfig, generateUser, generateSignUpRequest} from '../helper';
 import {UserModel} from '../../src/models/user/user';
-
+import {AuthError} from '../../src/errors/tools';
 
 
 tap.test('Test password hashing', async (test) => {
@@ -17,29 +18,26 @@ tap.test('Test password hashing', async (test) => {
     test.ok(createIndexResp.acknowledged, 'Acknowledged is not true');
 
     const userDraft:UserDraft = generateUser();
-    const docResp = await user.createDocument(userDraft);
+    const docResp = await user.createDocumentMap(userDraft);
 
-    test.ok(docResp.password.hash, 'Hash is null');
-    test.ok(docResp.password.salt, 'Salt is null');
+    test.ok(docResp.document.password.hash, 'Hash is null');
+    test.ok(docResp.document.password.salt, 'Salt is null');
 
-    const savingResp = await user.saveDocument(docResp);
+    const userId = await docResp.save();
 
-    if (!savingResp.success) {
-        app.log.error(savingResp);
+    test.ok(validateUUID(userId), 'User id is invalid');
+
+    try {
+        await user.verifyPassword(userDraft.email, randomBytes(8).toString('hex'));
+    } catch(error) {
+        test.ok(error instanceof AuthError, 'Wrong error thrown');
     }
 
-    test.ok(savingResp.success, 'Response is not successful');
-
-    const invalidSession = await user.verifyPassword(userDraft.email, randomBytes(8).toString('hex'));
     const validSession = await user.verifyPassword(userDraft.email, userDraft.password);
 
-    test.ok(invalidSession.anonymous, 'Password is not invalid');
-    test.notOk(invalidSession.user_id, 'User id is not empty');
-    test.notOk(invalidSession.account_id, 'Account id is not empty');
-
     test.notOk(validSession.anonymous, 'Password is invalid');
-    test.equal(validSession.user_id, docResp.record_id, 'Wrong user id');
-    test.equal(validSession.account_id, docResp.account_id, 'Wrong account id');
+    test.equal(validSession.user_id, docResp.document.user_id, 'Wrong user id');
+    test.equal(validSession.account_id, docResp.document.account_id, 'Wrong account id');
 
     const indexRemovingResp = await user.deleteIndex();
     test.ok(indexRemovingResp, 'Acknowledged is not true');
@@ -49,25 +47,24 @@ tap.test('Create user and log in', async (test) => {
     const appConfig = getTestAppConfig();
 
     const app = await buildApp(test, appConfig);
-    const userDraft:UserDraft = generateUser();
+    const signUpPayload = generateSignUpRequest();
 
     test.test('Sign up test', async (signUpTest) => {
         const signUpResp = await app.inject({
             method: 'POST',
             url: '/auth/signup',
-            payload: userDraft
+            payload: signUpPayload,
         });
 
         signUpTest.equal(signUpResp.statusCode, 201, 'Signup response is not 201');
-        signUpTest.equal(signUpResp.json().message, 'User created', 'Wrong message');
 
         signUpTest.test('Log in tst', async (logInTest) => {
             const logInResp = await app.inject({
                 method: 'POST',
                 url: '/auth/login',
                 payload: {
-                    email: userDraft.email,
-                    password: userDraft.password
+                    email: signUpPayload.email,
+                    password: signUpPayload.password
                 }
             });
 
@@ -91,20 +88,20 @@ tap.test('Login with wrong credentials', async (test) => {
         }
     });
 
-    test.equal(logInResp.statusCode, 400, 'Auth error response code is not 400');
+    test.equal(logInResp.statusCode, 401, 'Auth error response code is not 401');
 });
 
 tap.test('Log in and make sure user getting proper info', async (test) =>  {
     const appConfig = getTestAppConfig();
 
     const app = await buildApp(test, appConfig);
-    const userDraft:UserDraft = generateUser();
+    const signUpPayload = generateSignUpRequest();
 
     test.test('Sign up test', async (signUpTest) => {
         const signUpResp = await app.inject({
             method: 'POST',
             url: '/auth/signup',
-            payload: userDraft
+            payload: signUpPayload
         });
 
         signUpTest.equal(signUpResp.statusCode, 201, 'Signup response is not 201');
@@ -114,8 +111,8 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
                 method: 'POST',
                 url: '/auth/login',
                 payload: {
-                    email: userDraft.email,
-                    password: userDraft.password
+                    email: signUpPayload.email,
+                    password: signUpPayload.password
                 }
             });
 
@@ -144,9 +141,25 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
                 }
 
                 myDataTest.equal(myAccountResp.statusCode, 200, 'Response for profile is not 200');
-                myDataTest.equal(myAccountResp.json().first_name, userDraft.first_name, 'Wrong first name');
-                myDataTest.equal(myAccountResp.json().last_name, userDraft.last_name, 'Wrong first name');
+                myDataTest.equal(myAccountResp.json().first_name, signUpPayload.first_name, 'Wrong first name');
+                myDataTest.equal(myAccountResp.json().last_name, signUpPayload.last_name, 'Wrong first name');
             });
         });
     });
+});
+
+tap.test('Sign up response format', async (test) => {
+    const appConfig = getTestAppConfig();
+    const app = await buildApp(test, appConfig);
+    const newAccount = generateSignUpRequest();
+
+    const signUpResponse = await app.inject({
+        url: '/auth/signup',
+        method: 'POST',
+        payload: newAccount,
+    });
+
+    test.equal(signUpResponse.statusCode, 201, 'Response code for sign up is not 201');
+    test.ok(validateUUID(signUpResponse.json().user_id), 'User id is invalid');
+    test.ok(validateUUID(signUpResponse.json().account_id), 'Account id is invalid');
 });

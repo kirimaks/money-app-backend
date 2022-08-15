@@ -8,6 +8,7 @@ import {v4 as uuidv4} from 'uuid';
 import {app as App} from '../src/app';
 import {getAppConfig} from '../src/config';
 import {UserModel} from '../src/models/user/user';
+import {AccountModel} from '../src/models/account/account';
 
 import type * as tap from 'tap';
 import type {FastifyInstance} from 'fastify';
@@ -59,9 +60,21 @@ function generateUser():UserDraft {
         phone_number: randomBytes(5).toString('hex'),
         email: randomBytes(10).toString('hex'),
         password: randomBytes(12).toString('hex'),
-        account_id: uuidv4(),
+        account_id: uuidv4(), /* TODO: random */
         comment: randomBytes(12).toString('hex'),
     }
+}
+
+function generateSignUpRequest():SignUpRequestBody {
+    return {
+        first_name: randomBytes(12).toString('hex'),
+        last_name: randomBytes(12).toString('hex'),
+        phone_number: randomBytes(5).toString('hex'),
+        email: randomBytes(10).toString('hex'),
+        password: randomBytes(12).toString('hex'),
+        comment: randomBytes(12).toString('hex'),
+        account_name: randomBytes(10).toString('hex'),
+    };
 }
 
 function generateModelIndexName(bytesLength:number) {
@@ -69,29 +82,32 @@ function generateModelIndexName(bytesLength:number) {
     return `auto-index-${randomName}`;
 }
 
-async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promise<string> {
-    const userDraft:UserDraft = generateUser();
-    const userModel = new UserModel(app.log, app.elastic,  appConfig.USERS_INDEX_NAME);
+async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promise<RandomSessionInfo> {
 
+    /* Create indices for tests */
+    const accountModel = new AccountModel(app.log, app.elastic,  appConfig.ACCOUNTS_INDEX_NAME);
+    await accountModel.createIndex();
+
+    const userModel = new UserModel(app.log, app.elastic,  appConfig.USERS_INDEX_NAME);
     await userModel.createIndex();
+
+    const signUpPayload:SignUpRequestBody = generateSignUpRequest();
 
     const signUpResp = await app.inject({
         method: 'POST',
         url: '/auth/signup',
-        payload: userDraft
+        payload: signUpPayload
     });
-
     app.log.debug(`<<< Generate session sing up resp: ${signUpResp.statusCode} >>>`);
 
     const logInResponse = await app.inject({
         method: 'POST',
         url: '/auth/login',
         payload: {
-            email: userDraft.email,
-            password: userDraft.password,
+            email: signUpPayload.email,
+            password: signUpPayload.password,
         }
     });
-
     app.log.debug(`<<< Generate session log in resp: ${logInResponse.statusCode} >>>`);
 
     const sessionCookie:Cookie|undefined = (logInResponse.cookies as Cookie[]).find((cookie) => {
@@ -100,13 +116,17 @@ async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promis
 
     if (sessionCookie) {
         app.log.debug(`Session cookie: ${sessionCookie.value}`);
-        return sessionCookie.value;
+    
+        const sessionInfo:RandomSessionInfo = {
+            account_id: signUpResp.json().account_id,
+            user_id: signUpResp.json().user_id,
+            cookie: sessionCookie.value,
+        };
 
-    } else {
-        app.log.error('Cannot generate session, no cookie returned from login.');
-    }
+        return sessionInfo;
+    } 
 
-    return '';
+    throw new Error('Cannot generate session, no cookie returned from login.');
 }
 
 function getTestAppConfig() {
@@ -118,4 +138,4 @@ function getTestAppConfig() {
     return appConfig;
 }
 
-export {buildApp, getAppConfig, generateModelIndexName, getTestAppConfig, generateSession, generateUser}
+export {buildApp, getAppConfig, generateModelIndexName, getTestAppConfig, generateSession, generateUser, generateSignUpRequest}
