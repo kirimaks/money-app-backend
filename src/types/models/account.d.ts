@@ -3,5 +3,7 @@ interface AccountDraft {
 }
 
 interface AccountDocument extends AccountDraft {
-    record_id: string;
+    account_id: string;
+
+    /* TODO: budgets, spendings, ... */
 }

@@ -4,7 +4,7 @@ type CreateAccountProperties = {
     }
 };
 type CreateAccountRequest = FastifyRequest<CreateAccountProperties>;
-type CreateAccountRequestHandler = (request:CreateAccountRequest, reply:FastifyReply) => Promise<void>;
+type CreateAccountRequestHandler = (request:CreateAccountRequest, reply:FastifyReply) => Promise<HttpError>;
 
 type GetAccountProperties = {
     Params: {
@@ -15,7 +15,7 @@ type GetAccountProperties = {
     }
 };
 type GetAccountRequest = FastifyRequest<GetAccountProperties>;
-type GetAccountRequestHandler = (request:GetAccountRequest, reply:FastifyReply) => Promise<void>;
+type GetAccountRequestHandler = (request:GetAccountRequest, reply:FastifyReply) => Promise<HttpError>;
 
 type DeleteRequestProperties = {
     Params: {
@@ -26,4 +26,4 @@ type DeleteRequestProperties = {
     }
 };
 type DeleteAccountRequest = FastifyRequest<DeleteRequestProperties>;
-type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:FastifyReply) => Promise<void>;
+type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:FastifyReply) => Promise<HttpError>;

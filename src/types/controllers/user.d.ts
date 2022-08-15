@@ -2,7 +2,7 @@ type CreateUserProperties = {
     Body: UserDraft;
 };
 type CreateUserRequest = FastifyRequest<CreateUserProperties>;
-type NewUserRequestHandler = (request:CreateUserRequest, reply:FastifyReply) => Promise<void>;
+type NewUserRequestHandler = (request:CreateUserRequest, reply:FastifyReply) => Promise<HttpError>;
 
 type GetUserProperties = {
     Params: {
@@ -13,7 +13,7 @@ type GetUserProperties = {
     }
 };
 type GetUserRequest = FastifyRequest<GetUserProperties>;
-type GetUserRequestHandler = (request:GetUserRequest, reply:FastifyReply) => Promise<void>;
+type GetUserRequestHandler = (request:GetUserRequest, reply:FastifyReply) => Promise<HttpError>;
 
 type RemoveUserProperties = {
     Params: {
@@ -24,4 +24,4 @@ type RemoveUserProperties = {
     }
 };
 type RemoveUserRequest = FastifyRequest<RemoveUserProperties>;
-type RemoveUserRequestHandler = (request:RemoveUserRequest, reply:FastifyReply) => Promise<void>;
+type RemoveUserRequestHandler = (request:RemoveUserRequest, reply:FastifyReply) => Promise<HttpError>;
