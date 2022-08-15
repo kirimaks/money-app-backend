@@ -14,11 +14,14 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
             url: '/auth/signup',
             schema: {
                 body: {
-                    $ref: 'createUserRequest'
+                    $ref: 'signUpRequest',
                 },
                 response: {
                     400: {
-                        $ref: 'badRequestResponse'
+                        $ref: 'badRequestResponse',
+                    },
+                    201: {
+                        $ref: 'signUpOkResponse',
                     }
                 },
             },
