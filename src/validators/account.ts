@@ -1,38 +1,24 @@
 import {validate as validateUUID} from 'uuid';
-import {BaseRequestValidator} from './base';
+
+import type {FastifyReply} from 'fastify';
 
 
-class GetAccountRequestValidator extends BaseRequestValidator<GetAccountRequest> {
-    async isValid():Promise<boolean> {
-        if (!validateUUID(this.requestParams.account_id)) {
-            this.errorMessage = 'Invalid uuid';
-            return false;
-        }
-
-        return true;
+async function createAccountRequestValidator(request:CreateAccountRequest, reply:FastifyReply):Promise<void> {
+    if (request.body.account_name.match(/[,._]/)) {
+        return reply.badRequest('Bad characters in account name');
     }
 }
 
-class CreateAccountValidator extends BaseRequestValidator<CreateAccountRequest> {
-    async isValid():Promise<boolean> {
-        if (this.requestParams.account_name.match(/[,._]/)) {
-            this.errorMessage = 'Bad characters in account name';
-            return false;
-        }
-
-        return true;
+async function getAccountRequestValidator(request:GetAccountRequest, reply:FastifyReply):Promise<void> {
+    if (!validateUUID(request.params.account_id)) {
+        return reply.badRequest('Invalid uuid');
     }
 }
 
-class RemoveAccountRequestValidator extends BaseRequestValidator<DeleteAccountRequest> {
-    async isValid():Promise<boolean> {
-        if (!validateUUID(this.requestParams.account_id)) {
-            this.errorMessage = 'Invalid uuid';
-            return false;
-        }
-
-        return true;
+async function removeAccountRequestValidator(request:DeleteAccountRequest, reply:FastifyReply):Promise<void> {
+    if (!validateUUID(request.params.account_id)) {
+        return reply.badRequest('Invalid uuid');
     }
 }
 
-export {GetAccountRequestValidator, CreateAccountValidator, RemoveAccountRequestValidator}
+export {createAccountRequestValidator, getAccountRequestValidator, removeAccountRequestValidator}

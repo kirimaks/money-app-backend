@@ -1,7 +1,4 @@
 import {getErrorMessage, NotFoundError} from '../errors/tools';
-import {
-    CreateAccountValidator, GetAccountRequestValidator, RemoveAccountRequestValidator
-} from '../validators/account';
 
 import type {HttpError} from '@fastify/sensible/lib/httpError';
 import type {FastifyReply, FastifyInstance} from 'fastify';
@@ -10,18 +7,13 @@ import type {FastifyReply, FastifyInstance} from 'fastify';
 function createAccountController(fastify:FastifyInstance, _config:AppConfig): CreateAccountRequestHandler {
     async function create(request:CreateAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const validator = new CreateAccountValidator(request.body);
+            const account = await fastify.models.account.createDocumentMap(request.body);
+            await account.save();
 
-            if (await validator.isValid()) {
-                const account = await fastify.models.account.createDocumentMap(request.body);
-                await account.save();
-
-                return reply.code(201).send({
-                    account_name: account.document.account_name,
-                    account_id: account.document.account_id,
-                });
-            }
-            return fastify.httpErrors.badRequest(validator.errorMessage);
+            return reply.code(201).send({
+                account_name: account.document.account_name,
+                account_id: account.document.account_id,
+            });
 
         } catch(error) {
             const errorMessage = getErrorMessage(error);
@@ -36,16 +28,12 @@ function createAccountController(fastify:FastifyInstance, _config:AppConfig): Cr
 function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAccountRequestHandler {
     async function getAccount(request:GetAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const validator = new GetAccountRequestValidator(request.params);
+            const {account_id} = request.params;
+            const account = await fastify.models.account.getDocumentMap(account_id);
 
-            if (await validator.isValid()) {
-                const {account_id} = request.params;
-                const account = await fastify.models.account.getDocumentMap(account_id);
-                return reply.code(200).send({
-                    account_name: account.document.account_name
-                });
-            }
-            return fastify.httpErrors.badRequest(validator.errorMessage);
+            return reply.code(200).send({
+                account_name: account.document.account_name
+            });
 
         } catch(error) {
             if (error instanceof NotFoundError) {
@@ -63,16 +51,11 @@ function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAc
 function deleteAccountController(fastify:FastifyInstance, _config:AppConfig): DeleteAccountRequestHandler {
     async function deleteAccount(request:DeleteAccountRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const validator = new RemoveAccountRequestValidator(request.params);
+            const {account_id} = request.params;
+            const account = await fastify.models.account.getDocumentMap(account_id);
+            await account.delete();
 
-            if (await validator.isValid()) {
-                const accountId = request.params.account_id;
-                const account = await fastify.models.account.getDocumentMap(accountId);
-                await account.delete();
-                return reply.code(204).send({});
-            }
-
-            return fastify.httpErrors.badRequest(validator.errorMessage);
+            return reply.code(204).send({});
 
         } catch(error) {
             if (error instanceof NotFoundError) {

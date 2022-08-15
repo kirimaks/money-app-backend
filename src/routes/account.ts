@@ -1,6 +1,9 @@
 import type { FastifyInstance, RouteOptions } from 'fastify';
 
 import {createAccountController, getAccountController, deleteAccountController} from '../controllers/account';
+import {
+    createAccountRequestValidator, getAccountRequestValidator, removeAccountRequestValidator
+} from '../validators/account';
 
 
 async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
@@ -8,6 +11,8 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
         {
             method: 'POST',
             url: '/account/create',
+            handler: createAccountController(fastify, config),
+            preHandler: createAccountRequestValidator,
             schema: {
                 body: {
                     $ref: 'createAccountRequest',
@@ -18,14 +23,15 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                     },
                     400: {
                         $ref: 'badRequestResponse',
-                    }
-                }
+                    },
+                },
             },
-            handler: createAccountController(fastify, config),
         },
         {
             method: 'GET',
             url: '/account/:account_id',
+            handler: getAccountController(fastify, config),
+            preHandler: getAccountRequestValidator,
             schema: {
                 response: {
                     200: {
@@ -33,23 +39,23 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                     },
                     400: {
                         $ref: 'badRequestResponse',
-                    }
-                }
+                    },
+                },
             },
-            handler: getAccountController(fastify, config),
         },
         {
             method: 'DELETE',
             url: '/account/:account_id',
+            handler: deleteAccountController(fastify, config),
+            preHandler: removeAccountRequestValidator,
             schema: {
                 response: {
                     400: {
                         $ref: 'badRequestResponse',
-                    }
-                }
+                    },
+                },
             },
-            handler: deleteAccountController(fastify, config),
-        }
+        },
     ];
 
     routes.map((route) => fastify.route(route));
