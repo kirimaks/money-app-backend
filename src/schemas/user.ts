@@ -68,7 +68,7 @@ const CREATE_USER_RESPONSE_SCHEMA = {
     $id: 'createUserResponse',
     type: 'object',
     properties: {
-        record_id: {
+        user_id: {
             type: 'string'
         },
         first_name: {

@@ -110,15 +110,15 @@ tap.test('Create user', async (createUserTest) => {
         }
     });
 
-    const {record_id} = resp.json();
+    const {user_id} = resp.json();
 
     createUserTest.equal(resp.statusCode, 201, 'Response for new user is not 201');
-    createUserTest.ok(validateUUID(record_id), 'User id is invalid uuid');
+    createUserTest.ok(validateUUID(user_id), 'User id is invalid uuid');
 
     createUserTest.test('Get this user', async (getUserTest) => {
         const resp = await app.inject({
             method: 'GET',
-            url: `/user/${record_id}`,
+            url: `/user/${user_id}`,
             cookies: {
                 'session-id': session.cookie
             }
@@ -129,7 +129,7 @@ tap.test('Create user', async (createUserTest) => {
         getUserTest.test('Remove this user', async (removeUserTest) => {
             const resp = await app.inject({
                 method: 'DELETE',
-                url: `/user/${record_id}`,
+                url: `/user/${user_id}`,
                 cookies: {
                     'session-id': session.cookie
                 }

@@ -1,69 +1,40 @@
 import {validate as validateUUID} from 'uuid';
+import {NotFoundError, getErrorMessage} from '../errors/tools';
 
-import {BaseRequestValidator} from './base';
-
-import type {Client as ESClient, estypes} from '@elastic/elasticsearch';
+import type {FastifyInstance, FastifyReply} from 'fastify';
 
 
-class NewUserRequestValidator extends BaseRequestValidator<CreateUserRequest> {
-    elastic:ESClient;
+function createUserRequestValidator(fastify:FastifyInstance) {
+    async function validate(request:CreateUserRequest, reply:FastifyReply) {
+        const {account_id} = request.body;
 
-    constructor(elastic:ESClient, requestParams:CreateUserRequest) {
-        super(requestParams);
+        try {
+            await fastify.models.account.getDocumentMap(account_id);
 
-        this.elastic = elastic;
-    }
-
-    async isValid():Promise<boolean> {
-        const accountId = this.requestParams.account_id;
-
-        if (!await this.accountExists(accountId)) {
-            this.errorMessage = `No such account: ${accountId}`;
-            return false;
-        }
-
-        return true;
-    }
-
-    async accountExists(accountId:string):Promise<boolean> {
-        const searchRequest:estypes.SearchRequest = {
-            query: {
-                match: {account_id: accountId}
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return reply.badRequest(`No such account: ${account_id}`);
             }
-        };
-        const searchResp:estypes.SearchResponseBody<AccountDocument> = await this.elastic.search(searchRequest);
 
-        if (searchResp.hits.hits.length > 0) {
-            const firstHit = searchResp.hits.hits[0];
-            if (firstHit && firstHit._source) {
-                return true;
-            }
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot validate sign up request: ${errorMessage}`);
+            return reply.internalServerError();
         }
+    }
 
-        return false;
+    return validate;
+}
+
+async function getUserRequestValidator(request:GetUserRequest, reply:FastifyReply) {
+    if (!validateUUID(request.params.record_id)) {
+        return reply.badRequest('Invalid uuid');
     }
 }
 
-class GetUserRequestValidator extends BaseRequestValidator<GetUserRequest> {
-    async isValid():Promise<boolean> {
-        if (!validateUUID(this.requestParams.record_id)) {
-            this.errorMessage = 'Invalid uuid';
-            return false;
-        }
-
-        return true;
+async function removeUserRequestValidator(request:GetUserRequest, reply:FastifyReply) {
+    if (!validateUUID(request.params.record_id)) {
+        return reply.badRequest('Invalid uuid');
     }
 }
 
-class RemoveUserRequestValidator extends BaseRequestValidator<GetUserRequest> {
-    async isValid():Promise<boolean> {
-        if (!validateUUID(this.requestParams.record_id)) {
-            this.errorMessage = 'Invalid uuid';
-            return false;
-        }
-
-        return true;
-    }
-}
-
-export {NewUserRequestValidator, GetUserRequestValidator, RemoveUserRequestValidator}
+export {createUserRequestValidator, getUserRequestValidator, removeUserRequestValidator}
