@@ -1,9 +1,26 @@
 import {getErrorMessage, AuthError} from '../errors/tools';
-import {SignUpRequestValidator} from '../validators/auth';
 
 import type {HttpError} from '@fastify/sensible/lib/httpError';
 import type {FastifyInstance, FastifyReply} from 'fastify';
 
+
+function getAccountDocument(requestBody:SignUpRequestBody):AccountDraft {
+    return {
+        account_name: requestBody.account_name
+    };
+}
+
+function getUserDocument(requestBody:SignUpRequestBody, accountId:string):UserDraft {
+    return {
+        account_id: accountId,
+        first_name: requestBody.first_name,
+        last_name: requestBody.last_name,
+        phone_number: requestBody.phone_number,
+        email: requestBody.email,
+        password: requestBody.password,
+        comment: requestBody.comment,
+    };
+}
 
 function logInController(fastify:FastifyInstance, _config:AppConfig): LogInRequestHandler {
     async function login(request:LogInRequest, reply:FastifyReply): Promise<HttpError> {
@@ -40,22 +57,15 @@ function logInController(fastify:FastifyInstance, _config:AppConfig): LogInReque
 function signUpController(fastify:FastifyInstance, _config:AppConfig): SignUpRequestHandler {
     async function signup(request:SignUpRequest, reply:FastifyReply): Promise<HttpError> {
         try {
-            const validator = new SignUpRequestValidator(request.body);
+            const accountDocument = getAccountDocument(request.body);
+            const account = await fastify.models.account.createDocumentMap(accountDocument);
+            const accountId = await account.save();
 
-            if (await validator.isValid()) {
-                const accountDocument = validator.getAccountDocument();
-                const account = await fastify.models.account.createDocumentMap(accountDocument);
-                const accountId = await account.save();
+            const userDocument = getUserDocument(request.body, accountId);
+            const user = await fastify.models.user.createDocumentMap(userDocument);
+            await user.save();
 
-                const userDocument = validator.getUserDocument(accountId);
-                const user = await fastify.models.user.createDocumentMap(userDocument);
-                await user.save();
-
-                /* TODO: format output */
-                return reply.code(201).send(user.document);
-            }
-
-            return fastify.httpErrors.badRequest(validator.errorMessage);
+            return reply.code(201).send(user.document);
 
         } catch(error) {
             const errorMessage = getErrorMessage(error);
