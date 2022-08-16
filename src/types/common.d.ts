@@ -22,6 +22,7 @@ interface AppConfig {
     ELASTIC_PASSWORD: string;
     ACCOUNTS_INDEX_NAME: string;
     USERS_INDEX_NAME: string;
+    TRANSACTIONS_INDEX_NAME: string;
     ENV: 'test' | 'dev' | 'prod';
     SESSION_SECRET_KEY: string;
 }

@@ -3,6 +3,7 @@ import type {Client as ESClient, estypes} from '@elastic/elasticsearch';
 
 import type {AccountModel} from './account/account';
 import type {UserModel} from './user/user';
+import type {TransactionModel} from './transaction/transaction';
 
 
 declare module 'fastify' {
@@ -11,6 +12,7 @@ declare module 'fastify' {
         models: {
             account: AccountModel;
             user: UserModel;
+            transaction: TransactionModel;
         }
     }
 }
