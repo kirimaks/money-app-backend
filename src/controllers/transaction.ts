@@ -4,7 +4,7 @@ import type {HttpError} from '@fastify/sensible/lib/httpError';
 import type {FastifyInstance, FastifyReply} from 'fastify';
 
 
-function createTransactionController(fastify:FastifyInstance): CreateTransactionRequestHandler {
+export function createTransactionController(fastify:FastifyInstance): CreateTransactionRequestHandler {
     return async (request:CreateTransactionRequest, reply:FastifyReply): Promise<HttpError> => {
         try {
             const transactionDraft:TransactionDraft = Object.assign(
@@ -30,7 +30,7 @@ function createTransactionController(fastify:FastifyInstance): CreateTransaction
     }
 }
 
-function getTransactionController(fastify:FastifyInstance): GetTransactionRequestHandler {
+export function getTransactionController(fastify:FastifyInstance): GetTransactionRequestHandler {
     return async (request:GetTransactionRequest, reply:FastifyReply): Promise<HttpError> => {
         try {
             const {transaction_id} = request.params;
@@ -53,7 +53,7 @@ function getTransactionController(fastify:FastifyInstance): GetTransactionReques
     }
 }
 
-function deleteTransactionController(fastify:FastifyInstance): DeleteTransactionRequestHandler {
+export function deleteTransactionController(fastify:FastifyInstance): DeleteTransactionRequestHandler {
     return async (request:DeleteTransactionRequest, reply:FastifyReply): Promise<HttpError> => {
         try {
             const {transaction_id} = request.params;
@@ -74,5 +74,3 @@ function deleteTransactionController(fastify:FastifyInstance): DeleteTransaction
         }
     }
 }
-
-export {createTransactionController, getTransactionController, deleteTransactionController}

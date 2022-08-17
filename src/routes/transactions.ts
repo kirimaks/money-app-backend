@@ -1,6 +1,5 @@
-/* TODO: refactor imports */
-import {createTransactionController, getTransactionController, deleteTransactionController} from '../controllers/transaction';
-import {createTransactionRequestValidator, getTransactionRequestValidator} from '../validators/transaction';
+import * as controllers from '../controllers/transaction';
+import * as validators from '../validators/transaction';
 
 import type {FastifyInstance, RouteOptions} from 'fastify';
 
@@ -10,8 +9,8 @@ export default async (fastify:FastifyInstance, _config:AppConfig): Promise<void>
         {
             method: 'POST',
             url: '/transactions/new-transaction',
-            preHandler: createTransactionRequestValidator(fastify),
-            handler: createTransactionController(fastify),
+            preHandler: validators.createTransactionRequestValidator(fastify),
+            handler: controllers.createTransactionController(fastify),
             schema: {
                 body: {
                     $ref: 'transactionRequest',
@@ -29,8 +28,8 @@ export default async (fastify:FastifyInstance, _config:AppConfig): Promise<void>
         {
             method: 'GET',
             url: '/transactions/:transaction_id',
-            preHandler: getTransactionRequestValidator(fastify),
-            handler: getTransactionController(fastify),
+            preHandler: validators.getTransactionRequestValidator(fastify),
+            handler: controllers.getTransactionController(fastify),
             schema: {
                 response: {
                     400: {
@@ -45,7 +44,7 @@ export default async (fastify:FastifyInstance, _config:AppConfig): Promise<void>
         {
             method: 'DELETE',
             url: '/transactions/:transaction_id',
-            handler: deleteTransactionController(fastify),
+            handler: controllers.deleteTransactionController(fastify),
             schema: {
                 response: {
                     400: {
