@@ -10,6 +10,7 @@ declare global {
             ACCOUNTS_INDEX_NAME: string;
             USERS_INDEX_NAME: string;
             TRANSACTIONS_INDEX_NAME: string;
+            CATEGORIES_INDEX_NAME: string;
             ENV: 'test' | 'dev' | 'prod';
             SESSION_SECRET_KEY: string;
         }

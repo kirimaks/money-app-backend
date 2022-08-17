@@ -35,7 +35,7 @@ export default async (fastify:FastifyInstance, _config:AppConfig): Promise<void>
                     400: {
                         $ref: 'badRequestResponse',
                     },
-                    201: {
+                    201: { /* TODO: wrong code */
                         $ref: 'transactionResponse',
                     }
                 }

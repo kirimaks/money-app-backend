@@ -18,7 +18,8 @@ export function createTransactionController(fastify:FastifyInstance): CreateTran
             await transaction.save();
 
             return reply.code(201).send({
-                transaction_id: transaction.document.transaction_id
+                transaction_id: transaction.document.transaction_id,
+                category_id: transaction.document.category_id,
             });
 
         } catch(error) {
@@ -37,7 +38,8 @@ export function getTransactionController(fastify:FastifyInstance): GetTransactio
             const transaction = await fastify.models.transaction.getDocumentMap(transaction_id);
 
             return reply.code(200).send({
-                transaction_id: transaction.document.transaction_id
+                transaction_id: transaction.document.transaction_id,
+                category_id: transaction.document.category_id,
             });
 
         } catch(error) {

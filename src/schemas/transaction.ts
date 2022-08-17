@@ -27,10 +27,13 @@ const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
 const TRANSACTION_RESPONSE_SCHEMA:FastifySchemaType = {
     $id: 'transactionResponse', 
     type: 'object',
-    required: ['transaction_id'],
+    required: ['transaction_id', 'category_id'],
     properties: {
         transaction_id: {
             type: 'string',
+        },
+        category_id: {
+            type: 'string'
         }
     }
 };
