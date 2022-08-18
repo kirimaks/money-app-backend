@@ -1,7 +1,18 @@
+/* Model types */
+interface AccountRequestBody {
+    account_name: string;
+}
+
+interface AccountDraft extends AccountRequestBody { }
+
+interface AccountDocument extends AccountDraft {
+    account_id: string;
+    /* TODO: budgets, spendings, ... */
+}
+
+/* Request types */
 type CreateAccountProperties = {
-    body: {
-        account_name: string;
-    }
+    body: AccountRequestBody;
 };
 type CreateAccountRequest = FastifyRequest<CreateAccountProperties>;
 type CreateAccountRequestHandler = (request:CreateAccountRequest, reply:FastifyReply) => Promise<HttpError>;
