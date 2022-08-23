@@ -4,7 +4,7 @@ import {envConfigSchema} from './schemas/environment';
 
 
 function getAppConfig(): AppConfig {
-    return Object.assign({}, process.env);
+    return {...process.env};
 }
 
 
