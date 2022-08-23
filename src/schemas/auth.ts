@@ -77,7 +77,7 @@ const SIGN_UP_OK_RESPONSE = {
 const SIGN_UP_REQUEST = {
     $id: 'signUpRequest',
     type: 'object',
-    required: ['first_name', 'last_name', 'phone_number', 'email', 'password', 'comment', 'account_name'],
+    required: ['first_name', 'last_name', 'phone_number', 'email', 'password', 'account_name'],
     properties: {
         first_name: {
             type: 'string',
@@ -92,9 +92,6 @@ const SIGN_UP_REQUEST = {
             type: 'string',
         },
         password: { /* TODO: Password validator */
-            type: 'string',
-        },
-        comment: {
             type: 'string',
         },
         account_name: {
