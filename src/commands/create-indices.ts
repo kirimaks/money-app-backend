@@ -32,4 +32,6 @@ async function buildApp(config:AppConfig) {
 
     app.log.debug(await app.models.account.createIndex());
     app.log.debug(await app.models.user.createIndex());
+    app.log.debug(await app.models.transaction.createIndex());
+    app.log.debug(await app.models.category.createIndex());
 })();
