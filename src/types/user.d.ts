@@ -10,6 +10,7 @@ interface UserDraft {
 
 interface UserDocument extends UserDraft {
     user_id: string;
+    created: number;
     password: {
         hash: string;
         salt: string;

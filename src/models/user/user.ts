@@ -63,6 +63,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
 
         const document = {
             user_id: uuidv4(),
+            created: new Date().getTime(),
             first_name: requestBody.first_name,
             last_name: requestBody.last_name, 
             phone_number: requestBody.phone_number,

@@ -63,6 +63,8 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
     }
 
     async createIndex():Promise<estypes.IndicesCreateResponse> {
+        this.log.debug('<<< Creating transactions index >>>');
+
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
