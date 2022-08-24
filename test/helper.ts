@@ -134,6 +134,8 @@ function getTestAppConfig() {
 
     appConfig.ACCOUNTS_INDEX_NAME = generateModelIndexName(16);
     appConfig.USERS_INDEX_NAME = generateModelIndexName(16);
+    appConfig.TRANSACTIONS_INDEX_NAME = generateModelIndexName(16);
+    appConfig.CATEGORIES_INDEX_NAME = generateModelIndexName(16);
 
     return appConfig;
 }
