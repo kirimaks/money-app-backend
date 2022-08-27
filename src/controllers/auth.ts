@@ -22,7 +22,7 @@ function getUserDocument(requestBody:SignUpRequestBody, accountId:string):UserDr
     };
 }
 
-function logInController(fastify:FastifyInstance, _config:AppConfig): LogInRequestHandler {
+function logInController(fastify:FastifyInstance, config:AppConfig): LogInRequestHandler {
     async function login(request:LogInRequest, reply:FastifyReply): Promise<HttpError> {
         const email = request.body.email;
         const password = request.body.password;
@@ -36,6 +36,7 @@ function logInController(fastify:FastifyInstance, _config:AppConfig): LogInReque
             fastify.log.info(`Setting session: ${JSON.stringify(sessionData)}`);
 
             request.session.set('user', sessionData);
+            request.session.options({maxAge: config.SESSION_MAX_AGE_MINUTES * 60});
 
             return reply.code(200).send({message: 'Logged in, session saved'});
 
@@ -78,4 +79,26 @@ function signUpController(fastify:FastifyInstance, _config:AppConfig): SignUpReq
     return signup;
 }
 
-export {logInController, signUpController}
+function logOutController(fastify:FastifyInstance): LogOutRequestHandler {
+    async function logout(request:LogOutRequest, reply:FastifyReply): Promise<HttpError> {
+        try {
+            fastify.log.info(`<<< Session: ${JSON.stringify(request.session)} >>>`);
+
+            await request.session.delete();
+
+            fastify.log.info(`<<< Session: ${JSON.stringify(request.session)} >>>`);
+
+            return reply.code(204).send();
+
+        } catch(error) {
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Log out error: ${errorMessage}`);
+
+            return fastify.httpErrors.internalServerError();
+        }
+    }
+
+    return logout;
+}
+
+export { logInController, signUpController, logOutController }

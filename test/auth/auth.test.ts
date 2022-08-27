@@ -121,7 +121,6 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
             const sessionCookie:Cookie|undefined = (logInResp.cookies as Cookie[]).find((cookie) => {
                 return cookie.name === 'session-id';
             });
-
             if (!sessionCookie) {
                 test.fail('Session cookie is null');
                 return;
@@ -143,6 +142,17 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
                 myDataTest.equal(myAccountResp.statusCode, 200, 'Response for profile is not 200');
                 myDataTest.equal(myAccountResp.json().first_name, signUpPayload.first_name, 'Wrong first name');
                 myDataTest.equal(myAccountResp.json().last_name, signUpPayload.last_name, 'Wrong first name');
+
+                myDataTest.test('Log out', async (logOutTest) => {
+                    const logOutResp = await app.inject({
+                        method: 'GET',
+                        url: '/auth/logout',
+                        cookies: {
+                            'session-id': sessionCookie.value,
+                        }
+                    });
+                    logOutTest.equal(logOutResp.statusCode, 204, 'Log out return not 200');
+                });
             });
         });
     });

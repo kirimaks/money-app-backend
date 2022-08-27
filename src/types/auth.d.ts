@@ -34,3 +34,6 @@ type SignUpProperties = {
 }
 type SignUpRequest = FastifyRequest<SignUpProperties>;
 type SignUpRequestHandler = (request:SignUpRequest, reply:FastifyReply) => Promise<HttpError>;
+
+type LogOutRequest = FastifyRequest<{}>;
+type LogOutRequestHandler = (request:LogOutRequest, reply:FastifyReply) => Promise<HttpError>;

@@ -1,11 +1,7 @@
-import type {FastifyRequest, FastifyReply, FastifyInstance, RouteOptions} from 'fastify';
+import { logInController, signUpController, logOutController } from '../controllers/auth';
 
-import {logInController, signUpController} from '../controllers/auth';
+import type { FastifyInstance, RouteOptions } from 'fastify';
 
-
-function emptyPreHandler(_request:FastifyRequest, _reply:FastifyReply, done: () => void) {
-    done();
-}
 
 async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
     const routes:RouteOptions[] = [
@@ -25,14 +21,14 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                     }
                 },
             },
-            preHandler: emptyPreHandler,
             handler: signUpController(fastify, config),
         },
         {
             method: 'POST', 
             url: '/auth/login', 
             schema: {
-                body: { $ref: 'logInRequest'
+                body: { 
+                    $ref: 'logInRequest'
                 },
                 response: {
                     400: {
@@ -40,8 +36,12 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                     },
                 }
             },
-            preHandler: emptyPreHandler,
             handler: logInController(fastify, config),
+        },
+        {
+            method: 'GET',
+            url: '/auth/logout',
+            handler: logOutController(fastify),
         }
     ];
 
