@@ -26,6 +26,7 @@ interface AppConfig {
     USERS_INDEX_NAME: string;
     TRANSACTIONS_INDEX_NAME: string;
     CATEGORIES_INDEX_NAME: string;
+    SESSION_MAX_AGE_MINUTES: number;
 }
 
 enum AppIndex {
@@ -37,3 +38,20 @@ type Cookie = {
     name: string;
     value: string;
 };
+
+declare global {
+    namespace NodeJS {
+        interface ProcessEnv { 
+            ELASTIC_URL: string;
+            ELASTIC_USER: string;
+            ELASTIC_PASSWORD: string;
+            ACCOUNTS_INDEX_NAME: string;
+            USERS_INDEX_NAME: string;
+            TRANSACTIONS_INDEX_NAME: string;
+            CATEGORIES_INDEX_NAME: string;
+            ENV: 'test' | 'dev' | 'prod';
+            SESSION_SECRET_KEY: string;
+            SESSION_MAX_AGE_MINUTES: number;
+        }
+    }
+}

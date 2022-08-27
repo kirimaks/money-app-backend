@@ -2,6 +2,11 @@ import Ajv from "ajv";
 
 import {envConfigSchema} from './schemas/environment';
 
+declare global {
+    namespace NodeJS {
+        interface ProcessEnv extends AppConfig {}
+    }
+}
 
 function getAppConfig(): AppConfig {
     return {...process.env};
