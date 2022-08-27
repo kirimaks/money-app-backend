@@ -94,7 +94,7 @@ function getSessionOptions(config:AppConfig) {
         key: Buffer.from(config.SESSION_SECRET_KEY, 'hex'),
         cookie: {
             path: '/',
-            httpOnly: true
+            httpOnly: true,
         }
     }
 }

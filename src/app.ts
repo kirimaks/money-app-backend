@@ -26,9 +26,6 @@ const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> 
     fastify.register(require('@fastify/elasticsearch'), getElasticSearchOptions(config));
     fastify.register(require('@fastify/swagger'), getSwaggerOptions());
     fastify.register(require('@fastify/secure-session'), getSessionOptions(config));
-    fastify.register(require('@fastify/cors'), {
-        origin: 'https://money.home.arpa',
-    });
 
     fastify.decorateRequest('user', undefined);
     fastify.decorate('removeAutoIndices', async function() {
