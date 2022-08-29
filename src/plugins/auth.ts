@@ -62,6 +62,7 @@ const authPlugin:FastifyPluginAsync<AppConfig> = async (fastify:FastifyInstance,
                 if (validateUUID(session.user_id) && validateUUID(session.account_id)) {
                     request.user = {
                         user_id: session.user_id,
+                        user_db_id: session.user_db_id,
                         account_id: session.account_id,
                         anonymous: false,
                     }

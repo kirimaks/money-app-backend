@@ -29,9 +29,10 @@ function logInController(fastify:FastifyInstance, config:AppConfig): LogInReques
 
         try {
             const sessionInfo = await fastify.models.user.verifyPassword(email, password);
-            const sessionData = {
+            const sessionData:SessionData = {
                 user_id: sessionInfo.user_id, 
-                account_id: sessionInfo.account_id
+                account_id: sessionInfo.account_id,
+                user_db_id: sessionInfo.user_db_id,
             }
             fastify.log.info(`Setting session: ${JSON.stringify(sessionData)}`);
 

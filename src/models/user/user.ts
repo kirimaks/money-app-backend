@@ -80,7 +80,8 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
         const sessionInfo:UserSessionInfo = {
             anonymous: true,
             account_id: '',
-            user_id: ''
+            user_id: '',
+            user_db_id: '',
         };
 
         const searchDoc:estypes.SearchRequest = {
@@ -102,6 +103,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
                     sessionInfo.user_id = user.user_id;
                     sessionInfo.account_id = user.account_id;
                     sessionInfo.anonymous = false;
+                    sessionInfo.user_db_id = firstHit._id;
                     return sessionInfo;
 
                 }
@@ -113,6 +115,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
     }
 
     async getDocumentMap(user_id:string):Promise<UserDocMap> {
+        /* TODO: use db_id */
         const searchDoc:estypes.SearchRequest = {
             query: {
                 match: {user_id: user_id}

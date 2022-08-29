@@ -11,7 +11,8 @@ interface SignUpRequestBody {
 interface UserSessionInfo {
     anonymous: boolean;
     account_id: string;
-    user_id: string;
+    user_id: string;    /* Possibly id to exponse */
+    user_db_id: string; /* Internal id not for exponse */
 }
 
 interface RandomSessionInfo {
@@ -20,8 +21,14 @@ interface RandomSessionInfo {
     cookie: string;
 }
 
+interface SessionData {
+    user_id: string;
+    user_db_id: string;
+    account_id: string;
+}
+
 type LogInProperties = {
-    Body: {
+    body: {
         email: string;
         password: string;
     }
