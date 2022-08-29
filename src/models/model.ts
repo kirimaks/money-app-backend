@@ -46,8 +46,9 @@ abstract class AbstractModel<DocDraftType, DocType> {
     abstract createDocumentMap(document:DocDraftType):Promise<AbstractDocMap<DocType>>;
 
     /* Getting document mapping */
-    abstract getDocumentMap(record_id:string):Promise<AbstractDocMap<DocType>>;
+    abstract getDocumentMap(record_id:string):Promise<AbstractDocMap<DocType>>; // Deprecated?
     abstract createIndex():Promise<estypes.IndicesCreateResponse>;
+    abstract getDocument(db_id:string):Promise<AbstractDocMap<DocType>>;
 
     constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName: string) {
         this.log = log;

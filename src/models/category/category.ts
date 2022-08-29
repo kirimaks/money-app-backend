@@ -41,6 +41,21 @@ class CategoryModel extends AbstractModel<CategoryDraft, CategoryDocument> {
         return new CategoryDocMap(this.log, this.elastic, this.indexName, categoryDoc);
     }
 
+    async getDocument(category_db_id:string):Promise<CategoryDocMap> {
+        const request:estypes.GetRequest = {
+            id: category_db_id,
+            index: this.indexName,
+        };
+
+        const resp:estypes.GetGetResult<CategoryDocument> = await this.elastic.get(request);
+
+        if (resp.found && resp._source) {
+            return new CategoryDocMap(this.log, this.elastic, this.indexName, resp._source);
+        }
+
+        throw new NotFoundError(`Documnt ${category_db_id} not found`);
+    }
+
     async getDocumentMap(category_id:string):Promise<CategoryDocMap> {
         const searchDoc:estypes.SearchRequest = {
             query: {

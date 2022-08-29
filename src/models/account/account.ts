@@ -48,6 +48,21 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
         return new AccountDocMap(this.log, this.elastic, this.indexName, accountDocument);
     }
 
+    async getDocument(account_db_id:string):Promise<AccountDocMap> {
+        const request:estypes.GetRequest = {
+            id: account_db_id,
+            index: this.indexName,
+        };
+
+        const resp:estypes.GetGetResult<AccountDocument> = await this.elastic.get(request);
+
+        if (resp.found && resp._source) {
+            return new AccountDocMap(this.log, this.elastic, this.indexName, resp._source);
+        }
+
+        throw new NotFoundError(`Documnt ${account_db_id} not found`);
+    }
+
     async getDocumentMap(account_id:string):Promise<AccountDocMap> {
         const searchDoc:estypes.SearchRequest = {
             query: {

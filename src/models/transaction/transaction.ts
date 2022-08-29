@@ -45,6 +45,21 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
         return new TransactionDocMap(this.log, this.elastic, this.indexName, transactionDocument);
     }
 
+    async getDocument(user_db_id:string):Promise<TransactionDocMap> {
+        const request:estypes.GetRequest = {
+            id: user_db_id,
+            index: this.indexName,
+        };
+
+        const resp:estypes.GetGetResult<TransactionDocument> = await this.elastic.get(request);
+
+        if (resp.found && resp._source) {
+            return new TransactionDocMap(this.log, this.elastic, this.indexName, resp._source);
+        }
+
+        throw new NotFoundError(`Document ${user_db_id} not found`);
+    }
+
     async getDocumentMap(transaction_id:string):Promise<TransactionDocMap> {
         const searchDoc:estypes.SearchRequest = {
             query: {
