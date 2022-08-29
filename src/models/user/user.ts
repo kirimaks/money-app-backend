@@ -133,6 +133,55 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
         throw new NotFoundError(`Document ${user_id} not found`);
     }
 
+    async getDocument(user_db_id:string):Promise<UserDocMap> {
+        const request:estypes.GetRequest = {
+            id: user_db_id,
+            index: this.indexName,
+        };
+
+        const resp:estypes.GetGetResult<UserDocument> = await this.elastic.get(request);
+
+        if (resp.found && resp._source) {
+            return new UserDocMap(this.log, this.elastic, this.indexName, resp._source);
+        }
+
+        throw new NotFoundError(`Document ${user_db_id} not found`);
+    }
+
+    async updateDocument(user_db_id:string, newData:ProfileUpdateFields):Promise<UserDocMap> {
+        const updateRequest:estypes.UpdateRequest<UserDocument> & { doc: ProfileUpdateFields } = {
+            id: user_db_id,
+            index: this.indexName,
+            doc: {},
+            refresh: true,
+        }
+
+        if (newData.first_name) {
+            updateRequest.doc.first_name = newData.first_name;
+        }
+
+        if (newData.last_name) {
+            updateRequest.doc.last_name = newData.last_name;
+        }
+
+        if (newData.phone_number) {
+            updateRequest.doc.phone_number = newData.phone_number;
+        }
+
+        if (Object.keys(updateRequest.doc).length > 0) {
+
+            const updateResp:estypes.UpdateResponse<UserDocument> = await this.elastic.update(updateRequest);
+
+            if (!updateResp._version) {
+                throw new Error('Cannot update this user');
+            }
+        } else {
+            this.log.info('Skip update (empty doc)');
+        }
+
+        return this.getDocument(user_db_id);
+    }
+
     async createIndex(): Promise<estypes.IndicesCreateResponse> {
         this.log.debug(`<<< Creating index: ${this.indexName} >>>`);
 
