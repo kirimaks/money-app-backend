@@ -3,7 +3,7 @@ import {validate as validateUUID} from 'uuid';
 
 import tap from 'tap';
 
-import {buildApp, getTestAppConfig, generateUser, generateSignUpRequest} from '../helper';
+import {buildApp, getTestAppConfig, generateUser, generateSignUpRequest, generateSession} from '../helper';
 import {UserModel} from '../../src/models/user/user';
 import {AuthError} from '../../src/errors/tools';
 
@@ -172,4 +172,38 @@ tap.test('Sign up response format', async (test) => {
     test.equal(signUpResponse.statusCode, 201, 'Response code for sign up is not 201');
     test.ok(validateUUID(signUpResponse.json().user_id), 'User id is invalid');
     test.ok(validateUUID(signUpResponse.json().account_id), 'Account id is invalid');
+});
+
+tap.test('Prevent sign up if email exist', async (test) => {
+    const appConfig = getTestAppConfig();
+    const app = await buildApp(test, appConfig);
+
+    await generateSession(app, appConfig);
+
+    const newAccount = generateSignUpRequest();
+    newAccount.email = 'test-email@email.com'
+
+    test.test('Sign up', async (signUpTest) => {
+
+        const signUpResponse = await app.inject({
+            url: '/auth/signup',
+            method: 'POST',
+            payload: newAccount,
+        });
+
+        signUpTest.equal(signUpResponse.statusCode, 201, 'Response code for sign up is not 201');
+
+        signUpTest.test('Sign up with email that is exist', async (existingEmailSignUpTest) => {
+            const newAccount2 = generateSignUpRequest();
+            newAccount2.email = 'test-email@email.com'
+
+            const signUpResp = await app.inject({
+                url: '/auth/signup',
+                method: 'POST',
+                payload: newAccount2,
+            });
+            existingEmailSignUpTest.equal(signUpResp.statusCode, 400, 'Response for existing email is not 400');
+            existingEmailSignUpTest.equal(signUpResp.json().message, 'This email already exist', 'Wrong error');
+        });
+    });
 });

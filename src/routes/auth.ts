@@ -1,4 +1,5 @@
 import { logInController, signUpController, logOutController } from '../controllers/auth';
+import { signUpRequestValidator } from '../validators/signup';
 
 import type { FastifyInstance, RouteOptions } from 'fastify';
 
@@ -8,6 +9,8 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
         {
             method: 'POST',
             url: '/auth/signup',
+            handler: signUpController(fastify, config),
+            preHandler: signUpRequestValidator(fastify),
             schema: {
                 body: {
                     $ref: 'signUpRequest',
@@ -21,7 +24,6 @@ async function createAuthRoutes(fastify:FastifyInstance, config:AppConfig): Prom
                     }
                 },
             },
-            handler: signUpController(fastify, config),
         },
         {
             method: 'POST', 

@@ -48,6 +48,24 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
         this.SALT_BYTES_LENGTH = 16;
     }
 
+    async searchDocument(searchQuery:{email: string}):Promise<UserDocMap> {
+        const searchDoc:estypes.SearchRequest = {
+            query: {
+                term: {email: searchQuery.email}
+            }
+        };
+        const resp:estypes.SearchResponse<UserDocument> = await this.elastic.search(searchDoc);
+
+        if (resp.hits.hits.length > 0) {
+            const hit = resp.hits.hits[0];
+            if (hit && hit._source) {
+                return new UserDocMap(this.log, this.elastic, this.indexName, hit._source);
+            }
+        }
+
+        throw new NotFoundError('No such user');
+    }
+
     async createDocumentMap(requestBody:UserDraft):Promise<UserDocMap> {
         const salt:string = randomBytes(this.SALT_BYTES_LENGTH).toString('hex');
         const hash:Buffer = scryptSync(requestBody.password, salt, 64);
@@ -225,7 +243,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
                         type: 'text',
                     },
                     email: {
-                        type: 'text',
+                        type: 'keyword',
                     },
                     phone_number: {
                         type: 'text',
