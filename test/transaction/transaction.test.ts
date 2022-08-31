@@ -8,6 +8,7 @@ import {generateTransaction} from './test-tools';
 tap.test('Create, get and delete transaction', async (test) => {
     const appConfig = getTestAppConfig();
     const app = await buildApp(test, appConfig);
+    app.models.transaction.createIndex();
     const session = await generateSession(app, appConfig);
 
     const transactionPayload = generateTransaction(session.user_id, session.account_id);

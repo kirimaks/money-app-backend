@@ -11,6 +11,8 @@ tap.test('Create, get and remove category', async (test) => {
     const app = await buildApp(test, appConfig);
     const session = await generateSession(app, appConfig);
 
+    await app.models.category.createIndex();
+
     const categoryPayload = generateCategory();
 
     test.test('Create category', async (createCategoryTest) => {
@@ -95,6 +97,9 @@ tap.test('Create transaction for category', async (test) => {
     const appConfig = getTestAppConfig();
     const app = await buildApp(test, appConfig);
     const session = await generateSession(app, appConfig);
+
+    await app.models.transaction.createIndex();
+    await app.models.category.createIndex();
 
     test.test('Create category', async (createCategoryTest) => {
         const categoryPayload = generateCategory();

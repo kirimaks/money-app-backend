@@ -47,6 +47,9 @@ tap.test('Create user and log in', async (test) => {
     const appConfig = getTestAppConfig();
 
     const app = await buildApp(test, appConfig);
+    await app.models.user.createIndex();
+    await app.models.account.createIndex();
+
     const signUpPayload = generateSignUpRequest();
 
     test.test('Sign up test', async (signUpTest) => {
@@ -96,6 +99,9 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
 
     const app = await buildApp(test, appConfig);
     const signUpPayload = generateSignUpRequest();
+
+    await app.models.user.createIndex();
+    await app.models.account.createIndex();
 
     test.test('Sign up test', async (signUpTest) => {
         const signUpResp = await app.inject({
@@ -161,6 +167,10 @@ tap.test('Log in and make sure user getting proper info', async (test) =>  {
 tap.test('Sign up response format', async (test) => {
     const appConfig = getTestAppConfig();
     const app = await buildApp(test, appConfig);
+
+    await app.models.user.createIndex();
+    await app.models.account.createIndex();
+
     const newAccount = generateSignUpRequest();
 
     const signUpResponse = await app.inject({

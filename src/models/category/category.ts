@@ -86,6 +86,9 @@ class CategoryModel extends AbstractModel<CategoryDraft, CategoryDocument> {
                     category_id: {
                         type: 'text',
                     },
+                    category_name: {
+                        type: 'text',
+                    },
                     account_id: {
                         type: 'text',
                     },
