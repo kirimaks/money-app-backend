@@ -89,6 +89,9 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
             mappings: {
                 dynamic: 'strict',
                 properties: {
+                    name: {
+                        type: 'text',
+                    },
                     transaction_id: {
                         type: 'text',
                     },

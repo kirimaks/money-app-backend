@@ -1,8 +1,14 @@
+// TODO: ajv types: https://ajv.js.org/guide/typescript.html
+
+
 const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
     $id: 'transactionRequest', 
     type: 'object',
-    required: ['amount'],
+    required: ['amount', 'name'],
     properties: {
+        name: {
+            type: 'string',
+        },
         amount: {
             type: 'integer',
         },

@@ -1,5 +1,6 @@
 /* Received form user */
 interface NewTransactionRequestBody {
+    name: string;
     amount: number;
     category_id?: string;
     description?: string;
