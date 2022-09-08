@@ -44,6 +44,35 @@ const TRANSACTION_RESPONSE_SCHEMA:FastifySchemaType = {
     }
 };
 
+const LATEST_TRANSACTIONS_SCHEMA:FastifySchemaType = {
+    $id: 'latestTransactionsResponse',
+    type: 'object',
+    required: [],
+    properties: {
+        transactions: {
+            type: 'array',
+            maxItems: 10,
+            items: {
+                type: 'object',
+                properties: {
+                    transaction_id: {
+                        type: 'string',
+                    },
+                    amount: {
+                        type: 'string',
+                    },
+                    timestamp: {
+                        type: 'string',
+                    },
+                    name: {
+                        type: 'string',
+                    }
+                }
+            }
+        }
+    }
+};
+
 export const TRANSACTION_SCHEMAS:FastifySchemaType[] = [
-    CREATE_TRANSACTION_REQUEST_SCHEMA, TRANSACTION_RESPONSE_SCHEMA
+    CREATE_TRANSACTION_REQUEST_SCHEMA, TRANSACTION_RESPONSE_SCHEMA, LATEST_TRANSACTIONS_SCHEMA
 ];

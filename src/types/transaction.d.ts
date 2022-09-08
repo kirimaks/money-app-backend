@@ -21,6 +21,8 @@ interface TransactionDocument extends TransactionDraft {
     timestamp: number;
 }
 
+/* Controller types */
+
 type CreateTransactionProperties = {
     body: NewTransactionRequestBody;
 };
@@ -42,3 +44,8 @@ type DeleteTransactionProperties = {
 };
 type DeleteTransactionRequest = FastifyRequest<DeleteTransactionProperties>;
 type DeleteTransactionRequestHandler = (request:DeleteTransactionRequest, reply:FastifyReply) => Promise<HttpError>;
+
+
+type LatestTransactionsProperties = {};
+type LatestTransactionsRequest = FastifyRequest<LatestTransactionsProperties>;
+type LatestTransactionsRequestHandler = (request:LatestTransactionsRequest, reply:FastifyReply) => Promise<HttpError>;

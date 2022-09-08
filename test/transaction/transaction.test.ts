@@ -8,7 +8,7 @@ import {generateTransaction} from './test-tools';
 tap.test('Create, get and delete transaction', async (test) => {
     const appConfig = getTestAppConfig();
     const app = await buildApp(test, appConfig);
-    app.models.transaction.createIndex();
+    await app.models.transaction.createIndex();
     const session = await generateSession(app, appConfig);
 
     const transactionPayload = generateTransaction(session.user_id, session.account_id);
@@ -91,4 +91,42 @@ tap.test('Removing missing transaction', async (test) => {
 
     test.equal(resp.statusCode, 404, 'Wrong status code for missing transaction');
     test.equal(resp.json().message, 'Not Found', 'Wrong error message');
+});
+
+tap.test('Test recent transactions', async (test) => {
+    const appConfig = getTestAppConfig();
+    const app = await buildApp(test, appConfig);
+    const session = await generateSession(app, appConfig);
+
+    await app.models.transaction.createIndex();
+
+    test.test('Create transaction', async (createTransactionTest) => {
+        const transactionPayload = generateTransaction(session.user_id, session.account_id);
+
+        const newTransactionResp = await app.inject({
+            method: 'POST',
+            url: '/transactions/new-transaction',
+            cookies: {
+                'session-id': session.cookie,
+            },
+            payload: transactionPayload,
+        });
+
+        createTransactionTest.equal(
+            newTransactionResp.statusCode, 201, 'Response code for new transaction is not 201'
+        );
+
+        createTransactionTest.test('Test recent transactions', async (recentTransactionsTest) => {
+            const latestTransactionsResp = await app.inject({
+                method: 'GET',
+                url: '/transactions/latest',
+                cookies: {
+                    'session-id': session.cookie,
+                }
+            });
+
+            recentTransactionsTest.equal(latestTransactionsResp.statusCode, 200, 'Response for latest transactions not 200');
+            recentTransactionsTest.equal(latestTransactionsResp.json().transactions[0].name, transactionPayload.name, 'Wrong transaction name');
+        });
+    });
 });

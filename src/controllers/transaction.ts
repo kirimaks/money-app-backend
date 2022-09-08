@@ -76,3 +76,27 @@ export function deleteTransactionController(fastify:FastifyInstance): DeleteTran
         }
     }
 }
+
+export function latestTransactionsController(fastify:FastifyInstance): LatestTransactionsRequestHandler {
+    return async (request:LatestTransactionsRequest, reply:FastifyReply): Promise<HttpError> => {
+        try {
+            const transactions = await fastify.models.transaction.getRecentTransactions(request.user.account_id);
+            
+            fastify.log.info(`< Transactions: ${JSON.stringify(transactions)} >`);
+
+            return reply.code(200).send({
+                transactions: transactions
+            });
+            
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot get recent transactions: ${errorMessage}`);
+
+            return fastify.httpErrors.internalServerError();
+        }
+    }
+}

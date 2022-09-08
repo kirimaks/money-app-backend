@@ -52,6 +52,21 @@ export default async (fastify:FastifyInstance, _config:AppConfig): Promise<void>
                     },
                 }
             }
+        },
+        {
+            method: 'GET',
+            url: '/transactions/latest',
+            handler: controllers.latestTransactionsController(fastify),
+            schema: {
+                response: {
+                    200: {
+                        $ref: 'latestTransactionsResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse',
+                    }
+                }
+            }
         }
     ];
 

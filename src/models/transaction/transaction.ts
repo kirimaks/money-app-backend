@@ -77,6 +77,37 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
         throw new NotFoundError('No such document');
     }
 
+    async getRecentTransactions(account_id:string):Promise<TransactionDocument[]> {
+        const searchDoc:estypes.SearchRequest = {
+            from: 0, 
+            size: 10,
+            query: {
+                bool: {
+                    must: [
+                        {match: {account_id: account_id}},
+                        {range: {timestamp: {lte: new Date().getTime()}}}
+                    ]
+                }
+            }
+        };
+
+        const resp:estypes.SearchResponse<TransactionDocument> = await this.elastic.search(searchDoc);
+
+        if (resp.hits.hits.length > 0) {
+            const transactions:TransactionDocument[] = [];
+
+            for (const hit of resp.hits.hits) {
+                if (hit._source) {
+                    transactions.push(hit._source);
+                }
+            }
+
+            return transactions;
+        }
+
+        throw new NotFoundError('No transactions');
+    }
+
     async createIndex():Promise<estypes.IndicesCreateResponse> {
         this.log.debug('<<< Creating transactions index >>>');
 
