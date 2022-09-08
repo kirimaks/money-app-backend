@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run build:ts && tsc -p test/tsconfig.json && env $(cat .env) tap --ts --jobs 2 \"test/**/*.test.ts\"",
+    "test": "npm run build:ts && tsc -p test/tsconfig.json && env $(cat .env) tap --ts -t 120 --jobs 2 \"test/**/*.test.ts\"",
     "start": "npm run build:ts && fastify start dist/app.js",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
