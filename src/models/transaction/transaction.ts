@@ -6,6 +6,11 @@ import {NotFoundError} from '../../errors/tools';
 import type {estypes} from '@elastic/elasticsearch';
 
 
+/* TODO: Check type for sorging */
+interface SearchRequestSorted extends Omit<estypes.SearchRequest, 'sort'> { 
+    sort: any;
+}
+
 class TransactionDocMap extends AbstractDocMap<TransactionDocument> {
     async save(): Promise<string> {
         const request:estypes.IndexRequest = {
@@ -78,7 +83,8 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
     }
 
     async getRecentTransactions(account_id:string):Promise<TransactionDocument[]> {
-        const searchDoc:estypes.SearchRequest = {
+        const searchDoc:SearchRequestSorted = {
+            index: this.indexName,
             from: 0, 
             size: 10,
             query: {
@@ -88,7 +94,12 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
                         {range: {timestamp: {lte: new Date().getTime()}}}
                     ]
                 }
-            }
+            },
+            sort: [{
+                timestamp: {
+                    order: 'desc'
+                }
+            }]
         };
 
         const resp:estypes.SearchResponse<TransactionDocument> = await this.elastic.search(searchDoc);
