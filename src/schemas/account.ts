@@ -37,9 +37,14 @@ const GET_ACCOUNT_REQUEST_SCHEMA:FastifySchemaType  = {
 const GET_ACCOUNT_RESPONSE_SCHEMA:FastifySchemaType  = {
     $id: 'getAccountResponse',
     type: 'object',
-    required: ['account_name'],
+    required: ['account_name', 'money_sources'],
     properties: {
-        account_name: { type: 'string'},
+        account_name: { 
+            type: 'string',
+        },
+        money_sources: {
+            type: 'array',
+        },
     }
 };
 

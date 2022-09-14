@@ -42,7 +42,9 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
             /* TODO: budgets, spendings, ... */
             account_name: requestBody.account_name,
             account_id: uuidv4(),
-
+            money_sources: [
+                {source_name: 'wallet', source_id: uuidv4(), source_icon: 'money'}
+            ]
         }
 
         return new AccountDocMap(this.log, this.elastic, this.indexName, accountDocument);
@@ -102,6 +104,20 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
                     comment: {
                         type: 'text',
                         index: false
+                    },
+                    money_sources: {
+                        properties: {
+                            source_name: {
+                                type: 'keyword'
+                            },
+                            source_id: {
+                                type: 'keyword'
+                            },
+                            source_icon: {
+                                type: 'keyword',
+                                index: false,
+                            }
+                        }
                     }
                 }
             }

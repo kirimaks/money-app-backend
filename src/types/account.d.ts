@@ -5,9 +5,16 @@ interface AccountRequestBody {
 
 interface AccountDraft extends AccountRequestBody { }
 
+interface MoneySource {
+    source_name: string;
+    source_id: string;
+    source_icon: string;
+}
+
 interface AccountDocument extends AccountDraft {
     account_id: string;
     /* TODO: budgets, spendings, ... */
+    money_sources: MoneySource[];
 }
 
 /* Request types */

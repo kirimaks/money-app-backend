@@ -32,7 +32,8 @@ function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAc
             const account = await fastify.models.account.getDocumentMap(account_id);
 
             return reply.code(200).send({
-                account_name: account.document.account_name
+                account_name: account.document.account_name,
+                money_sources: account.document.money_sources,
             });
 
         } catch(error) {
