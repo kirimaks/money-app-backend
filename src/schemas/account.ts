@@ -48,8 +48,20 @@ const GET_ACCOUNT_RESPONSE_SCHEMA:FastifySchemaType  = {
     }
 };
 
+const CREATE_MONEY_SOURCE_RESPONSE_SCHEMA:FastifySchemaType = {
+    $id: 'createMoneySourceResponse',
+    type: 'object',
+    required: ['updated'],
+    properties: {
+        updated: {
+            type: 'string'
+        }
+    }
+};
+
 
 export const ACCOUNT_SCHEMAS:FastifySchemaType[] = [
     CREATE_ACCOUNT_REQUEST_SCHEMA, CREATE_ACCOUNT_RESPONSE_SCHEMA, 
-    GET_ACCOUNT_REQUEST_SCHEMA, GET_ACCOUNT_RESPONSE_SCHEMA
+    GET_ACCOUNT_REQUEST_SCHEMA, GET_ACCOUNT_RESPONSE_SCHEMA,
+    CREATE_MONEY_SOURCE_RESPONSE_SCHEMA
 ];

@@ -73,4 +73,27 @@ function deleteAccountController(fastify:FastifyInstance, _config:AppConfig): De
     return deleteAccount;
 }
 
-export {createAccountController, getAccountController, deleteAccountController}
+function createMoneySourceController(fastify:FastifyInstance, _config:AppConfig):CreateMoneySourceRequestHandler {
+    return async (request:CreateMoneySourceRequest, reply:FastifyReply): Promise<HttpError> => {
+        try {
+            const { account_id } = request.params;
+            const { source_name } = request.body;
+            const { source_icon } = request.body;
+
+            const updateResp = await fastify.models.account.addMoneySource(account_id, source_name, source_icon);
+
+            return reply.code(201).send({updated: updateResp.updated});
+
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot create source: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError();
+        }
+    }
+}
+
+export { createAccountController, getAccountController, deleteAccountController, createMoneySourceController }

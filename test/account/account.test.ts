@@ -1,4 +1,4 @@
-import { validate as validateUUID } from 'uuid';
+import { validate as validateUUID, v4 as uuidv4 } from 'uuid';
 import tap from 'tap';
 
 import {buildApp, generateSession, getTestAppConfig} from '../helper';
@@ -276,4 +276,42 @@ tap.test('Create account and make sure money wallet is create', async (createAcc
 
         queryAccountTest.ok(validateUUID(walletSource.source_id), 'Invalid wallet id');
     }); 
+});
+
+tap.test('Create account and add money source', async (createAccountTest) => {
+    const appConfig = getTestAppConfig();
+    const app = await buildApp(createAccountTest, appConfig);
+    const session = await generateSession(app, appConfig);
+    const accountName:string = getRandomString(16);
+
+    const response = await app.inject({
+        method: 'POST',
+        url: '/account/create',
+        payload: {
+            account_name: accountName,
+        },
+        cookies: {
+            'session-id': session.cookie,
+        },
+    });
+ 
+    const accountId:string = response.json().account_id;
+
+    createAccountTest.test('Add money source', async (addSourceTest) => {
+        const sourceName = uuidv4();
+        const response = await app.inject({
+            method: 'PUT',
+            url: `/account/${accountId}/create-money-source`,
+            payload: {
+                source_name: sourceName,
+                source_icon: 'test',
+            },
+            cookies: {
+                'session-id': session.cookie,
+            }
+        });
+
+        addSourceTest.equal(response.statusCode, 201, 'Status code for new money source is not 201');
+        addSourceTest.equal(response.json().updated, '1', 'Should be updated 1 document');
+    });
 });

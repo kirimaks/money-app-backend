@@ -39,3 +39,12 @@ type DeleteRequestProperties = {
 };
 type DeleteAccountRequest = FastifyRequest<DeleteRequestProperties>;
 type DeleteAccountRequestHandler = (request:DeleteAccountRequest, reply:FastifyReply) => Promise<HttpError>;
+
+type CreateMoneySourceProperties = {
+    body: {
+        source_name: string;
+        source_icon: string;
+    }
+};
+type CreateMoneySourceRequest = FastifyRequest<CreateMoneySourceProperties>;
+type CreateMoneySourceRequestHandler = (request:CreateMoneySourceRequest, reply:FastifyReply) => Promise<HttpError>;

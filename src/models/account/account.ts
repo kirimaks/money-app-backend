@@ -93,7 +93,7 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
                 dynamic: 'strict',
                 properties: {
                     account_id: {
-                        type: 'text',
+                        type: 'keyword',
                     },
                     account_name: {
                         type: 'text',
@@ -124,6 +124,29 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
         };
 
         return await this.elastic.indices.create(indexDoc);
+    }
+
+    async addMoneySource(accountId:string, sourceName:string, sourceIcon:string): Promise<estypes.UpdateByQueryResponse> {
+        const updateRequest:estypes.UpdateByQueryRequest = {
+            index: this.indexName,
+            query: {
+                term: {
+                    account_id: accountId
+                }
+            },
+            script: {
+                source: 'ctx._source.money_sources.add(params.new_source)',
+                params: {
+                    new_source: {
+                        source_id: uuidv4(),
+                        source_name: sourceName,
+                        source_icon: sourceIcon,
+                    }
+                }
+            }
+        };
+
+        return await this.elastic.updateByQuery(updateRequest);
     }
 }
 

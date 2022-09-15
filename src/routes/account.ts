@@ -1,6 +1,10 @@
 import type { FastifyInstance, RouteOptions } from 'fastify';
 
-import {createAccountController, getAccountController, deleteAccountController} from '../controllers/account';
+import { 
+    createAccountController, getAccountController, deleteAccountController, 
+    createMoneySourceController 
+} from '../controllers/account';
+
 import {
     createAccountRequestValidator, getAccountRequestValidator, removeAccountRequestValidator
 } from '../validators/account';
@@ -56,6 +60,22 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 },
             },
         },
+        {
+            method: 'PUT',
+            url: '/account/:account_id/create-money-source',
+            handler: createMoneySourceController(fastify, config),
+            // preHandler: createMoneySourceRequestValidator,
+            schema: {
+                response: {
+                    201: {
+                        $ref: 'createMoneySourceResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse',
+                    },
+                }
+            }
+        }
     ];
 
     routes.map((route) => fastify.route(route));
