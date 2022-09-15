@@ -11,6 +11,16 @@ async function removeAutoIndices(fastify:FastifyInstance, _config:AppConfig):Pro
         fastify.log.debug(`<<< Remving index[account]: ${fastify.models.account.indexName}`);
         await fastify.models.account.deleteIndex();
     }
+
+    if (fastify.models.transaction.indexName.startsWith('auto')) {
+        fastify.log.debug(`<<< Removing index[transaction]: ${fastify.models.transaction.indexName}`);
+        await fastify.models.transaction.deleteIndex();
+    }
+
+    if (fastify.models.category.indexName.startsWith('auto')) {
+        fastify.log.debug(`<<< Removing index[category]: ${fastify.models.category.indexName}`);
+        await fastify.models.category.deleteIndex();
+    }
 }
 
 export {removeAutoIndices}
