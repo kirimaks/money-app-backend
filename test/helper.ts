@@ -77,9 +77,9 @@ function generateSignUpRequest():SignUpRequestBody {
     };
 }
 
-function generateModelIndexName(bytesLength:number) {
+function generateModelIndexName(prefix:string, bytesLength:number) {
     const randomName = randomBytes(bytesLength).toString('hex');
-    return `auto-index-${randomName}`;
+    return `auto-${prefix}-${randomName}`;
 }
 
 async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promise<RandomSessionInfo> {
@@ -132,10 +132,10 @@ async function generateSession(app:FastifyInstance, appConfig:AppConfig): Promis
 function getTestAppConfig() {
     const appConfig = getAppConfig();
 
-    appConfig.ACCOUNTS_INDEX_NAME = generateModelIndexName(16);
-    appConfig.USERS_INDEX_NAME = generateModelIndexName(16);
-    appConfig.TRANSACTIONS_INDEX_NAME = generateModelIndexName(16);
-    appConfig.CATEGORIES_INDEX_NAME = generateModelIndexName(16);
+    appConfig.ACCOUNTS_INDEX_NAME = generateModelIndexName('account', 16);
+    appConfig.USERS_INDEX_NAME = generateModelIndexName('user', 16);
+    appConfig.TRANSACTIONS_INDEX_NAME = generateModelIndexName('transaction', 16);
+    appConfig.CATEGORIES_INDEX_NAME = generateModelIndexName('category', 16);
 
     return appConfig;
 }
