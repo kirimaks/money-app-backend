@@ -258,13 +258,11 @@ tap.test('Create account and make sure money wallet is create', async (createAcc
             'session-id': session.cookie,
         },
     });
-    
-    const accountId:string = response.json().account_id;
 
     createAccountTest.test('Query account', async (queryAccountTest) => {
         const resp = await app.inject({
             method: 'GET',
-            url: `/account/${accountId}`,
+            url: '/account',
             cookies: {
                 'session-id': session.cookie,
             }

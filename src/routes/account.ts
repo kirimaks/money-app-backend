@@ -2,7 +2,7 @@ import type { FastifyInstance, RouteOptions } from 'fastify';
 
 import { 
     createAccountController, getAccountController, deleteAccountController, 
-    createMoneySourceController 
+    createMoneySourceController, getAccountDetails
 } from '../controllers/account';
 
 import {
@@ -12,8 +12,8 @@ import {
 
 async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): Promise<void> {
     const routes:RouteOptions[] = [
-        {
-            method: 'POST',
+        { 
+            method: 'POST', // TODO: remove
             url: '/account/create',
             handler: createAccountController(fastify, config),
             preHandler: createAccountRequestValidator,
@@ -31,8 +31,8 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 },
             },
         },
-        {
-            method: 'GET',
+        { 
+            method: 'GET', // TODO: remove id
             url: '/account/:account_id',
             handler: getAccountController(fastify, config),
             preHandler: getAccountRequestValidator,
@@ -47,8 +47,8 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 },
             },
         },
-        {
-            method: 'DELETE',
+        {   
+            method: 'DELETE', // TODO: remove
             url: '/account/:account_id',
             handler: deleteAccountController(fastify, config),
             preHandler: removeAccountRequestValidator,
@@ -60,8 +60,8 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                 },
             },
         },
-        {
-            method: 'PUT',
+        { 
+            method: 'PUT', // TODO: remove id
             url: '/account/:account_id/create-money-source',
             handler: createMoneySourceController(fastify, config),
             // preHandler: createMoneySourceRequestValidator,
@@ -73,6 +73,21 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                     400: {
                         $ref: 'badRequestResponse',
                     },
+                }
+            }
+        },
+        {
+            method: 'GET',
+            url: '/account',
+            handler: getAccountDetails(fastify),
+            schema: {
+                response: {
+                    200: {
+                        $ref: 'accountDetailsResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse'
+                    }
                 }
             }
         }

@@ -48,3 +48,7 @@ type CreateMoneySourceProperties = {
 };
 type CreateMoneySourceRequest = FastifyRequest<CreateMoneySourceProperties>;
 type CreateMoneySourceRequestHandler = (request:CreateMoneySourceRequest, reply:FastifyReply) => Promise<HttpError>;
+
+type AccountDetailsProps = {};
+type AccountDetailsRequest = FastifyRequest<GetAccountDetailsProps>;
+type AccountDetailsRequestHandler = (request:GetAccountDetailsRequest, reply:FastifyReply) => Promise<HttpError>;

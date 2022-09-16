@@ -37,8 +37,11 @@ const GET_ACCOUNT_REQUEST_SCHEMA:FastifySchemaType  = {
 const GET_ACCOUNT_RESPONSE_SCHEMA:FastifySchemaType  = {
     $id: 'getAccountResponse',
     type: 'object',
-    required: ['account_name', 'money_sources'],
+    required: ['account_id', 'account_name', 'money_sources'],
     properties: {
+        account_id: {
+            type: 'string',
+        },
         account_name: { 
             type: 'string',
         },
@@ -59,9 +62,22 @@ const CREATE_MONEY_SOURCE_RESPONSE_SCHEMA:FastifySchemaType = {
     }
 };
 
+const ACCOUNT_DETAILS_RESPONSE = {
+    $id: 'accountDetailsResponse',
+    type: 'object',
+    required: ['account_name', 'money_sources'],
+    properties: {
+        account_name: {
+            type: 'string',
+        },
+        money_sources: {
+            type: 'array',
+        }
+    }
+};
 
 export const ACCOUNT_SCHEMAS:FastifySchemaType[] = [
     CREATE_ACCOUNT_REQUEST_SCHEMA, CREATE_ACCOUNT_RESPONSE_SCHEMA, 
     GET_ACCOUNT_REQUEST_SCHEMA, GET_ACCOUNT_RESPONSE_SCHEMA,
-    CREATE_MONEY_SOURCE_RESPONSE_SCHEMA
+    CREATE_MONEY_SOURCE_RESPONSE_SCHEMA, ACCOUNT_DETAILS_RESPONSE
 ];

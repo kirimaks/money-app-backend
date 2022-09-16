@@ -32,6 +32,7 @@ function getAccountController(fastify:FastifyInstance, _config:AppConfig): GetAc
             const account = await fastify.models.account.getDocumentMap(account_id);
 
             return reply.code(200).send({
+                account_id: account.document.account_id,
                 account_name: account.document.account_name,
                 money_sources: account.document.money_sources,
             });
@@ -96,4 +97,32 @@ function createMoneySourceController(fastify:FastifyInstance, _config:AppConfig)
     }
 }
 
-export { createAccountController, getAccountController, deleteAccountController, createMoneySourceController }
+function getAccountDetails(fastify:FastifyInstance): AccountDetailsRequestHandler {
+    return async (request:AccountDetailsRequest, reply:FastifyReply): Promise<HttpError> => {
+        try {
+            const {account_id} = request.user;
+            fastify.log.info(`<<< Account id: ${account_id} >>>`);
+
+            const account = await fastify.models.account.getDocumentMap(account_id);
+            fastify.log.info(`<<< Account doc: ${JSON.stringify(account.document)} >>>`);
+
+            return reply.code(200).send({
+                account_name: account.document.account_name,
+                money_sources: account.document.money_sources,
+            });
+
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot get account: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError();
+        }
+    }
+}
+
+export { 
+    createAccountController, getAccountController, deleteAccountController, 
+    createMoneySourceController, getAccountDetails
+}
