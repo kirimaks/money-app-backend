@@ -259,6 +259,8 @@ tap.test('Create account and make sure money wallet is create', async (createAcc
         },
     });
 
+    app.log.info(`Create account response: ${JSON.stringify(response.json())}`);
+
     createAccountTest.test('Query account', async (queryAccountTest) => {
         const resp = await app.inject({
             method: 'GET',

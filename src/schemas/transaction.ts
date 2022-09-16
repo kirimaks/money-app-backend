@@ -4,7 +4,7 @@
 const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
     $id: 'transactionRequest', 
     type: 'object',
-    required: ['amount', 'name'],
+    required: ['amount', 'name'], // TODO: source_id required
     properties: {
         name: {
             type: 'string',
@@ -12,13 +12,16 @@ const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
         amount: {
             type: 'integer',
         },
+        source_id: {
+            type: 'string',
+        },
         category_id: {
             type: 'string',
         },
         description: {
             type: 'string',
         },
-        sepending_id: {
+        spending_id: {
             type: 'string',
         },
         saving_id: {
@@ -33,7 +36,7 @@ const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
 const TRANSACTION_RESPONSE_SCHEMA:FastifySchemaType = {
     $id: 'transactionResponse', 
     type: 'object',
-    required: ['transaction_id', 'category_id'],
+    required: ['transaction_id'],
     properties: {
         transaction_id: {
             type: 'string',

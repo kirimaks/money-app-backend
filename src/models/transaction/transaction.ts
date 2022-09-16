@@ -149,6 +149,9 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
                     amount: {
                         type: 'integer',
                     },
+                    source_id: {
+                        type: 'keyword',
+                    },
                     category_id: {
                         type: 'text',
                     },

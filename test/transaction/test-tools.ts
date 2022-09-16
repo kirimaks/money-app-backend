@@ -5,6 +5,7 @@ function generateTransaction(user_id:string, account_id:string):TransactionDraft
     return {
         name: uuidv4(),
         amount: Math.floor(Math.random() * 1000),
+        source_id: uuidv4(),
         description: uuidv4(),
         category_id: uuidv4(),
         spending_id: uuidv4(),

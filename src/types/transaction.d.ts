@@ -2,6 +2,7 @@
 interface NewTransactionRequestBody {
     name: string;
     amount: number;
+    source_id: string;
     category_id?: string;
     description?: string;
     spending_id?: string;
