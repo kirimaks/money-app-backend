@@ -104,4 +104,9 @@ function getSessionOptions(config:AppConfig) {
     }
 }
 
-export { getAppConfig, validateConfig, getElasticSearchOptions, getSwaggerOptions, getSessionOptions }
+const DEFAULT_MONEY_SOURCE_NAME = 'Wallet';
+
+export { 
+    getAppConfig, validateConfig, getElasticSearchOptions, getSwaggerOptions, getSessionOptions,
+    DEFAULT_MONEY_SOURCE_NAME
+}

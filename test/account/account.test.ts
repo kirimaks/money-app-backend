@@ -1,10 +1,11 @@
 import { validate as validateUUID, v4 as uuidv4 } from 'uuid';
 import tap from 'tap';
 
-import {buildApp, generateSession, getTestAppConfig} from '../helper';
+import { buildApp, generateSession, getTestAppConfig } from '../helper';
 
-import {getRandomString} from '../tools';
-import {ACCOUNT_NAME_MIN_LENGTH, ACCOUNT_NAME_MAX_LENGTH} from '../../src/schemas/account';
+import { getRandomString } from '../tools';
+import { ACCOUNT_NAME_MIN_LENGTH, ACCOUNT_NAME_MAX_LENGTH } from '../../src/schemas/account';
+import { DEFAULT_MONEY_SOURCE_NAME } from '../../src/config';
 
 
 tap.test('Get account by invalid uuid', async (test) => {
@@ -272,7 +273,9 @@ tap.test('Create account and make sure money wallet is create', async (createAcc
 
         queryAccountTest.equal(resp.statusCode, 200, 'Status code is not 200');
 
-        const walletSource = resp.json().money_sources.find((source:MoneySource) => source.source_name === 'Wallet');
+        const walletSource = resp.json().money_sources.find(
+            (source:MoneySource) => source.source_name === DEFAULT_MONEY_SOURCE_NAME
+        );
 
         queryAccountTest.ok(validateUUID(walletSource.source_id), 'Invalid wallet id');
     }); 
