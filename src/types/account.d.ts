@@ -11,10 +11,17 @@ interface MoneySource {
     source_icon: string;
 }
 
+interface Tag {
+    tag_name: string;
+    tag_id: string;
+    tag_icon: string;
+}
+
 interface AccountDocument extends AccountDraft {
     account_id: string;
     /* TODO: budgets, spendings, ... */
     money_sources: MoneySource[];
+    tags: Tag[];
 }
 
 /* Request types */

@@ -1,8 +1,9 @@
 import {v4 as uuidv4} from 'uuid';
 import type {estypes} from '@elastic/elasticsearch';
 
-import {AbstractModel, AbstractDocMap} from '../model';
-import {NotFoundError} from '../../errors/tools';
+import { AbstractModel, AbstractDocMap } from '../model';
+import { NotFoundError } from '../../errors/tools';
+import { getDefaultTags, getDefaultSources } from './tools';
 
 
 class AccountDocMap extends AbstractDocMap<AccountDocument> {
@@ -42,9 +43,8 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
             /* TODO: budgets, spendings, ... */
             account_name: requestBody.account_name,
             account_id: uuidv4(),
-            money_sources: [
-                {source_name: 'wallet', source_id: uuidv4(), source_icon: 'money'}
-            ]
+            money_sources: getDefaultSources(),
+            tags: getDefaultTags(),
         }
 
         return new AccountDocMap(this.log, this.elastic, this.indexName, accountDocument);
@@ -114,6 +114,20 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
                                 type: 'keyword'
                             },
                             source_icon: {
+                                type: 'keyword',
+                                index: false,
+                            }
+                        }
+                    },
+                    tags: {
+                        properties: {
+                            tag_name: {
+                                type: 'keyword',
+                            },
+                            tag_id: {
+                                type: 'keyword',
+                            },
+                            tag_icon: {
                                 type: 'keyword',
                                 index: false,
                             }

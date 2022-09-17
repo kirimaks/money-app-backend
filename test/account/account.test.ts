@@ -272,7 +272,7 @@ tap.test('Create account and make sure money wallet is create', async (createAcc
 
         queryAccountTest.equal(resp.statusCode, 200, 'Status code is not 200');
 
-        const walletSource = resp.json().money_sources.find((source:MoneySource) => source.source_name === 'wallet');
+        const walletSource = resp.json().money_sources.find((source:MoneySource) => source.source_name === 'Wallet');
 
         queryAccountTest.ok(validateUUID(walletSource.source_id), 'Invalid wallet id');
     }); 
