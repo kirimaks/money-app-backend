@@ -122,7 +122,30 @@ function getAccountDetails(fastify:FastifyInstance): AccountDetailsRequestHandle
     }
 }
 
+function createTagController(fastify:FastifyInstance): CreateTagRequestHandler {
+    return async (request:CreateTagRequest, reply:FastifyReply): Promise<HttpError> => {
+        try {
+            const { account_id } = request.user;
+            const { tag_name } = request.body;
+            const { tag_icon } = request.body;
+
+            const updateResp = await fastify.models.account.createTag(account_id, tag_name, tag_icon);
+
+            return reply.code(201).send({updated: updateResp.updated});
+
+        } catch(error) {
+            if (error instanceof NotFoundError) {
+                return fastify.httpErrors.notFound();
+            }
+
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot create tag: ${errorMessage}`);
+            return fastify.httpErrors.internalServerError();
+        }
+    }
+}
+
 export { 
     createAccountController, getAccountController, deleteAccountController, 
-    createMoneySourceController, getAccountDetails
+    createMoneySourceController, getAccountDetails, createTagController
 }

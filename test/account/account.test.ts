@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { validate as validateUUID, v4 as uuidv4 } from 'uuid';
 import tap from 'tap';
 
@@ -316,5 +317,43 @@ tap.test('Create account and add money source', async (createAccountTest) => {
 
         addSourceTest.equal(response.statusCode, 201, 'Status code for new money source is not 201');
         addSourceTest.equal(response.json().updated, '1', 'Should be updated 1 document');
+    });
+});
+
+tap.test('Create account add add tag', async (createAccountTest) => {
+    const appConfig = getTestAppConfig();
+    const app = await buildApp(createAccountTest, appConfig);
+    const session = await generateSession(app, appConfig);
+    const accountName:string = getRandomString(16);
+
+    const response = await app.inject({
+        method: 'POST',
+        url: '/account/create',
+        payload: {
+            account_name: accountName,
+        },
+        cookies: {
+            'session-id': session.cookie,
+        },
+    });
+
+    createAccountTest.equal(response.statusCode, 201);
+
+    createAccountTest.test('Create tag', async (createTagTest) => {
+        const tagName = crypto.randomBytes(4).toString('hex');
+        const response = await app.inject({
+            method: 'PUT',
+            url: `/account/create-tag`,
+            payload: {
+                tag_name: tagName,
+                tag_icon: 'test',
+            },
+            cookies: {
+                'session-id': session.cookie,
+            }
+        });
+
+        createTagTest.equal(response.statusCode, 201, 'Status code for create tag is not 201');
+        createTagTest.equal(response.json().updated, '1', 'Should be updated 1 document');
     });
 });

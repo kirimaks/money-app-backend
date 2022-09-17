@@ -2,7 +2,7 @@ import type { FastifyInstance, RouteOptions } from 'fastify';
 
 import { 
     createAccountController, getAccountController, deleteAccountController, 
-    createMoneySourceController, getAccountDetails
+    createMoneySourceController, getAccountDetails, createTagController
 } from '../controllers/account';
 
 import {
@@ -87,6 +87,21 @@ async function createAccountRoutes(fastify:FastifyInstance, config:AppConfig): P
                     },
                     400: {
                         $ref: 'badRequestResponse'
+                    }
+                }
+            }
+        },
+        {
+            method: 'PUT',
+            url: '/account/create-tag',
+            handler: createTagController(fastify),
+            schema: {
+                response: {
+                    201: {
+                        $ref: 'createTagResponse',
+                    },
+                    400: {
+                        $ref: 'badRequestResponse',
                     }
                 }
             }

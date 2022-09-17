@@ -1,5 +1,7 @@
-import {v4 as uuidv4} from 'uuid';
-import type {estypes} from '@elastic/elasticsearch';
+import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
+
+import type { estypes } from '@elastic/elasticsearch';
 
 import { AbstractModel, AbstractDocMap } from '../model';
 import { NotFoundError } from '../../errors/tools';
@@ -155,6 +157,29 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
                         source_id: uuidv4(),
                         source_name: sourceName,
                         source_icon: sourceIcon,
+                    }
+                }
+            }
+        };
+
+        return await this.elastic.updateByQuery(updateRequest);
+    }
+    
+    async createTag(accountId:string, tagName:string, tagIcon:string): Promise<estypes.UpdateByQueryResponse> {
+        const updateRequest:estypes.UpdateByQueryRequest = {
+            index: this.indexName,
+            query: {
+                term: {
+                    account_id: accountId,
+                }
+            },
+            script: {
+                source: 'ctx._source.tags.add(params.new_tag)',
+                params: {
+                    new_tag: {
+                        tag_id: crypto.randomBytes(4).toString('hex'),
+                        tag_name: tagName,
+                        tag_icon: tagIcon,
                     }
                 }
             }

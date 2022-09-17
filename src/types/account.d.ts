@@ -59,3 +59,12 @@ type CreateMoneySourceRequestHandler = (request:CreateMoneySourceRequest, reply:
 type AccountDetailsProps = {};
 type AccountDetailsRequest = FastifyRequest<GetAccountDetailsProps>;
 type AccountDetailsRequestHandler = (request:GetAccountDetailsRequest, reply:FastifyReply) => Promise<HttpError>;
+
+type CreateTagProperties = {
+    body: {
+        tag_name: string;
+        tag_icon: string;
+    }
+};
+type CreateTagRequest = FastifyRequest<CreateTagProperties>;
+type CreateTagRequestHandler = (request:CreateTagRequest, reply:FastifyReply) => Promise<HttpError>;
