@@ -109,6 +109,7 @@ function getAccountDetails(fastify:FastifyInstance): AccountDetailsRequestHandle
             return reply.code(200).send({
                 account_name: account.document.account_name,
                 money_sources: account.document.money_sources,
+                tags: account.document.tags,
             });
 
         } catch(error) {

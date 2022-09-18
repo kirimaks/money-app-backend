@@ -65,14 +65,17 @@ const CREATE_MONEY_SOURCE_RESPONSE_SCHEMA:FastifySchemaType = {
 const ACCOUNT_DETAILS_RESPONSE = {
     $id: 'accountDetailsResponse',
     type: 'object',
-    required: ['account_name', 'money_sources'],
+    required: ['account_name', 'money_sources', 'tags'],
     properties: {
         account_name: {
             type: 'string',
         },
         money_sources: {
             type: 'array',
-        }
+        },
+        tags: {
+            type: 'array',
+        },
     }
 };
 

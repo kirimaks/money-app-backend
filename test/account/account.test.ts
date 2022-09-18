@@ -355,5 +355,20 @@ tap.test('Create account add add tag', async (createAccountTest) => {
 
         createTagTest.equal(response.statusCode, 201, 'Status code for create tag is not 201');
         createTagTest.equal(response.json().updated, '1', 'Should be updated 1 document');
+
+        createTagTest.test('Make sure tag is created', async (accountDetailsTest) => {
+            const accountDetailsResp = await app.inject({
+                method: 'GET',
+                url: '/account',
+                cookies: {
+                    'session-id': session.cookie,
+                }
+            });
+
+            accountDetailsTest.equal(accountDetailsResp.statusCode, 200);
+            const tag:Tag = accountDetailsResp.json().tags.find((tag:Tag) => tag.tag_name === tagName);
+
+            accountDetailsTest.ok(tag, 'Tag not found');
+        });
     });
 });

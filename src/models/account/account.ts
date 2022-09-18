@@ -182,7 +182,8 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
                         tag_icon: tagIcon,
                     }
                 }
-            }
+            },
+            refresh: true,
         };
 
         return await this.elastic.updateByQuery(updateRequest);
