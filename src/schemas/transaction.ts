@@ -15,6 +15,23 @@ const CREATE_TRANSACTION_REQUEST_SCHEMA:FastifySchemaType = {
         source_id: {
             type: 'string',
         },
+        tags: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    tag_name: {
+                        type: 'string',
+                    },
+                    tag_id: {
+                        type: 'string',
+                    },
+                    tag_icon: {
+                        type: 'string',
+                    }
+                }
+            }
+        },
         category_id: {
             type: 'string',
         },
@@ -41,8 +58,11 @@ const TRANSACTION_RESPONSE_SCHEMA:FastifySchemaType = {
         transaction_id: {
             type: 'string',
         },
-        category_id: {
+        category_id: { // TODO: remove
             type: 'string'
+        },
+        tags: {
+            type: 'array',
         }
     }
 };
@@ -69,6 +89,9 @@ const LATEST_TRANSACTIONS_SCHEMA:FastifySchemaType = {
                     },
                     name: {
                         type: 'string',
+                    },
+                    tags: {
+                        type: 'array',
                     }
                 }
             }

@@ -153,22 +153,33 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
                         type: 'keyword',
                     },
                     tags: {
-                        type: 'keyword',
+                        properties: {
+                            tag_id: {
+                                type: 'keyword',
+                            },
+                            tag_name: {
+                                type: 'keyword',
+                            },
+                            tag_icon: {
+                                type: 'keyword',
+                                index: false,
+                            }
+                        }
                     },
-                    category_id: {
+                    category_id: { // TODO: remove
                         type: 'text',
                     },
                     description: {
                         type: 'text',
                     },
                     spending_id: {
-                        type: 'text',
+                        type: 'text', // TODO: keyword
                     },
                     saving_id: {
-                        type: 'text',
+                        type: 'text', // TODO: keyword
                     },
                     budget_id: {
-                        type: 'text',
+                        type: 'text',  // TODO: keyword
                     }
                 }
             }

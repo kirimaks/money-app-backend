@@ -14,6 +14,7 @@ export function createTransactionController(fastify:FastifyInstance): CreateTran
                     account_id: request.user.account_id
                 }
             );
+
             const transaction = await fastify.models.transaction.createDocumentMap(transactionDraft);
             await transaction.save();
 

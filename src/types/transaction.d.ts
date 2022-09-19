@@ -20,6 +20,7 @@ interface TransactionDraft extends NewTransactionRequestBody {
 interface TransactionDocument extends TransactionDraft {
     transaction_id: string;
     timestamp: number;
+    tags?: TagRecord[];
 }
 
 /* Controller types */
