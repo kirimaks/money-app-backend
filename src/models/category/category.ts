@@ -1,8 +1,8 @@
 import {v4 as uuidv4} from 'uuid';
 import type {estypes} from '@elastic/elasticsearch';
 
-import {AbstractModel, AbstractDocMap} from '../model';
-import {NotFoundError} from '../../errors/tools';
+import { AbstractModel, AbstractDocMap } from '../model';
+import { NotFoundError } from '../../errors/tools';
 
 
 class CategoryDocMap extends AbstractDocMap<CategoryDocument> {
@@ -73,7 +73,7 @@ class CategoryModel extends AbstractModel<CategoryDraft, CategoryDocument> {
         throw new NotFoundError(`Document ${category_id} not found`);
     }
 
-    async createIndex() {
+    override async createIndex() {
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -99,7 +99,7 @@ class CategoryModel extends AbstractModel<CategoryDraft, CategoryDocument> {
             }
         };
 
-        return await this.elastic.indices.create(indexDoc);
+        return super.createIndex(indexDoc);
     }
 }
 

@@ -2,8 +2,12 @@ import Fastify from 'fastify';
 import fp from 'fastify-plugin';
 import pino from 'pino';
 
-import {app as App} from '../app';
-import {getAppConfig} from '../config';
+import { errors as elasticErrors } from '@elastic/elasticsearch';
+
+import { app as App } from '../app';
+import { getAppConfig } from '../config';
+import { IndexExist } from '../errors/exceptions';
+import type { ModelCollectionKey } from '../types/models';
 
 
 async function buildApp(config:AppConfig) {
@@ -30,8 +34,21 @@ async function buildApp(config:AppConfig) {
     const config = getAppConfig();
     const app = await buildApp(config);
 
-    app.log.debug(await app.models.account.createIndex());
-    app.log.debug(await app.models.user.createIndex());
-    app.log.debug(await app.models.transaction.createIndex());
-    app.log.debug(await app.models.category.createIndex());
+    (Object.keys(app.models) as ModelCollectionKey[]).map( async(modelName) => {
+
+        try {
+            await app.models[modelName].createIndex();
+
+        } catch(error) {
+            if (error instanceof IndexExist) {
+                app.log.warn(error.message);
+
+            } else if (error instanceof elasticErrors.ResponseError) {
+                app.log.error(`Response error: ${error.body}`);
+
+            } else {
+                app.log.error(`Cannot create index: ${error}`);
+            }
+        }
+    });
 })();

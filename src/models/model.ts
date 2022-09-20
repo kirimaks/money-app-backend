@@ -1,23 +1,10 @@
-import type {FastifyLoggerInstance} from 'fastify';
-import type {Client as ESClient, estypes} from '@elastic/elasticsearch';
+import type { FastifyLoggerInstance } from 'fastify';
+import type { Client as ESClient, estypes } from '@elastic/elasticsearch';
 
-import type {AccountModel} from './account/account';
-import type {UserModel} from './user/user';
-import type {TransactionModel} from './transaction/transaction';
-import type {CategoryModel} from './category/category';
+import { errors as ElasticErrors } from '@elastic/elasticsearch';
+import { getErrorMessage } from '../errors/tools';
+import { CreateIndexError, IndexExist } from '../errors/exceptions';
 
-
-declare module 'fastify' {
-    interface FastifyInstance {
-        elastic: ESClient;
-        models: {
-            account: AccountModel;
-            user: UserModel;
-            transaction: TransactionModel;
-            category: CategoryModel;
-        }
-    }
-}
 
 /* Mapping to concrete document in elastic */
 abstract class AbstractDocMap<DocType> {
@@ -47,7 +34,6 @@ abstract class AbstractModel<DocDraftType, DocType> {
 
     /* Getting document mapping */
     abstract getDocumentMap(record_id:string):Promise<AbstractDocMap<DocType>>; // Deprecated?
-    abstract createIndex():Promise<estypes.IndicesCreateResponse>;
     abstract getDocument(db_id:string):Promise<AbstractDocMap<DocType>>;
 
     constructor(log:FastifyLoggerInstance, elastic:ESClient, indexName: string) {
@@ -90,6 +76,24 @@ abstract class AbstractModel<DocDraftType, DocType> {
         }
 
         return indexExistResp;
+    }
+
+    protected async createIndex(indexDoc:estypes.IndicesCreateRequest):Promise<estypes.IndicesCreateResponse> {
+        this.log.info(`<<< Creating index: [${this.indexName}] >>>`);
+
+        try {
+            return await this.elastic.indices.create(indexDoc);
+
+        } catch(error) {
+            if (error instanceof ElasticErrors.ResponseError) {
+                if (error.body.error.type === 'resource_already_exists_exception') {
+                    throw new IndexExist(`Index: [${this.indexName}] exist`);
+                }
+            }
+
+            const errorMessage = getErrorMessage(error);
+            throw new CreateIndexError(errorMessage);
+        }
     }
 }
 

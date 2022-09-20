@@ -119,9 +119,7 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
         throw new NotFoundError('No transactions');
     }
 
-    async createIndex():Promise<estypes.IndicesCreateResponse> {
-        this.log.debug('<<< Creating transactions index >>>');
-
+    override async createIndex():Promise<estypes.IndicesCreateResponse> {
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -185,7 +183,7 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
             }
         };
 
-        return await this.elastic.indices.create(indexDoc);
+        return super.createIndex(indexDoc);
     }
 }
 

@@ -42,7 +42,6 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
     async createDocumentMap(requestBody:AccountDraft):Promise<AccountDocMap> {
 
         const accountDocument:AccountDocument = {
-            /* TODO: budgets, spendings, ... */
             account_name: requestBody.account_name,
             account_id: uuidv4(),
             money_sources: getDefaultSources(),
@@ -84,7 +83,7 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
         throw new NotFoundError(`Document ${account_id} not found`);
     }
 
-    async createIndex() {
+    override async createIndex():Promise<estypes.IndicesCreateResponse> {
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -139,7 +138,7 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
             }
         };
 
-        return await this.elastic.indices.create(indexDoc);
+        return super.createIndex(indexDoc);
     }
 
     async addMoneySource(accountId:string, sourceName:string, sourceIcon:string): Promise<estypes.UpdateByQueryResponse> {
@@ -190,4 +189,4 @@ class AccountModel extends AbstractModel<AccountDraft, AccountDocument> {
     }
 }
 
-export {AccountModel}
+export { AccountModel }

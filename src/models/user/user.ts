@@ -200,9 +200,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
         return this.getDocument(user_db_id);
     }
 
-    async createIndex(): Promise<estypes.IndicesCreateResponse> {
-        this.log.debug(`<<< Creating index: ${this.indexName} >>>`);
-
+    override async createIndex(): Promise<estypes.IndicesCreateResponse> {
         const indexDoc:estypes.IndicesCreateRequest = {
             index: this.indexName,
             settings: {
@@ -255,7 +253,7 @@ class UserModel extends AbstractModel<UserDraft, UserDocument> {
             }
         };
 
-        return await this.elastic.indices.create(indexDoc);
+        return super.createIndex(indexDoc);
     }
 }
 
