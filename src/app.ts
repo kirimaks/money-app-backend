@@ -7,8 +7,8 @@ import {
     validateConfig, getElasticSearchOptions, getSwaggerOptions, 
     getAppConfig, getSessionOptions
 } from './config';
-import {getSchemas} from './schemas/tools';
-import {removeAutoIndices} from './models/tools';
+import { getSchemas } from './schemas/tools';
+import { removeAutoIndices } from './models/tools';
 
 
 const app: FastifyPluginAsync<AppConfig> = async (fastify, opts): Promise<void> => {

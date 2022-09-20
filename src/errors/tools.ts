@@ -7,6 +7,7 @@ function getErrorMessage(catchedError:unknown):string {
 }
 
 
+// TODO: move to "exceptions" ---------------
 class NotFoundError extends Error {
     constructor(message:string) {
         super(message);
@@ -20,5 +21,6 @@ class AuthError extends Error {
         super(message);
     }
 }
+// ------------------------------------------
 
-export {getErrorMessage, NotFoundError, AuthError}
+export { getErrorMessage, NotFoundError, AuthError }
