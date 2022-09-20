@@ -1,37 +1,9 @@
-import {validate as validateUUID} from 'uuid';
+import { validate as validateUUID } from 'uuid';
 import fp from 'fastify-plugin';
+import { getErrorMessage } from '../errors/tools';
 
-import {getErrorMessage} from '../errors/tools';
+import type { FastifyPluginAsync, FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
-import type { 
-    FastifyPluginAsync, ContextConfigDefault, FastifyInstance, FastifyReply,
-    FastifyRequest, FastifySchema, preHandlerHookHandler 
-} from 'fastify';
-import type { RouteGenericInterface } from 'fastify/types/route';
-import type {FastifyAuthFunction} from '@fastify/auth';
-import type {Session} from '@fastify/secure-session';
-
-
-
-declare module 'fastify' {
-    interface FastifyInstance<RawServer, RawRequest, RawReply, Logger, TypeProvider> {
-        verifyJWTToken: (request:FastifyRequest, reply:FastifyReply) => void;
-        verifyUserSession: (request:FastifyRequest, reply:FastifyReply) => void;
-        auth(
-            functions: FastifyAuthFunction[],
-            options?: {
-                relation?: 'and' | 'or',
-                run?: 'all'
-            }
-        ): preHandlerHookHandler<RawServer, RawRequest, RawReply, RouteGenericInterface, ContextConfigDefault, FastifySchema, TypeProvider>;
-    }
-
-    interface FastifyRequest {
-        session: Session;
-        user: UserSessionInfo;
-        requestReceivedTime: number;
-    }
-}
 
 const SESSION_AUTH_EXCLUDE = [
     '/auth/login',
