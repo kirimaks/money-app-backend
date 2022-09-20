@@ -29,6 +29,7 @@ declare module 'fastify' {
     interface FastifyRequest {
         session: Session;
         user: UserSessionInfo;
+        requestReceivedTime: number;
     }
 }
 
