@@ -23,6 +23,12 @@ interface TransactionDocument extends TransactionDraft {
     tags?: TagRecord[];
 }
 
+interface TransactionsAggregatedByTime {
+    timestamp: number;
+    total_sum: number;
+    transactions: TransactionDocument[];
+}
+
 /* Controller types */
 
 type CreateTransactionProperties = {

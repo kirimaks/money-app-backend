@@ -99,6 +99,18 @@ const LATEST_TRANSACTIONS_SCHEMA:FastifySchemaType = {
     }
 };
 
+const TRANSACTIONS_FOR_DAY_RESPONSE:FastifySchemaType = {
+    $id: 'transactionsForDayResponse',
+    type: 'object',
+    required: [],
+    properties: {
+        transactions: {
+            type: 'object',
+        },
+    }
+};
+
 export const TRANSACTION_SCHEMAS:FastifySchemaType[] = [
-    CREATE_TRANSACTION_REQUEST_SCHEMA, TRANSACTION_RESPONSE_SCHEMA, LATEST_TRANSACTIONS_SCHEMA
+    CREATE_TRANSACTION_REQUEST_SCHEMA, TRANSACTION_RESPONSE_SCHEMA, LATEST_TRANSACTIONS_SCHEMA,
+    TRANSACTIONS_FOR_DAY_RESPONSE
 ];

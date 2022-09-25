@@ -1,7 +1,11 @@
-import {getErrorMessage, NotFoundError} from '../errors/tools';
+import moment from 'moment';
 
-import type {HttpError} from '@fastify/sensible/lib/httpError';
-import type {FastifyInstance, FastifyReply} from 'fastify';
+import { getErrorMessage, NotFoundError } from '../errors/tools';
+
+import type { HttpError } from '@fastify/sensible/lib/httpError';
+import type { FastifyInstance, FastifyReply } from 'fastify';
+
+import type { TransactionsForDayRequest } from '../types/transaction-request';
 
 
 export function createTransactionController(fastify:FastifyInstance): CreateTransactionRequestHandler {
@@ -98,6 +102,30 @@ export function latestTransactionsController(fastify:FastifyInstance): LatestTra
             fastify.log.error(`Cannot get recent transactions: ${errorMessage}`);
 
             return fastify.httpErrors.internalServerError();
+        }
+    }
+}
+
+export function recentTransactionsConttoller(fastify:FastifyInstance) {
+    return async (request:TransactionsForDayRequest, reply:FastifyReply): Promise<void> => {
+        try {
+            const transactionsPerDay = await fastify.models.transaction.getAggregatedRecentTransactions(
+                request.user.account_id, moment().valueOf()
+            );
+
+            return reply.code(200).send(transactionsPerDay);
+
+        } catch(error) {
+
+            if (error instanceof NotFoundError) {
+                fastify.httpErrors.notFound();
+                return;
+            }
+
+            const errorMessage = getErrorMessage(error);
+            fastify.log.error(`Cannot get transactions: ${errorMessage}`);
+            fastify.httpErrors.internalServerError();
+            return;
         }
     }
 }

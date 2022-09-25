@@ -1,12 +1,17 @@
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 
-import {AbstractDocMap, AbstractModel} from '../model';
-import {NotFoundError} from '../../errors/tools';
+import { AbstractDocMap, AbstractModel } from '../model';
+import { NotFoundError } from '../../errors/tools';
+import { isAggregation } from '../../types/guards';
 
-import type {estypes} from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type { 
+    TransactionsTimeAggregationResp, TimeReducedHits, TransactionSearchHit 
+} from '../../types/transaction-query';
 
 
-/* TODO: Check type for sorging */
+/* TODO: Check type for sorting */
 interface SearchRequestSorted extends Omit<estypes.SearchRequest, 'sort'> { 
     sort: any;
 }
@@ -142,7 +147,7 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
                         type: 'text',
                     },
                     account_id: {
-                        type: 'text',
+                        type: 'keyword',
                     },
                     amount: {
                         type: 'integer',
@@ -185,6 +190,69 @@ class TransactionModel extends AbstractModel<TransactionDraft, TransactionDocume
 
         return super.createIndex(indexDoc);
     }
+
+    async getAggregatedRecentTransactions(account_id:string, start_time:number):Promise<TimeReducedHits> {
+        this.log.info(`Transaction starting time: ${start_time}`);
+
+        const searchDoc:SearchRequestSorted = {
+            index: this.indexName,
+            query: {
+                bool: {
+                    must: [
+                        {term: { account_id: account_id }},
+                        {range: { timestamp: {'lt': start_time}}}
+                    ]
+                }
+            },
+            sort: [{
+                timestamp: {
+                    order: 'desc'
+                }
+            }],
+            aggs: {
+                'transaction_time_agg': {
+                    date_histogram: {
+                        field: 'timestamp',
+                        calendar_interval: 'hour',
+                    },
+                    aggs: {
+                        'time_range_sum_agg': {
+                            sum: {
+                                field: 'amount'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const resp:TransactionsTimeAggregationResp = await this.elastic.search(searchDoc);
+
+        if (resp.hits.hits.length > 0) {
+            if (resp.aggregations && isAggregation(resp.aggregations['transaction_time_agg'])) {
+                return aggregateTransactionsByTime(resp);
+            }
+        }
+
+        throw new NotFoundError('No transactions');
+    }
 }
 
-export {TransactionModel}
+function aggregateTransactionsByTime(elasticResp:TransactionsTimeAggregationResp): TimeReducedHits {
+    return elasticResp.hits.hits.reduce((acc:TimeReducedHits, cur:TransactionSearchHit) => {
+        if (cur._source && cur._source.timestamp) {
+            const timestamp:number = moment(cur._source.timestamp).startOf('hour').valueOf();
+
+            if (!(timestamp in acc)) {
+                acc[timestamp] = [];
+            }
+            
+            acc[timestamp]?.push(cur._source);
+        }
+
+        return acc;
+
+    }, {});
+}
+
+export { TransactionModel }

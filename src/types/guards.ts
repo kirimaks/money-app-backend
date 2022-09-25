@@ -1,3 +1,6 @@
+import type { estypes } from '@elastic/elasticsearch';
+
+
 function isString(obj:unknown): obj is string {
     if (typeof obj === 'string') {
         return true;
@@ -6,4 +9,12 @@ function isString(obj:unknown): obj is string {
     return false;
 }
 
-export { isString }
+function isAggregation(obj:unknown): obj is estypes.AggregationsAggregate {
+    if (typeof obj !== undefined) {
+        return true;
+    }
+
+    return false;
+}
+
+export { isString, isAggregation }
