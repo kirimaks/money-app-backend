@@ -1,47 +1,29 @@
 {
   "name": "money-app-backend",
   "version": "1.0.0",
-  "description": "This project was bootstrapped with Fastify-CLI.",
-  "main": "app.ts",
-  "directories": {
-    "test": "test"
-  },
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "test": "npm run build:ts && tsc -p test/tsconfig.json && env $(cat .env) tap --ts -t 120 --jobs 8 \"test/**/*.test.ts\"",
-    "start": "npm run build:ts && fastify start dist/app.js",
-    "build:ts": "tsc",
-    "watch:ts": "tsc -w",
-    "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --ignore-watch=.ts$ -w -P dist/app.js",
-    "create:indices": "env $(cat .env) node dist/commands/create-indices.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json",
+    "start": "node server.js"
   },
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kirimaks/money-app-backend.git"
+  },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@elastic/elasticsearch": "^8.2.1",
-    "@fastify/auth": "^3.0.2",
-    "@fastify/autoload": "^5.0.0",
-    "@fastify/elasticsearch": "^3.0.0",
-    "@fastify/secure-session": "^5.2.0",
-    "@fastify/sensible": "^4.1.0",
-    "@fastify/swagger": "^7.4.1",
-    "fastify": "^4.0.0",
-    "fastify-cli": "^4.3.0",
-    "fastify-plugin": "^3.0.0",
-    "moment": "^2.29.4",
-    "uuid": "^8.3.2"
+  "bugs": {
+    "url": "https://github.com/kirimaks/money-app-backend/issues"
   },
+  "homepage": "https://github.com/kirimaks/money-app-backend#readme",
   "devDependencies": {
-    "@tsconfig/node16-strictest-esm": "^1.0.3",
-    "@types/node": "^18.7.15",
-    "@types/tap": "^15.0.5",
-    "@types/uuid": "^8.3.4",
-    "concurrently": "^7.0.0",
-    "fastify-tsconfig": "^1.0.1",
-    "tap": "^16.1.0",
-    "ts-node": "^10.9.1",
-    "tslib": "^2.4.0",
-    "typescript": "^4.8.2"
+    "@types/node": "^18.11.7",
+    "typescript": "^4.8.4",
+    "yarn": "^1.22.19"
+  },
+  "dependencies": {
+    "fastify": "^4.9.2"
   }
 }
