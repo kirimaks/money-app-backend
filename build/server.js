@@ -4,14 +4,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fastify_1 = __importDefault(require("fastify"));
-const server = (0, fastify_1.default)();
+const server = (0, fastify_1.default)({
+    maxParamLength: 5000
+});
 server.get('/ping', async (request, reply) => {
+    server.log.info(request);
+    server.log.info(reply);
     return 'pong\n';
 });
-server.listen({ port: 8080 }, (err, address) => {
-    if (err) {
-        console.error(err);
+(async () => {
+    try {
+        await server.listen({ port: 3000 });
+    }
+    catch (error) {
+        server.log.error(error);
         process.exit(1);
     }
-    console.log(`Server listening at ${address}`);
 });
