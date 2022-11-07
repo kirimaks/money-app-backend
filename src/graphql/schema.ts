@@ -1,6 +1,8 @@
 const GraphQLSchema = `
     type User {
         email: String!
+        firstName: String!
+        lastName: String!
     }
 
     type Query {
@@ -9,7 +11,7 @@ const GraphQLSchema = `
 
     type Mutation {
         login(email:String! password:String!):String!
-        createUser(email:String!): String!
+        createUser(email:String! password:String! firstName:String! lastName: String!): String!
     }
 `;
 

@@ -1,10 +1,11 @@
 import type { IResolvers } from 'mercurius';
 
 
-// TODO: name, surname,
 type CreateUserPayload = {
     email: string;
     password: string;
+    firstName: string;
+    lastName: string;
 };
 
 type LogInPayload = {
@@ -21,11 +22,11 @@ const GraphQLResolvers:IResolvers = {
     Mutation: {
         login(_root, {email, password}:LogInPayload) {
             console.log(`Login: ${email}, ${password}`);
-
             return 'token';
         },
-        createUser(_root, {email}:CreateUserPayload) {
-            console.log(`Create user: ${email}`);
+        createUser(obj, args, context) {
+            context.app.log.debug(`New user: ${JSON.stringify(args)}`);
+
             return 'done';
         }
     }
