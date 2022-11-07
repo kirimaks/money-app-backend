@@ -1,18 +1,6 @@
 import type { IResolvers } from 'mercurius';
 
 
-// type CreateUserPayload = {
-//     email: string;
-//     password: string;
-//     firstName: string;
-//     lastName: string;
-// };
-// 
-// type LogInPayload = {
-//     email: string;
-//     password: string;
-// };
-
 const GraphQLResolvers:IResolvers = {
     Query: {
         test(obj, payload, context) {
