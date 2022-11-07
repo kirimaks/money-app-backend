@@ -1,8 +1,10 @@
 import type { IResolvers } from 'mercurius';
 
 
+// TODO: name, surname,
 type CreateUserPayload = {
     email: string;
+    password: string;
 };
 
 type LogInPayload = {
@@ -10,15 +12,18 @@ type LogInPayload = {
     password: string;
 };
 
-const gqlResolvers:IResolvers = {
+const GraphQLResolvers:IResolvers = {
     Query: {
-        login(_root, {email, password}:LogInPayload) {
-            console.log(`Login: ${email}, ${password}`);
-
+        test(_root, {hello}) {
             return 'hello';
         }
     },
     Mutation: {
+        login(_root, {email, password}:LogInPayload) {
+            console.log(`Login: ${email}, ${password}`);
+
+            return 'token';
+        },
         createUser(_root, {email}:CreateUserPayload) {
             console.log(`Create user: ${email}`);
             return 'done';
@@ -26,4 +31,4 @@ const gqlResolvers:IResolvers = {
     }
 };
 
-export default gqlResolvers;
+export default GraphQLResolvers;

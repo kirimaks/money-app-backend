@@ -1,15 +1,16 @@
-const gqlSchema = `
+const GraphQLSchema = `
     type User {
         email: String!
     }
 
     type Query {
-        login(email: String! password: String!): String!
+        test(hello:String):String
     }
 
     type Mutation {
-        createUser(email: String!): String!
+        login(email:String! password:String!):String!
+        createUser(email:String!): String!
     }
 `;
 
-export default gqlSchema;
+export default GraphQLSchema;

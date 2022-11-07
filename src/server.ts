@@ -1,12 +1,13 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import Fastify from 'fastify';
 import FastifyEnv from '@fastify/env';
 import cors from '@fastify/cors';
-import mercurius from 'mercurius';
+
+import GraphQLPlugin from './graphql/plugin';
 
 import envOptions from './environment/config';
-
-import gqlSchema from './graphql/schema';
-import gqlResolvers from './graphql/resolvers';
 
 
 const fastify = Fastify({
@@ -14,7 +15,8 @@ const fastify = Fastify({
     logger: {
         transport: {
             target: 'pino-pretty'
-        }
+        },
+        level: process.env.FASTIFY_LOG_LEVEL,
     }
 });
 
@@ -22,27 +24,25 @@ fastify.register(cors, {
     origin: ['http://localhost:5173']
 });
 
-fastify.register(mercurius, { 
-    schema: gqlSchema, 
-    resolvers: gqlResolvers,
-    graphiql: true,
-});
+fastify.register(GraphQLPlugin);
 
 fastify.register(FastifyEnv, envOptions).ready((error) => {
     if (error) {
-        fastify.log.error(`Env error: ${error.message}`);
+        fastify.log.error(`Config error: ${error}`);
         process.exit(1);
     }
 
     const listenOptions = {
-        host: fastify.config.HOST,
-        port: fastify.config.PORT,
+        host: fastify.config.FASTIFY_HOST,
+        port: fastify.config.FASTIFY_PORT,
     };
 
     fastify.listen(listenOptions, (error) => {
         if (error) {
-            fastify.log.error(`Fastify error: ${error.message}`);
+            fastify.log.error(`Fastify error: ${error}`);
             process.exit(2);
         }
     });
+
+    fastify.log.debug(fastify.printRoutes());
 });
