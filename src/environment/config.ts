@@ -1,13 +1,16 @@
 const envSchema = {
     type: 'object',
-    required: ['PORT', 'HOST'],
+    required: ['FASTIFY_PORT', 'FASTIFY_HOST', 'FASTIFY_LOG_LEVEL'],
     properties: {
-        HOST: {
+        FASTIFY_HOST: {
             type: 'string',
         },
-        PORT: {
+        FASTIFY_PORT: {
             type: 'string',
         },
+        FASTIFY_LOG_LEVEL: {
+            type: 'string',
+        }
     }
 };
 

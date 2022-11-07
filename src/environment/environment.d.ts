@@ -10,8 +10,8 @@ declare global {
 declare module 'fastify' {
   interface FastifyInstance {
     config: { // this should be same as the confKey in options
-        HOST: string;
-        PORT: number;
+        FASTIFY_HOST: string;
+        FASTIFY_PORT: number;
     };
   }
 }
