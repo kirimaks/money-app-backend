@@ -1,35 +1,46 @@
-import fastify from 'fastify';
+import Fastify from 'fastify';
+import FastifyEnv from '@fastify/env';
+import cors from '@fastify/cors';
+import mercurius from 'mercurius';
 
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
+import envOptions from './environment/config';
 
-import { appRouter } from './trpc/auth/routes';
-import { createContext } from './trpc/context';
+import gqlSchema from './graphql/schema';
+import gqlResolvers from './graphql/resolvers';
 
-
-const server = fastify({
+const fastify = Fastify({
     maxParamLength: 5000
 });
 
-server.get('/ping', async (request, reply) => {
-    server.log.info(request);
-    server.log.info(reply);
-
-    return 'pong\n';
+fastify.register(cors, {
+    origin: ['http://localhost:5173']
 });
 
-server.register(
-    fastifyTRPCPlugin, {
-        prefix: '/trpc',
-        trpcOptions: { router: appRouter, createContext }
-    }
-);
+fastify.register(mercurius, { 
+    schema: gqlSchema, 
+    resolvers: gqlResolvers,
+    graphiql: true,
+});
 
-server.listen({port: 8080}, (error, address) => {
+fastify.register(FastifyEnv, envOptions).ready((error) => {
     if (error) {
-        // console.error(error);
-        server.log.error(error);
+        console.log(error);
         process.exit(1);
     }
 
-    console.log(`Server listening at ${address}`);
+    const listenOptions = {
+        host: fastify.config.HOST,
+        port: fastify.config.PORT,
+    };
+
+    fastify.listen(listenOptions, (error, address) => {
+        if (error) {
+            console.error(error);
+            fastify.log.error(error);
+            process.exit(2);
+        }
+
+        // console.log(`Server listening at ${address}`);
+        fastify.log.info(`Server listening at ${address}`);
+    });
 });
