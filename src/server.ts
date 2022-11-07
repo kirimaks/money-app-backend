@@ -39,7 +39,7 @@ fastify.register(FastifyEnv, envOptions).ready((error) => {
         port: fastify.config.PORT,
     };
 
-    fastify.listen(listenOptions, (error, address) => {
+    fastify.listen(listenOptions, (error) => {
         if (error) {
             fastify.log.error(`Fastify error: ${error.message}`);
             process.exit(2);
