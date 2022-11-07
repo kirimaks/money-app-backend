@@ -8,8 +8,14 @@ import envOptions from './environment/config';
 import gqlSchema from './graphql/schema';
 import gqlResolvers from './graphql/resolvers';
 
+
 const fastify = Fastify({
-    maxParamLength: 5000
+    maxParamLength: 5000,
+    logger: {
+        transport: {
+            target: 'pino-pretty'
+        }
+    }
 });
 
 fastify.register(cors, {
@@ -24,7 +30,7 @@ fastify.register(mercurius, {
 
 fastify.register(FastifyEnv, envOptions).ready((error) => {
     if (error) {
-        console.log(error);
+        fastify.log.error(`Env error: ${error.message}`);
         process.exit(1);
     }
 
@@ -35,12 +41,8 @@ fastify.register(FastifyEnv, envOptions).ready((error) => {
 
     fastify.listen(listenOptions, (error, address) => {
         if (error) {
-            console.error(error);
-            fastify.log.error(error);
+            fastify.log.error(`Fastify error: ${error.message}`);
             process.exit(2);
         }
-
-        // console.log(`Server listening at ${address}`);
-        fastify.log.info(`Server listening at ${address}`);
     });
 });
