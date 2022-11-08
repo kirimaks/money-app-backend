@@ -1,6 +1,6 @@
 import type { IResolvers } from 'mercurius';
 
-import { signUpResolver, signInResolver } from './auth';
+import { signUpResolver, signInResolver } from './auth/resolvers';
 
 
 const GraphQLResolvers:IResolvers = {
