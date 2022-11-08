@@ -1,5 +1,7 @@
 import type { IResolvers } from 'mercurius';
 
+import { signUpResolver, signInResolver } from './auth';
+
 
 const GraphQLResolvers:IResolvers = {
     Query: {
@@ -9,16 +11,8 @@ const GraphQLResolvers:IResolvers = {
         }
     },
     Mutation: {
-        login(obj, payload, context) {
-            context.app.log.debug(`Obj: ${JSON.stringify(obj)}`);
-            context.app.log.debug(`Login: ${JSON.stringify(payload)}`);
-            return 'token';
-        },
-        createUser(obj, payload, context) {
-            context.app.log.debug(`Obj: ${JSON.stringify(obj)}`);
-            context.app.log.debug(`New user: ${JSON.stringify(payload)}`);
-            return 'done';
-        }
+        signIn: signInResolver,
+        signUp: signUpResolver,
     }
 };
 
