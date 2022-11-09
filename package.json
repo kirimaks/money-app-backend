@@ -4,9 +4,9 @@
   "description": "Version without elasticsearch",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "tap --ts",
     "build": "eslint src && tsc -p tsconfig.json",
-    "start": "node build/server.js"
+    "start": "node build/src/server.js"
   },
   "repository": {
     "type": "git",
@@ -20,17 +20,21 @@
   "homepage": "https://github.com/kirimaks/money-app-backend#readme",
   "devDependencies": {
     "@types/node": "^18.11.7",
+    "@types/tap": "^15.0.7",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "^5.41.0",
     "eslint": "^8.26.0",
     "pino-pretty": "^9.1.1",
+    "prisma": "^4.6.0",
+    "tap": "^16.3.0",
+    "ts-node": "^10.9.1",
     "typescript": "^4.8.4",
     "yarn": "^1.22.19"
   },
   "dependencies": {
     "@fastify/cors": "^8.1.1",
     "@fastify/env": "^4.1.0",
-    "@prisma/client": "^4.5.0",
+    "@prisma/client": "^4.6.0",
     "fastify": "^4.9.2",
     "fastify-plugin": "^4.3.0",
     "graphql": "^16.6.0",
