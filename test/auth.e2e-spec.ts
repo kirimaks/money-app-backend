@@ -24,7 +24,7 @@ describe('Test SignIn', () => {
             email: 'test@test.test', 
             password: 'sometestpassword'
 
-        }).expect(201);
+        }).expect(200);
     });
 });
 

@@ -1,4 +1,4 @@
-import { UsePipes, Controller, Get, Post, Body } from '@nestjs/common';
+import { UsePipes, Controller, Get, Post, Body, HttpCode } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 
@@ -15,11 +15,6 @@ export class AuthController {
         this.authService = authService;
     }
 
-    @Get()
-    root() {
-        return 'Auth root';
-    }
-    
     @Post('sign-up')
     @UsePipes(new YupPipe(signInBodySchema))
     signUp(@Body() signUpDTO: SignUpDTO) {
@@ -28,6 +23,7 @@ export class AuthController {
     }
 
     @Post('sign-in')
+    @HttpCode(200)
     @UsePipes(new YupPipe(signUpBodySchema))
     signIn(@Body() signInBody: SignInBody) {
         this.authService.login(signInBody);
