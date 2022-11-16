@@ -1,21 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
+
 import type { SignUpDTO, SignInBody } from './auth.validation';
 
 
 @Injectable()
 export class AuthService {
     private readonly prismaClient: PrismaClientService;
+    private readonly logger: Logger;
 
-    constructor(prismaClient: PrismaClientService) {
+    constructor(prismaClient: PrismaClientService, logger:Logger) {
         this.prismaClient = prismaClient;
+        this.logger = logger;
     }
 
     createUser(signUpDTO: SignUpDTO) {
-        console.log(signUpDTO);
+        this.logger.log(signUpDTO);
     }
 
     login(signInBody: SignInBody) {
-        console.log(signInBody);
+        this.logger.log(signInBody);
     }
 }

@@ -4,11 +4,12 @@ import { AuthService } from './auth.service';
 
 import { SignUpDTO, SignInBody, signInBodySchema, signUpBodySchema } from './auth.validation';
 import { YupPipe } from '../pipes/yup.pipe';
+import { PrismaClientService } from '../prisma-client/prisma-client.service';
 
 
 @Controller('auth')
 export class AuthController {
-    authService: AuthService;
+    private readonly authService: AuthService;
 
     constructor(authService:AuthService) {
         this.authService = authService;
@@ -23,13 +24,13 @@ export class AuthController {
     @UsePipes(new YupPipe(signInBodySchema))
     signUp(@Body() signUpDTO: SignUpDTO) {
         this.authService.createUser(signUpDTO);
-        return 'User created';
+        return {status: 'ok'};
     }
 
     @Post('sign-in')
     @UsePipes(new YupPipe(signUpBodySchema))
     signIn(@Body() signInBody: SignInBody) {
         this.authService.login(signInBody);
-        return 'User logged in';
+        return {status: 'ok'};
     }
 }
