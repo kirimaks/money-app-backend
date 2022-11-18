@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { getErrorMessage } from '../errors/tools';
@@ -15,11 +16,13 @@ export class AuthService {
     private readonly prisma: PrismaClientService;
     private readonly logger: Logger;
     private readonly passwordTool: PasswordTool;
+    private readonly jwtService: JwtService;
 
-    constructor(prisma: PrismaClientService, logger:Logger) {
+    constructor(prisma: PrismaClientService, logger:Logger, jwtService:JwtService) {
         this.prisma = prisma;
         this.logger = logger;
         this.passwordTool = new PasswordTool();
+        this.jwtService = jwtService;
     }
 
     async validatePassword(hash:string, password:string) {
@@ -51,14 +54,17 @@ export class AuthService {
         }
     }
 
-    async login(signInBody: SignInBody) {
+    async login(signInBody: SignInBody):Promise<string> {
         try {
             const user = await this.getUserByEmail(signInBody.email);
             await this.validatePassword(user.passwordHash, signInBody.password);
 
-            return {
-                jwt_token: 'hello'
-            };
+            return this.jwtService.sign({
+                sub: {
+                    userId: user.id,
+                    email: user.email,
+                }
+            });
 
 
         } catch(error) {
