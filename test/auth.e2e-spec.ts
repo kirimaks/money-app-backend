@@ -2,8 +2,13 @@ import crypto from 'crypto';
 
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 import { AuthModule } from '../src/auth/auth.module';
+import {
+    SIGN_UP_URL, SIGN_IN_URL, EMAIL_EXISTS_ERROR,
+    SIGN_UP_OK_MESSAGE, SIGN_IN_OK_MESSAGE,
+    SIGN_IN_PASSWORD_ERROR, SIGN_IN_EMAIL_ERROR
+} from '../src/auth/auth.constants';
 
 
 function getRandomEmail() {
@@ -19,11 +24,10 @@ function getRandomPassword() {
     return crypto.randomBytes(8).toString('hex').toUpperCase();
 }
 
-
 describe('Auth test', () => {
     let app: INestApplication;
-    const randomEmail = getRandomEmail();
-    const randomPassword = getRandomPassword();
+    const testEmail = getRandomEmail();
+    const testPassword = getRandomPassword();
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -35,41 +39,83 @@ describe('Auth test', () => {
     });
 
     describe('Sign up', () => {
-        test('POST /auth/sign-up', () => {
+        test(`POST ${SIGN_UP_URL}`, () => {
             return request(
                 app.getHttpServer()
 
-            ).post('/auth/sign-up').send({
-                email: randomEmail,
-                password: randomPassword,
+            ).post(SIGN_UP_URL).send({
+                email: testEmail,
+                password: testPassword,
 
-            }).expect(201);
+            }).then((response) => {
+                expect(response.statusCode).toEqual(HttpStatus.CREATED);
+                expect(response.body.message).toEqual(SIGN_UP_OK_MESSAGE);
+            });
         });
     });
 
-    describe('Sign in fail', () => {
-        test('POST /auth/sign-in', () => {
+    describe('Email exists', () => {
+        test(`POST ${SIGN_UP_URL}`, () => {
             return request(
                 app.getHttpServer()
 
-            ).post('/auth/sign-in').send({
-                email: getRandomEmail(),
-                password: getRandomEmail()
+            ).post(`${SIGN_UP_URL}`).send({
+                email: testEmail,
+                password: testPassword,
 
-            }).expect(401);
+            }).then((response) => {
+                expect(response.statusCode).toEqual(HttpStatus.BAD_REQUEST);
+                expect(response.body.message).toEqual(EMAIL_EXISTS_ERROR);
+            });
+        });
+    });
+
+    describe('Sign in fail (wrong password)', () => {
+        test(`POST ${SIGN_IN_URL}`, () => {
+            return request(
+                app.getHttpServer()
+
+            ).post(SIGN_IN_URL).send({
+                email: testEmail,
+                password: getRandomPassword(), 
+
+            }).then(response => {
+                expect(response.statusCode).toEqual(HttpStatus.UNAUTHORIZED);
+                expect(response.body.message).toEqual(SIGN_IN_PASSWORD_ERROR);
+            });
+        });
+    });
+
+    describe('Sign in fail (wrong email)', () => {
+        test(`POST ${SIGN_IN_URL}`, () => {
+            return request(
+                app.getHttpServer()
+
+            ).post(SIGN_IN_URL).send({
+                email: getRandomEmail(),
+                password: getRandomPassword(), 
+
+            }).then(response => {
+                expect(response.statusCode).toEqual(HttpStatus.UNAUTHORIZED);
+                expect(response.body.message).toEqual(SIGN_IN_EMAIL_ERROR);
+            });
         });
     });
 
     describe('Sign in ok ', () => {
-        test('POST /auth/sign-in', () => {
+        test(`POST ${SIGN_IN_URL}`, () => {
             return request(
                 app.getHttpServer()
 
-            ).post('/auth/sign-in').send({
-                email: randomEmail,
-                password: randomPassword
+            ).post(SIGN_IN_URL).send({
+                email: testEmail,
+                password: testPassword
 
-            }).expect(200);
+            }).then(response => {
+                expect(response.statusCode).toEqual(HttpStatus.OK);
+                expect(response.body.message).toEqual(SIGN_IN_OK_MESSAGE);
+                expect(response.body.jwt_token).toBeTruthy();
+            });
         });
     });
 });
