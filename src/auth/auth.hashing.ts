@@ -7,7 +7,7 @@ type HashAttributes = {
 };
 
 
-export class Password {
+export class PasswordTool {
     private readonly saltLen = 16;
     private readonly keyLen = 32;
     private readonly keyIterations = 872791;

@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 
-import { Password } from './auth.hashing';
+import { PasswordTool } from './auth.hashing';
 
 
 describe('Password hashing', () => {
-    const password = new Password();
+    const password = new PasswordTool();
 
     test('Checking generated hashes', async () => {
         const randomPassword = crypto.randomBytes(12).toString('hex');
