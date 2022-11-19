@@ -28,6 +28,7 @@ describe('Auth test', () => {
     let app: INestApplication;
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
+    let jwtToken: string;
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({
@@ -115,6 +116,33 @@ describe('Auth test', () => {
                 expect(response.statusCode).toEqual(HttpStatus.OK);
                 expect(response.body.message).toEqual(SIGN_IN_OK_MESSAGE);
                 expect(response.body.jwt_token).toBeTruthy();
+
+                jwtToken = response.body.jwt_token;
+            });
+        });
+    });
+
+    describe('JWT Auth (wrong token)', () => {
+        test('GET /auth/test-jwt', () => {
+            return request(
+                app.getHttpServer()
+
+            ).get('/auth/test-jwt').then(response => {
+                expect(response.statusCode).toEqual(HttpStatus.UNAUTHORIZED);
+            });
+        });
+    });
+
+    describe('JWT Auth (correct toeken)', () => {
+        test('GET /auth/test-jwt', () => {
+            return request(
+                app.getHttpServer()
+
+            ).get('/auth/test-jwt').set(
+                'Authorization', `Bearer ${jwtToken}`
+                
+            ).then(response => {
+                expect(response.statusCode).toEqual(HttpStatus.OK);
             });
         });
     });

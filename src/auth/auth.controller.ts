@@ -1,5 +1,5 @@
 import { 
-    UsePipes, Controller, Get, Post, Body, HttpCode, Logger,
+    UsePipes, Controller, Get, Post, Body, HttpCode, Logger, UseGuards,
     BadRequestException, InternalServerErrorException, UnauthorizedException 
 } from '@nestjs/common';
 
@@ -12,6 +12,7 @@ import {
     SIGN_UP_OK_MESSAGE, SIGN_IN_OK_MESSAGE
 } from './auth.constants';
 import { EmailExistsError, PasswordAuthError, EmailAuthError } from './auth.errors';
+import { JwtAuthGuard } from './auth.jwt.guard';
 
 
 @Controller('auth')
@@ -60,5 +61,11 @@ export class AuthController { private readonly authService: AuthService;
         }
 
         throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+    }
+
+    @Get('test-jwt')
+    @UseGuards(JwtAuthGuard)
+    profile() {
+        return { message: 'Profile page' };
     }
 }
