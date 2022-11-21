@@ -1,0 +1,12 @@
+type Profile {
+    user: User!
+}
+
+type User {
+    uuid: String!
+    email: String!
+}
+
+type Query {
+    profile(token: String!): Profile
+}
