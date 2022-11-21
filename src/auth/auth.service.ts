@@ -62,7 +62,6 @@ export class AuthService {
             if (await this.validatePassword(user.passwordHash, signInBody.password)) {
                 const payload:JWTSignPayload = {
                     sub: {
-                        id: user.id,
                         email: user.email,
                     }
                 };

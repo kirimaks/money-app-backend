@@ -4,9 +4,10 @@ export type User = {
     passwordHash: string;
 };
 
+export type UserRepresentation = Pick<User, "email">;
+
 export type JWTSignPayload = {
     sub: {
-        id: string;
         email: string;
     }
 };

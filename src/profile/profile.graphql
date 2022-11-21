@@ -1,12 +1,11 @@
-type Profile {
+type ProfileResponse {
     user: User!
 }
 
 type User {
-    uuid: String!
     email: String!
 }
 
 type Query {
-    profile(token: String!): Profile
+    profile: ProfileResponse!
 }
