@@ -3,3 +3,10 @@ export type User = {
     email: string;
     passwordHash: string;
 };
+
+export type JWTSignPayload = {
+    sub: {
+        id: string;
+        email: string;
+    }
+};

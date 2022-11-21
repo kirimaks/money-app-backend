@@ -9,6 +9,7 @@ import { PasswordTool } from './auth.hashing';
 
 import type { SignUpDTO, SignInBody } from './auth.validation';
 import type { User } from './auth.types';
+import type { JWTSignPayload } from './auth.types';
 
 
 @Injectable()
@@ -57,15 +58,18 @@ export class AuthService {
     async login(signInBody: SignInBody):Promise<string> {
         try {
             const user = await this.getUserByEmail(signInBody.email);
-            await this.validatePassword(user.passwordHash, signInBody.password);
 
-            return this.jwtService.sign({
-                sub: {
-                    userId: user.id,
-                    email: user.email,
-                }
-            });
+            if (await this.validatePassword(user.passwordHash, signInBody.password)) {
+                const payload:JWTSignPayload = {
+                    sub: {
+                        id: user.id,
+                        email: user.email,
+                    }
+                };
+                return this.jwtService.sign(payload);
+            }
 
+            throw new PasswordAuthError(`Authentication error: validation error`);
 
         } catch(error) {
             if (error instanceof AuthError) {
