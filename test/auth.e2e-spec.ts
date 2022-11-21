@@ -21,7 +21,11 @@ function getRandomEmail() {
 }
 
 function getRandomPassword() {
-    return crypto.randomBytes(8).toString('hex').toUpperCase();
+    return crypto.randomBytes(8).toString(
+        'hex'
+    ).toUpperCase() + crypto.randomBytes(8).toString(
+        'hex'
+    ).toLowerCase();
 }
 
 describe('Auth test', () => {
@@ -47,6 +51,7 @@ describe('Auth test', () => {
             ).post(SIGN_UP_URL).send({
                 email: testEmail,
                 password: testPassword,
+                confirm: testPassword,
 
             }).then((response) => {
                 expect(response.statusCode).toEqual(HttpStatus.CREATED);
@@ -63,6 +68,7 @@ describe('Auth test', () => {
             ).post(`${SIGN_UP_URL}`).send({
                 email: testEmail,
                 password: testPassword,
+                confirm: testPassword,
 
             }).then((response) => {
                 expect(response.statusCode).toEqual(HttpStatus.BAD_REQUEST);

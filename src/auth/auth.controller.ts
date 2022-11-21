@@ -5,7 +5,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { SignUpDTO, SignInBody, signInBodySchema, signUpBodySchema } from './auth.validation';
-import { YupPipe } from '../pipes/yup.pipe';
+import { ZodPipe } from '../pipes/zod.pipe';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { 
     EMAIL_EXISTS_ERROR, INTERNAL_SERVER_ERROR, SIGN_IN_EMAIL_ERROR, SIGN_IN_PASSWORD_ERROR,
@@ -26,7 +26,7 @@ export class AuthController {
     }
 
     @Post('sign-up')
-    @UsePipes(new YupPipe(signInBodySchema))
+    @UsePipes(new ZodPipe(signUpBodySchema))
     async signUp(@Body() signUpDTO: SignUpDTO) {
         try {
             await this.authService.createUser(signUpDTO);
@@ -43,7 +43,7 @@ export class AuthController {
 
     @Post('sign-in')
     @HttpCode(200)
-    @UsePipes(new YupPipe(signUpBodySchema))
+    @UsePipes(new ZodPipe(signInBodySchema))
     async signIn(@Body() signInBody: SignInBody) {
         try {
             const jwtToken = await this.authService.login(signInBody);
