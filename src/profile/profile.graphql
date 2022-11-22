@@ -4,6 +4,8 @@ type ProfileResponse {
 
 type User {
     email: String!
+    firstName: String
+    lastName: String
 }
 
 type Query {

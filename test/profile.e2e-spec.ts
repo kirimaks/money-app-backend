@@ -1,5 +1,7 @@
-import request from 'supertest';
-import { Test } from '@nestjs/testing'; import { INestApplication, HttpStatus } from '@nestjs/common';
+import crypto from 'crypto';
+import request from 'supertest'; 
+import { Test } from '@nestjs/testing'; 
+import { INestApplication, HttpStatus } from '@nestjs/common';
 
 import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
@@ -15,6 +17,8 @@ import { ProfileModule } from '../src/profile/profile.module';
 describe('Profile test', () => {
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
+    const testFirstName = crypto.randomBytes(8).toString('hex');
+    const testLastName = crypto.randomBytes(8).toString('hex');
     let app: INestApplication;
     let jwtToken:string;
 
@@ -36,6 +40,8 @@ describe('Profile test', () => {
                 email: testEmail,
                 password: testPassword,
                 confirm: testPassword,
+                firstName: testFirstName,
+                lastName: testLastName,
 
             }).then((response) => {
                 expect(response.statusCode).toEqual(HttpStatus.CREATED);
@@ -86,7 +92,7 @@ describe('Profile test', () => {
     describe('Profile page', () => {
         const query = `{
             profile {
-                user { email }
+                user { email firstName lastName }
             }
         }`;
 
@@ -104,6 +110,8 @@ describe('Profile test', () => {
             }).then(response => {
                 expect(response.statusCode).toEqual(HttpStatus.OK);
                 expect(response.body.data.profile.user.email).toEqual(testEmail);
+                expect(response.body.data.profile.user.firstName).toEqual(testFirstName);
+                expect(response.body.data.profile.user.lastName).toEqual(testLastName);
             });
         });
     });

@@ -40,6 +40,8 @@ export class AuthService {
                 data: {
                     email: signUpDTO.email,
                     passwordHash: await this.passwordTool.hash(signUpDTO.password),
+                    firstName: signUpDTO.firstName,
+                    lastName: signUpDTO.lastName,
                 }
             });
 
@@ -63,6 +65,7 @@ export class AuthService {
                 const payload:JWTSignPayload = {
                     sub: {
                         email: user.email,
+                        id: user.id,
                     }
                 };
                 return this.jwtService.sign(payload);
