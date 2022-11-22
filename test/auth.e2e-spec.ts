@@ -1,32 +1,15 @@
-import crypto from 'crypto';
-
 import request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication, HttpStatus } from '@nestjs/common';
+
 import { AuthModule } from '../src/auth/auth.module';
 import {
     SIGN_UP_URL, SIGN_IN_URL, EMAIL_EXISTS_ERROR,
     SIGN_UP_OK_MESSAGE, SIGN_IN_OK_MESSAGE,
     SIGN_IN_PASSWORD_ERROR, SIGN_IN_EMAIL_ERROR
 } from '../src/auth/auth.constants';
+import { getRandomEmail, getRandomPassword } from './tools/auth';
 
-
-function getRandomEmail() {
-    return [
-        crypto.randomBytes(8).toString('hex'),
-        '@',
-        crypto.randomBytes(8).toString('hex'),
-        '.com'
-    ].join('');
-}
-
-function getRandomPassword() {
-    return crypto.randomBytes(8).toString(
-        'hex'
-    ).toUpperCase() + crypto.randomBytes(8).toString(
-        'hex'
-    ).toLowerCase();
-}
 
 describe('Auth test', () => {
     let app: INestApplication;
