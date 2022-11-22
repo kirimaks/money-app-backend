@@ -115,4 +115,34 @@ describe('Profile test', () => {
             });
         });
     });
+
+    describe('Update profile', () => {
+        const newFirstName = 'test1';
+        const newLastName = 'test2';
+
+        const mutation = `
+            mutation {
+                updateProfile(firstName: "${newFirstName}" lastName: "${newLastName}") {
+                    user { email firstName, lastName }
+                }
+            }
+        `;
+
+        test('Update profile', () => {
+            return request(
+                app.getHttpServer()
+
+            ).post('/graphql').send({
+                query: mutation
+
+            }).set({
+                'Content-type': 'application/json',
+                'Authorization': `Bearer ${jwtToken}`,
+
+            }).then(response => {
+                expect(response.body.data.updateProfile.user.firstName).toEqual(newFirstName);
+                expect(response.body.data.updateProfile.user.lastName).toEqual(newLastName);
+            });
+        });
+    });
 });

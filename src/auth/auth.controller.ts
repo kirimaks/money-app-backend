@@ -8,9 +8,10 @@ import { SignUpDTO, SignInBody, signInBodySchema, signUpBodySchema } from './aut
 import { ZodPipe } from '../pipes/zod.pipe';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { 
-    EMAIL_EXISTS_ERROR, INTERNAL_SERVER_ERROR, SIGN_IN_EMAIL_ERROR, SIGN_IN_PASSWORD_ERROR,
+    EMAIL_EXISTS_ERROR, SIGN_IN_EMAIL_ERROR, SIGN_IN_PASSWORD_ERROR,
     SIGN_UP_OK_MESSAGE, SIGN_IN_OK_MESSAGE
 } from './auth.constants';
+import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { EmailExistsError, PasswordAuthError, EmailAuthError } from './auth.errors';
 import { JwtAuthGuard } from './auth.jwt.guard';
 

@@ -11,3 +11,7 @@ type User {
 type Query {
     profile: ProfileResponse!
 }
+
+type Mutation {
+    updateProfile(firstName: String lastName: String): ProfileResponse!
+}
