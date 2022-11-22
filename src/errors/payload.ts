@@ -1,9 +1,9 @@
 export class EmptyPayload extends Error {
-    message: string;
+  message: string;
 
-    constructor(message:string) {
-        super(message);
-        this.message = message;
-        this.name = 'EmptyPayload';
-    }
+  constructor(message: string) {
+    super(message);
+    this.message = message;
+    this.name = 'EmptyPayload';
+  }
 }

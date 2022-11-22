@@ -6,7 +6,6 @@ import { GraphqlService } from './graphql/graphql.service';
 import { GraphqlModule } from './graphql/graphql.module';
 import { ProfileModule } from './profile/profile.module';
 
-
 @Module({
   imports: [AuthModule, PrismaClientModule, GraphqlModule, ProfileModule],
   providers: [PrismaClientService, GraphqlService],
