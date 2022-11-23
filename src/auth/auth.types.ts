@@ -12,3 +12,12 @@ export type UserInRequest = Pick<User, 'id' | 'email'>;
 export type JWTSignPayload = {
   sub: UserInRequest;
 };
+
+export type SignUpOK = {
+  message: string;
+};
+
+export type SignInOK = {
+  message: string;
+  jwt_token: string;
+};

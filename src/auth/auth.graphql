@@ -5,9 +5,18 @@ type User {
 }
 
 type SignUpResponse {
-    user: User!
+    message: String!
+}
+
+type LogInResponse {
+    message: String!
+    jwt_token: String!
 }
 
 type Mutation {
     signUp(email: String! password: String! confirm: String! firstName: String lastName: String): SignUpResponse!
+}
+
+type Mutation {
+    signIn(email: String! password: String!): LogInResponse!
 }

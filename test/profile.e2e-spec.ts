@@ -6,8 +6,6 @@ import { INestApplication, HttpStatus } from '@nestjs/common';
 import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
 import {
-  SIGN_UP_URL,
-  SIGN_IN_URL,
   SIGN_UP_OK_MESSAGE,
   SIGN_IN_OK_MESSAGE,
 } from '../src/auth/auth.constants';
@@ -31,38 +29,50 @@ describe('Profile test', () => {
     await app.init();
   });
 
-  describe('Sign up', () => {
-    test(`POST ${SIGN_UP_URL}`, () => {
+  describe('GraphQL auth', () => {
+    test('Sign up', () => {
+      const signUpQuery = `
+        mutation {
+          signUp(email: "${testEmail}" password: "${testPassword}" confirm: "${testPassword}" firstName: "${testFirstName}" lastName: "${testLastName}") {
+            message
+          }
+        }
+      `;
+
       return request(app.getHttpServer())
-        .post(SIGN_UP_URL)
+        .post('/graphql')
         .send({
-          email: testEmail,
-          password: testPassword,
-          confirm: testPassword,
-          firstName: testFirstName,
-          lastName: testLastName,
+          query: signUpQuery,
+        })
+        .set({
+          'Content-type': 'application/json',
         })
         .then((response) => {
-          expect(response.statusCode).toEqual(HttpStatus.CREATED);
-          expect(response.body.message).toEqual(SIGN_UP_OK_MESSAGE);
+          expect(response.body.data.signUp.message).toEqual(SIGN_UP_OK_MESSAGE);
         });
     });
-  });
 
-  describe('Sign in ok ', () => {
-    test(`POST ${SIGN_IN_URL}`, () => {
+    test('Sign in', () => {
+      const signInQuery = `
+        mutation {
+          signIn(email: "${testEmail}" password: "${testPassword}") {
+            jwt_token message
+          }
+        }
+      `;
+
       return request(app.getHttpServer())
-        .post(SIGN_IN_URL)
+        .post('/graphql')
         .send({
-          email: testEmail,
-          password: testPassword,
+          query: signInQuery,
+        })
+        .set({
+          'Content-type': 'application/json',
         })
         .then((response) => {
-          expect(response.statusCode).toEqual(HttpStatus.OK);
-          expect(response.body.message).toEqual(SIGN_IN_OK_MESSAGE);
-          expect(response.body.jwt_token).toBeTruthy();
-
-          jwtToken = response.body.jwt_token;
+          expect(response.body.data.signIn.jwt_token).toBeTruthy();
+          expect(response.body.data.signIn.message).toBe(SIGN_IN_OK_MESSAGE);
+          jwtToken = response.body.data.signIn.jwt_token;
         });
     });
   });

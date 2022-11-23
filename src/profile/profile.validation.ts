@@ -6,7 +6,9 @@ export const updateProfileSchema = Zod.object({
   lastName: Zod.string().max(NAME_MAX_LENGTH).default(''),
 });
 
-export class UpdateProfileInput implements Zod.infer<typeof updateProfileSchema> {
-    firstName: string;
-    lastName: string;
+export class UpdateProfileInput
+  implements Zod.infer<typeof updateProfileSchema>
+{
+  firstName: string;
+  lastName: string;
 }

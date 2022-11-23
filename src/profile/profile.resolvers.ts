@@ -3,17 +3,13 @@ import {
   Logger,
   NotFoundException,
   InternalServerErrorException,
-  BadRequestException, UsePipes
 } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { ProfileService } from './profile.service';
 import { NotFoundError } from '../errors/search';
-import {
-  PROFILE_NOT_FOUND_ERROR,
-  PROFILE_UPDATE_EMPTY_PAYLOAD_ERROR,
-} from './profile.constants';
+import { PROFILE_NOT_FOUND_ERROR } from './profile.constants';
 import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { UpdateProfileInput, updateProfileSchema } from './profile.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
@@ -52,12 +48,15 @@ export class ProfileResolver {
   @Mutation()
   @UseGuards(GQLJwtAuthGuard)
   async updateProfile(
-    @Args(new ZodPipe(updateProfileSchema)) updateProfileInput:UpdateProfileInput,
-    @CurrentUser() user: UserInRequest
+    @Args(new ZodPipe(updateProfileSchema))
+    updateProfileInput: UpdateProfileInput,
+    @CurrentUser() user: UserInRequest,
   ): Promise<ProfileRepresentation> {
     try {
-      return await this.profileService.updateProfile(user.id, updateProfileInput);
-
+      return await this.profileService.updateProfile(
+        user.id,
+        updateProfileInput,
+      );
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw new NotFoundException(PROFILE_NOT_FOUND_ERROR);

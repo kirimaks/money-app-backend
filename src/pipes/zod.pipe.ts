@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  PipeTransform,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, PipeTransform, BadRequestException } from '@nestjs/common';
 
 import { z as Zod } from 'zod';
 
@@ -11,10 +7,8 @@ export class ZodPipe implements PipeTransform {
   constructor(private objectSchema: any) {}
 
   async transform(value: unknown) {
-
     try {
       await this.objectSchema.parseAsync(value);
-
     } catch (error) {
       if (error instanceof Zod.ZodError) {
         for (const issue of error.issues) {
