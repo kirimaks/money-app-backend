@@ -2,12 +2,6 @@ type ProfileResponse {
     user: User!
 }
 
-type User {
-    email: String!
-    firstName: String
-    lastName: String
-}
-
 type Query {
     profile: ProfileResponse!
 }

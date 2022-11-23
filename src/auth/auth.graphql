@@ -1,0 +1,13 @@
+type User {
+    email: String!
+    firstName: String
+    lastName: String
+}
+
+type SignUpResponse {
+    user: User!
+}
+
+type Mutation {
+    signUp(email: String! password: String! confirm: String! firstName: String lastName: String): SignUpResponse!
+}
