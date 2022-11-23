@@ -1,6 +1,7 @@
 import { z as Zod } from 'zod';
 
 const NAME_MAX_LENGTH = 24;
+const MIN_PASSWORD_LENGH = 8;
 
 export const signInBodySchema = Zod.object({
   email: Zod.string({
@@ -31,6 +32,7 @@ export const signUpBodySchema = Zod.object({
   password: Zod.string({
     required_error: 'Password required',
   })
+    .min(MIN_PASSWORD_LENGH, `Minimum password length is ${MIN_PASSWORD_LENGH}`)
     .refine((val) => val.match(/\d+/), {
       message: 'Passwourd should container number',
     })
