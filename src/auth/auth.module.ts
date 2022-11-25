@@ -1,5 +1,6 @@
 import { Module, Logger } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -10,9 +11,10 @@ import { AuthResolver } from './auth.resolvers';
 @Module({
   controllers: [AuthController],
   imports: [
+    ConfigModule,
     JwtModule.register({
-      secret: 'SOME_JWT_SECRET',
-      signOptions: { expiresIn: '60s' },
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_LIFETIME },
     }),
   ],
   providers: [
