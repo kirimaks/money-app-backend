@@ -1,7 +1,8 @@
 import crypto from 'crypto';
-import request from 'supertest';
+import request from 'supertest-graphql';
 import { Test } from '@nestjs/testing';
 import { INestApplication, HttpStatus } from '@nestjs/common';
+import gql from 'graphql-tag';
 
 import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
@@ -11,6 +12,11 @@ import {
 } from '../src/auth/auth.constants';
 import { getRandomEmail, getRandomPassword } from './tools/auth';
 import { ProfileModule } from '../src/profile/profile.module';
+import { isString } from '../src/errors/typeguards';
+
+import type { SignUpOK, SignInOK } from '../src/auth/auth.types';
+import type { ProfileRepresentation } from '../src/profile/profile.types';
+
 
 describe('Profile test', () => {
   const testEmail = getRandomEmail();
@@ -30,99 +36,76 @@ describe('Profile test', () => {
   });
 
   describe('GraphQL auth', () => {
-    test('Sign up', () => {
-      const signUpQuery = `
+    test('Sign up', async () => {
+      const signUpQuery = gql`
         mutation {
           signUp(email: "${testEmail}" password: "${testPassword}" confirm: "${testPassword}" firstName: "${testFirstName}" lastName: "${testLastName}") {
             message
           }
         }
       `;
+      const { data } = await request<{signUp: SignUpOK}>(app.getHttpServer())
+        .query(signUpQuery)
+        .expectNoErrors();
 
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({
-          query: signUpQuery,
-        })
-        .set({
-          'Content-type': 'application/json',
-        })
-        .then((response) => {
-          expect(response.body.data.signUp.message).toEqual(SIGN_UP_OK_MESSAGE);
-        });
+      expect(data?.signUp.message).toEqual(SIGN_UP_OK_MESSAGE);
     });
 
-    test('Sign in', () => {
-      const signInQuery = `
-        mutation {
-          signIn(email: "${testEmail}" password: "${testPassword}") {
-            jwt_token message
+    test('Sign in', async () => {
+        const signInQuery = gql`
+          mutation {
+            signIn(email: "${testEmail}" password: "${testPassword}") {
+              jwt_token message
+            }
           }
-        }
-      `;
+        `;
 
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({
-          query: signInQuery,
-        })
-        .set({
-          'Content-type': 'application/json',
-        })
-        .then((response) => {
-          expect(response.body.data.signIn.jwt_token).toBeTruthy();
-          expect(response.body.data.signIn.message).toBe(SIGN_IN_OK_MESSAGE);
-          jwtToken = response.body.data.signIn.jwt_token;
-        });
+        const { data } = await request<{signIn: SignInOK}>(app.getHttpServer())
+          .query(signInQuery)
+          .expectNoErrors();
+
+        expect(data?.signIn?.jwt_token).toBeTruthy();
+        expect(data?.signIn?.message).toBe(SIGN_IN_OK_MESSAGE);
+
+        const token = data?.signIn?.jwt_token;
+        if (isString(token)) {
+            jwtToken = token;
+        }
     });
   });
 
   describe('Profile page auth error', () => {
-    const query = '{ profile { user { email } } }';
+    test('Get profile', async () => {
+      const query = gql`{ profile { user { email } } }`;
+      const { errors }= await request(app.getHttpServer())
+        .query(query);
 
-    test('Get profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({
-          query: query,
-        })
-        .set({
-          'Contet-type': 'application/json',
-          Authorization: `Bearer ${jwtToken}1`,
-        })
-        .then((response) => {
-          expect(response.body.errors[0].message).toEqual('Unauthorized');
-        });
+      expect(errors?.length).toBeGreaterThanOrEqual(1);
+
+      if (errors && errors.length > 0) {
+        expect(errors[0].message).toEqual('Unauthorized');
+
+      } else {
+        throw new Error('Wrong error message');
+      }
     });
   });
 
   describe('Profile page', () => {
-    const query = `{
-            profile {
-                user { email firstName lastName }
-            }
-        }`;
+    test('Get profile', async () => {
+      const query = gql`{
+        profile {
+          user { email firstName lastName }
+        }
+      }`;
+      const { data } = await request<{profile: ProfileRepresentation}>(app.getHttpServer())
+        .query(query)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
 
-    test('Get profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({
-          query: query,
-        })
-        .set({
-          'Contet-type': 'application/json',
-          Authorization: `Bearer ${jwtToken}`,
-        })
-        .then((response) => {
-          expect(response.statusCode).toEqual(HttpStatus.OK);
-          expect(response.body.data.profile.user.email).toEqual(testEmail);
-          expect(response.body.data.profile.user.firstName).toEqual(
-            testFirstName,
-          );
-          expect(response.body.data.profile.user.lastName).toEqual(
-            testLastName,
-          );
-        });
+      expect(data?.profile.user.email).toEqual(testEmail);
+      expect(data?.profile.user.firstName).toEqual(testFirstName);
+      expect(data?.profile.user.lastName).toEqual(testLastName);
     });
   });
 
@@ -130,32 +113,22 @@ describe('Profile test', () => {
     const newFirstName = 'test1';
     const newLastName = 'test2';
 
-    const mutation = `
-            mutation {
-                updateProfile(firstName: "${newFirstName}" lastName: "${newLastName}") {
-                    user { email firstName, lastName }
-                }
-            }
-        `;
+    test('Update profile', async () => {
+      const updateQuery = gql`
+          mutation {
+              updateProfile(firstName: "${newFirstName}" lastName: "${newLastName}") {
+                  user { email firstName, lastName }
+              }
+          }
+      `;
 
-    test('Update profile', () => {
-      return request(app.getHttpServer())
-        .post('/graphql')
-        .send({
-          query: mutation,
-        })
-        .set({
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${jwtToken}`,
-        })
-        .then((response) => {
-          expect(response.body.data.updateProfile.user.firstName).toEqual(
-            newFirstName,
-          );
-          expect(response.body.data.updateProfile.user.lastName).toEqual(
-            newLastName,
-          );
-        });
+      const { data } = await request<{updateProfile: ProfileRepresentation}>(app.getHttpServer())
+        .query(updateQuery)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
+
+      expect(data?.updateProfile.user.firstName).toEqual(newFirstName);
+      expect(data?.updateProfile.user.lastName).toEqual(newLastName);
     });
   });
 });
