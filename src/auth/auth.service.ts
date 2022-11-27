@@ -44,14 +44,27 @@ export class AuthService {
 
   async createUser(signUpDTO: SignUpDTO): Promise<User> {
     try {
-      return await this.prisma.user.create({
+      const resp = await this.prisma.account.create({
         data: {
-          email: signUpDTO.email,
-          passwordHash: await this.passwordTool.hash(signUpDTO.password),
-          firstName: signUpDTO.firstName,
-          lastName: signUpDTO.lastName,
+          name: 'New account',
+          users: {
+            create: [
+              { 
+                email: signUpDTO.email,
+                passwordHash: await this.passwordTool.hash(signUpDTO.password),
+                firstName: signUpDTO.firstName,
+                lastName: signUpDTO.lastName,
+              }
+            ]
+          }
         },
+        include: {
+          users: true
+        }
       });
+
+      return resp.users[0];
+
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
