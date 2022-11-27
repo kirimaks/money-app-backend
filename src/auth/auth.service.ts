@@ -8,6 +8,7 @@ import { PasswordTool } from './auth.hashing';
 
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
+import { SIGN_IN_PASSWORD_ERROR, SIGN_IN_EMAIL_ERROR } from './auth.constants';
 
 import type { SignUpDTO, SignInDTO } from './auth.validation';
 import type { JWTSignPayload } from './auth.types';
@@ -57,17 +58,15 @@ export class AuthService {
         return this.jwtService.sign(payload);
       }
 
-      throw new PasswordAuthError(`Authentication error: validation error`);
+      throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);
 
     } catch (error) {
       if (error instanceof AuthError) {
-        throw new PasswordAuthError(
-          `Authentication error: wrong email/password`,
-        );
+        throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);
       }
 
       if (error instanceof Prisma.NotFoundError) {
-        throw new EmailAuthError(`Authentication error: wrong email/password`);
+        throw new EmailAuthError(SIGN_IN_EMAIL_ERROR);
       }
 
       this.logger.error(error);
