@@ -7,9 +7,10 @@ import {
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
 import {
-  signUpBodySchema, signInBodySchema,
+  signUpBodySchema,
+  signInBodySchema,
   SignUpDTO,
-  SignInBody,
+  SignInDTO,
 } from './auth.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
 import { AuthService } from './auth.service';
@@ -57,7 +58,7 @@ export class AuthResolver {
 
   @Mutation()
   async signIn(
-    @Args(new ZodPipe(signInBodySchema)) signInDTO: SignInBody,
+    @Args(new ZodPipe(signInBodySchema)) signInDTO: SignInDTO,
   ): Promise<SignInOK> {
     try {
       const jwtToken = await this.authService.login(signInDTO);

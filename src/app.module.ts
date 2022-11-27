@@ -8,9 +8,14 @@ import { GraphqlService } from './graphql/graphql.service';
 import { GraphqlModule } from './graphql/graphql.module';
 import { ProfileModule } from './profile/profile.module';
 
-
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, PrismaClientModule, GraphqlModule, ProfileModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    PrismaClientModule,
+    GraphqlModule,
+    ProfileModule,
+  ],
   providers: [PrismaClientService, GraphqlService],
 })
 export class AppModule {}

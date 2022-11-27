@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import request from 'supertest-graphql';
 import { Test } from '@nestjs/testing';
-import { INestApplication, HttpStatus } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import gql from 'graphql-tag';
 
 import { AuthModule } from '../src/auth/auth.module';
@@ -16,7 +16,6 @@ import { isString } from '../src/errors/typeguards';
 
 import type { SignUpOK, SignInOK } from '../src/auth/auth.types';
 import type { ProfileRepresentation } from '../src/profile/profile.types';
-
 
 describe('Profile test', () => {
   const testEmail = getRandomEmail();
@@ -44,7 +43,7 @@ describe('Profile test', () => {
           }
         }
       `;
-      const { data } = await request<{signUp: SignUpOK}>(app.getHttpServer())
+      const { data } = await request<{ signUp: SignUpOK }>(app.getHttpServer())
         .query(signUpQuery)
         .expectNoErrors();
 
@@ -52,7 +51,7 @@ describe('Profile test', () => {
     });
 
     test('Sign in', async () => {
-        const signInQuery = gql`
+      const signInQuery = gql`
           mutation {
             signIn(email: "${testEmail}" password: "${testPassword}") {
               jwt_token message
@@ -60,31 +59,37 @@ describe('Profile test', () => {
           }
         `;
 
-        const { data } = await request<{signIn: SignInOK}>(app.getHttpServer())
-          .query(signInQuery)
-          .expectNoErrors();
+      const { data } = await request<{ signIn: SignInOK }>(app.getHttpServer())
+        .query(signInQuery)
+        .expectNoErrors();
 
-        expect(data?.signIn?.jwt_token).toBeTruthy();
-        expect(data?.signIn?.message).toBe(SIGN_IN_OK_MESSAGE);
+      expect(data?.signIn?.jwt_token).toBeTruthy();
+      expect(data?.signIn?.message).toBe(SIGN_IN_OK_MESSAGE);
 
-        const token = data?.signIn?.jwt_token;
-        if (isString(token)) {
-            jwtToken = token;
-        }
+      const token = data?.signIn?.jwt_token;
+      if (isString(token)) {
+        jwtToken = token;
+      }
     });
   });
 
   describe('Profile page auth error', () => {
     test('Get profile', async () => {
-      const query = gql`{ profile { user { email } } }`;
-      const { errors }= await request(app.getHttpServer())
-        .query(query);
+      const query = gql`
+        {
+          profile {
+            user {
+              email
+            }
+          }
+        }
+      `;
+      const { errors } = await request(app.getHttpServer()).query(query);
 
       expect(errors?.length).toBeGreaterThanOrEqual(1);
 
       if (errors && errors.length > 0) {
         expect(errors[0].message).toEqual('Unauthorized');
-
       } else {
         throw new Error('Wrong error message');
       }
@@ -93,12 +98,20 @@ describe('Profile test', () => {
 
   describe('Profile page', () => {
     test('Get profile', async () => {
-      const query = gql`{
-        profile {
-          user { email firstName lastName }
+      const query = gql`
+        {
+          profile {
+            user {
+              email
+              firstName
+              lastName
+            }
+          }
         }
-      }`;
-      const { data } = await request<{profile: ProfileRepresentation}>(app.getHttpServer())
+      `;
+      const { data } = await request<{ profile: ProfileRepresentation }>(
+        app.getHttpServer(),
+      )
         .query(query)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -122,7 +135,9 @@ describe('Profile test', () => {
           }
       `;
 
-      const { data } = await request<{updateProfile: ProfileRepresentation}>(app.getHttpServer())
+      const { data } = await request<{ updateProfile: ProfileRepresentation }>(
+        app.getHttpServer(),
+      )
         .query(updateQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();

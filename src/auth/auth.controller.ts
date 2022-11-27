@@ -15,7 +15,7 @@ import {
 import { AuthService } from './auth.service';
 import {
   SignUpDTO,
-  SignInBody,
+  SignInDTO,
   signInBodySchema,
   signUpBodySchema,
 } from './auth.validation';
@@ -63,7 +63,7 @@ export class AuthController {
   @Post('sign-in')
   @HttpCode(200)
   @UsePipes(new ZodPipe(signInBodySchema))
-  async signIn(@Body() signInBody: SignInBody) {
+  async signIn(@Body() signInBody: SignInDTO) {
     try {
       const jwtToken = await this.authService.login(signInBody);
       return {

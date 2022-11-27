@@ -12,7 +12,7 @@ import {
 } from './auth.errors';
 import { PasswordTool } from './auth.hashing';
 
-import type { SignUpDTO, SignInBody } from './auth.validation';
+import type { SignUpDTO, SignInDTO } from './auth.validation';
 import type { User } from './auth.types';
 import type { JWTSignPayload } from './auth.types';
 
@@ -49,22 +49,21 @@ export class AuthService {
           name: 'New account',
           users: {
             create: [
-              { 
+              {
                 email: signUpDTO.email,
                 passwordHash: await this.passwordTool.hash(signUpDTO.password),
                 firstName: signUpDTO.firstName,
                 lastName: signUpDTO.lastName,
-              }
-            ]
-          }
+              },
+            ],
+          },
         },
         include: {
-          users: true
-        }
+          users: true,
+        },
       });
 
       return resp.users[0];
-
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -77,7 +76,7 @@ export class AuthService {
     }
   }
 
-  async login(signInBody: SignInBody): Promise<string> {
+  async login(signInBody: SignInDTO): Promise<string> {
     try {
       const user = await this.getUserByEmail(signInBody.email);
 

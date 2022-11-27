@@ -14,7 +14,7 @@ export const signInBodySchema = Zod.object({
   }),
 });
 
-export class SignInBody implements Zod.infer<typeof signInBodySchema> {
+export class SignInDTO implements Zod.infer<typeof signInBodySchema> {
   email: string;
   password: string;
 }
