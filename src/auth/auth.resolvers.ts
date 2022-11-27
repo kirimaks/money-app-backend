@@ -45,8 +45,9 @@ export class AuthResolver {
     @Args(new ZodPipe(signUpBodySchema)) signUpDTO: SignUpDTO,
   ): Promise<SignUpOK> {
     try {
-      await this.authService.createUser(signUpDTO);
+      await this.authService.createAccount(signUpDTO);
       return { message: SIGN_UP_OK_MESSAGE };
+
     } catch (error) {
       if (error instanceof EmailExistsError) {
         throw new BadRequestException(EMAIL_EXISTS_ERROR);

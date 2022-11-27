@@ -14,7 +14,7 @@ import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { UpdateProfileInput, updateProfileSchema } from './profile.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
 
-import type { UserInRequest } from '../auth/auth.types';
+import type { UserInRequest } from '../user/user.types';
 import type { ProfileRepresentation } from './profile.types';
 
 @Resolver('Profile')

@@ -49,8 +49,9 @@ export class AuthController {
   @UsePipes(new ZodPipe(signUpBodySchema))
   async signUp(@Body() signUpDTO: SignUpDTO) {
     try {
-      await this.authService.createUser(signUpDTO);
+      await this.authService.createAccount(signUpDTO);
       return { message: SIGN_UP_OK_MESSAGE };
+
     } catch (error) {
       if (error instanceof EmailExistsError) {
         throw new BadRequestException(EMAIL_EXISTS_ERROR);

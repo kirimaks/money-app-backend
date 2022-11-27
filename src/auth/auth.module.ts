@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { JwtStrategy } from './auth.jwt.strategy';
 import { AuthResolver } from './auth.resolvers';
+import { AccountService } from '../account/account.service';
+import { UserService } from '../user/user.service';
 
 @Module({
   controllers: [AuthController],
@@ -23,6 +25,8 @@ import { AuthResolver } from './auth.resolvers';
     Logger,
     JwtStrategy,
     AuthResolver,
+    AccountService,
+    UserService,
   ],
 })
 export class AuthModule {}

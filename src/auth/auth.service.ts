@@ -2,36 +2,37 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 
-import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { getErrorMessage } from '../errors/tools';
-import {
-  EmailExistsError,
-  AuthError,
-  PasswordAuthError,
-  EmailAuthError,
-} from './auth.errors';
+import { AuthError, PasswordAuthError, EmailAuthError } from './auth.errors';
 import { PasswordTool } from './auth.hashing';
 
+import { AccountService } from '../account/account.service';
+import { UserService } from '../user/user.service';
+
 import type { SignUpDTO, SignInDTO } from './auth.validation';
-import type { User } from './auth.types';
 import type { JWTSignPayload } from './auth.types';
+import type { Account } from '../account/account.types';
 
 @Injectable()
 export class AuthService {
-  private readonly prisma: PrismaClientService;
   private readonly logger: Logger;
   private readonly passwordTool: PasswordTool;
   private readonly jwtService: JwtService;
+  private readonly accountService: AccountService;
+  private readonly userService: UserService;
 
   constructor(
-    prisma: PrismaClientService,
     logger: Logger,
     jwtService: JwtService,
+    accountService: AccountService,
+    userService: UserService,
   ) {
-    this.prisma = prisma;
     this.logger = logger;
     this.passwordTool = new PasswordTool();
     this.jwtService = jwtService;
+
+    this.accountService = accountService;
+    this.userService = userService;
   }
 
   async validatePassword(hash: string, password: string) {
@@ -42,43 +43,9 @@ export class AuthService {
     throw new AuthError('Wrong password');
   }
 
-  async createUser(signUpDTO: SignUpDTO): Promise<User> {
-    try {
-      const resp = await this.prisma.account.create({
-        data: {
-          name: 'New account',
-          users: {
-            create: [
-              {
-                email: signUpDTO.email,
-                passwordHash: await this.passwordTool.hash(signUpDTO.password),
-                firstName: signUpDTO.firstName,
-                lastName: signUpDTO.lastName,
-              },
-            ],
-          },
-        },
-        include: {
-          users: true,
-        },
-      });
-
-      return resp.users[0];
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new EmailExistsError('Email exists');
-        }
-      }
-      this.logger.error(error);
-
-      throw new Error(`Cannot create user: ${getErrorMessage(error)}`);
-    }
-  }
-
   async login(signInBody: SignInDTO): Promise<string> {
     try {
-      const user = await this.getUserByEmail(signInBody.email);
+      const user = await this.userService.getUserByEmail(signInBody.email);
 
       if (await this.validatePassword(user.passwordHash, signInBody.password)) {
         const payload: JWTSignPayload = {
@@ -91,6 +58,7 @@ export class AuthService {
       }
 
       throw new PasswordAuthError(`Authentication error: validation error`);
+
     } catch (error) {
       if (error instanceof AuthError) {
         throw new PasswordAuthError(
@@ -108,11 +76,13 @@ export class AuthService {
     }
   }
 
-  async getUserByEmail(email: string) {
-    return await this.prisma.user.findUniqueOrThrow({
-      where: {
-        email: email,
-      },
+  async createAccount(signUpDTO: SignUpDTO): Promise<Account> {
+    return await this.accountService.createAccount({
+      accountName: 'Hello',
+      email: signUpDTO.email,
+      password: signUpDTO.password,
+      firstName: signUpDTO.firstName,
+      lastName: signUpDTO.lastName,
     });
   }
 }
