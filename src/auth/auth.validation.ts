@@ -49,6 +49,9 @@ export const signUpBodySchema = Zod.object({
   confirm: Zod.string({
     required_error: 'Password confirmation required',
   }),
+
+  accountName: Zod.string().max(NAME_MAX_LENGTH).default(''),
+
 }).refine((data) => data.password === data.confirm, {
   message: "Passwords don't match",
   path: ['confirm'],
@@ -60,4 +63,5 @@ export class SignUpDTO implements Zod.infer<typeof signUpBodySchema> {
   email: string;
   password: string;
   confirm: string;
+  accountName: string;
 }

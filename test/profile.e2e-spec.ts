@@ -22,6 +22,8 @@ describe('Profile test', () => {
   const testPassword = getRandomPassword();
   const testFirstName = crypto.randomBytes(8).toString('hex');
   const testLastName = crypto.randomBytes(8).toString('hex');
+  const testAccountName = crypto.randomBytes(8).toString('hex');
+
   let app: INestApplication;
   let jwtToken: string;
 
@@ -38,7 +40,10 @@ describe('Profile test', () => {
     test('Sign up', async () => {
       const signUpQuery = gql`
         mutation {
-          signUp(email: "${testEmail}" password: "${testPassword}" confirm: "${testPassword}" firstName: "${testFirstName}" lastName: "${testLastName}") {
+          signUp(
+            email: "${testEmail}" password: "${testPassword}" confirm: "${testPassword}" 
+            firstName: "${testFirstName}" lastName: "${testLastName}" accountName: "${testAccountName}"
+          ) {
             message
           }
         }
@@ -106,6 +111,9 @@ describe('Profile test', () => {
               firstName
               lastName
             }
+            account {
+              name
+            }
           }
         }
       `;
@@ -119,6 +127,7 @@ describe('Profile test', () => {
       expect(data?.profile.user.email).toEqual(testEmail);
       expect(data?.profile.user.firstName).toEqual(testFirstName);
       expect(data?.profile.user.lastName).toEqual(testLastName);
+      expect(data?.profile.account.name).toEqual(testAccountName);
     });
   });
 

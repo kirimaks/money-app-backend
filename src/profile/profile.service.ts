@@ -16,18 +16,24 @@ export class ProfileService {
   }
 
   async getProfile(userId: string): Promise<ProfileRepresentation> {
-    const user = await this.prisma.user.findUniqueOrThrow({
+    const resp = await this.prisma.user.findUniqueOrThrow({
       where: {
         id: userId,
       },
+      include: {
+        account: true
+      }
     });
 
     return {
       user: {
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        email: resp.email,
+        firstName: resp.firstName,
+        lastName: resp.lastName,
       },
+      account: {
+        name: resp.account.name,
+      }
     };
   }
 
@@ -36,19 +42,25 @@ export class ProfileService {
     updateProfileInput: UpdateProfileInput,
   ): Promise<ProfileRepresentation> {
     try {
-      const user = await this.prisma.user.update({
+      const resp = await this.prisma.user.update({
         where: {
           id: userId,
         },
         data: updateProfileInput,
+        include: {
+          account: true
+        }
       });
 
       return {
         user: {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          email: resp.email,
+          firstName: resp.firstName,
+          lastName: resp.lastName,
         },
+        account: {
+          name: resp.account.name
+        }
       };
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {

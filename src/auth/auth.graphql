@@ -14,7 +14,10 @@ type LogInResponse {
 }
 
 type Mutation {
-    signUp(email: String! password: String! confirm: String! firstName: String lastName: String): SignUpResponse!
+    signUp(
+      email: String! password: String! confirm: String! 
+      firstName: String lastName: String accountName: String
+    ): SignUpResponse!
 }
 
 type Mutation {

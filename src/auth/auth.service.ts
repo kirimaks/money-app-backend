@@ -77,7 +77,7 @@ export class AuthService {
 
   async createAccount(signUpDTO: SignUpDTO): Promise<Account> {
     return await this.accountService.createAccount({
-      accountName: 'Hello',
+      accountName: signUpDTO.accountName,
       email: signUpDTO.email,
       password: signUpDTO.password,
       firstName: signUpDTO.firstName,

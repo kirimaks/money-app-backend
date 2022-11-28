@@ -12,3 +12,7 @@ export type Account = {
   name: string;
   users: User[];
 };
+
+export type AccountRepresentation = {
+  name: string;
+};

@@ -1,5 +1,10 @@
+type Account {
+  name: String!
+}
+
 type ProfileResponse {
     user: User!
+    account: Account!
 }
 
 type Query {
