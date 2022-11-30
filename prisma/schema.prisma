@@ -8,17 +8,69 @@ datasource db {
 }
 
 model Account {
-  id    String @id @default(uuid())
-  name  String @default("")
-  users User[]
+  id          String        @id @default(uuid())
+  name        String        @default("")
+  users       User[]
+  Category    Category[]
+  Transaction Transaction[]
 }
 
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
+  id           String        @id @default(uuid())
+  email        String        @unique
   passwordHash String
-  firstName    String  @default("")
-  lastName     String  @default("")
+  firstName    String        @default("")
+  lastName     String        @default("")
   accountId    String
-  account      Account @relation(fields: [accountId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  Transaction  Transaction[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  Transaction Transaction[]
+
+  @@index([accountId])
+}
+
+model Budget {
+  id          String        @id @default(cuid())
+  name        String
+  Transaction Transaction[]
+}
+
+model MoneySource {
+  id          String        @id @default(cuid())
+  name        String
+  Transaction Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  name      String
+  timestamp DateTime
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  budgetId String?
+  budget   Budget? @relation(fields: [budgetId], references: [id], onDelete: SetNull)
+
+  sourceId String?
+  source   MoneySource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+
+  @@index([accountId, categoryId, timestamp])
+  @@index([accountId, timestamp])
+  @@index([accountId, budgetId, timestamp])
 }
