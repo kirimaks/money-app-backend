@@ -10,12 +10,13 @@ import {
   SIGN_UP_OK_MESSAGE,
   SIGN_IN_OK_MESSAGE,
 } from '../src/auth/auth.constants';
-import { getRandomEmail, getRandomPassword } from './tools/auth';
+import { getRandomEmail, getRandomPassword, signUpTool, signInTool } from './tools/auth';
 import { ProfileModule } from '../src/profile/profile.module';
 import { isString } from '../src/errors/typeguards';
 
 import type { SignUpOK, SignInOK } from '../src/auth/auth.types';
 import type { ProfileRepresentation } from '../src/profile/profile.types';
+
 
 describe('Profile test', () => {
   const testEmail = getRandomEmail();
@@ -34,48 +35,9 @@ describe('Profile test', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
-  });
 
-  describe('GraphQL auth', () => {
-    test('Sign up', async () => {
-      const signUpQuery = gql`
-        mutation {
-          signUp(
-            email: "${testEmail}" password: "${testPassword}" confirm: "${testPassword}" 
-            firstName: "${testFirstName}" lastName: "${testLastName}" accountName: "${testAccountName}"
-          ) {
-            message
-          }
-        }
-      `;
-      const { data } = await request<{ signUp: SignUpOK }>(app.getHttpServer())
-        .query(signUpQuery)
-        .expectNoErrors();
-
-      expect(data?.signUp.message).toEqual(SIGN_UP_OK_MESSAGE);
-    });
-
-    test('Sign in', async () => {
-      const signInQuery = gql`
-          mutation {
-            signIn(email: "${testEmail}" password: "${testPassword}") {
-              jwt_token message
-            }
-          }
-        `;
-
-      const { data } = await request<{ signIn: SignInOK }>(app.getHttpServer())
-        .query(signInQuery)
-        .expectNoErrors();
-
-      expect(data?.signIn?.jwt_token).toBeTruthy();
-      expect(data?.signIn?.message).toBe(SIGN_IN_OK_MESSAGE);
-
-      const token = data?.signIn?.jwt_token;
-      if (isString(token)) {
-        jwtToken = token;
-      }
-    });
+    await signUpTool(app, testEmail, testPassword, testFirstName, testLastName, testAccountName);
+    jwtToken = await signInTool(app, testEmail, testPassword);
   });
 
   describe('Profile page auth error', () => {
