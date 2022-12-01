@@ -47,6 +47,7 @@ CREATE TABLE "MoneySource" (
 CREATE TABLE "Transaction" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "amount" BIGINT NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL,
     "accountId" TEXT NOT NULL,
     "categoryId" TEXT,

@@ -1,0 +1,13 @@
+type TransactionResponse { 
+  name: String!
+  amount: Int!
+  timestamp: String!
+}
+
+type Query {
+  transaction: TransactionResponse!
+}
+
+type Mutation {
+  createTransaction(name:String! amount:Int! timestamp:String!): TransactionResponse!
+}

@@ -53,6 +53,7 @@ model MoneySource {
 model Transaction {
   id        String   @id @default(cuid())
   name      String
+  amount    BigInt
   timestamp DateTime
 
   accountId String
