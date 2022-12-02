@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Account {
-  id          String        @id @default(uuid())
+  id          String        @id @default(cuid())
   name        String        @default("")
   users       User[]
   Category    Category[]
@@ -16,7 +16,7 @@ model Account {
 }
 
 model User {
-  id           String        @id @default(uuid())
+  id           String        @id @default(cuid())
   email        String        @unique
   passwordHash String
   firstName    String        @default("")
@@ -51,10 +51,10 @@ model MoneySource {
 }
 
 model Transaction {
-  id        String   @id @default(cuid())
-  name      String
-  amount    BigInt
-  timestamp DateTime
+  id            String   @id @default(cuid())
+  name          String
+  amount_cents  BigInt
+  utc_timestamp DateTime
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
@@ -71,7 +71,7 @@ model Transaction {
   sourceId String?
   source   MoneySource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
 
-  @@index([accountId, categoryId, timestamp])
-  @@index([accountId, timestamp])
-  @@index([accountId, budgetId, timestamp])
+  @@index([accountId, categoryId, utc_timestamp])
+  @@index([accountId, utc_timestamp])
+  @@index([accountId, budgetId, utc_timestamp])
 }

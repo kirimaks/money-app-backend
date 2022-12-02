@@ -21,7 +21,6 @@ import type { TransactionRepresentation } from '../src/transaction/transaction.t
 
 describe('Transaction test', () => {
   let app: INestApplication;
-  let jwtToken: string;
   const testEmail = getRandomEmail();
   const testPassword = getRandomPassword();
 
@@ -32,29 +31,24 @@ describe('Transaction test', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
-
-    await signUpTool(app, testEmail, testPassword);
-    jwtToken = await signInTool(app, testEmail, testPassword);
   });
 
   describe('Create transaction', () => {
-    test('Sign in', async () => {
-      expect(jwtToken).toBeTruthy();
-    });
+    const transactionName = crypto.randomBytes(8).toString('hex');
+    const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
+    const transactionTime = new Date().getTime();
 
     test('New transaction', async () => {
-      const transactionName = crypto.randomBytes(8).toString('hex');
-      const transactionAmount = Math.round(Math.random() * 1000);
-      const transactionTime = new Date().getTime().toString();
+      await signUpTool(app, testEmail, testPassword);
+      const jwtToken = await signInTool(app, testEmail, testPassword);
 
       const newTransactionQuery = gql`
         mutation {
           createTransaction(name: "${transactionName}" amount: ${transactionAmount} timestamp: "${transactionTime}") {
-            name amount timestamp
+            name amount timestamp id
           }
         }
       `;
-
       const { data } = await request<{ createTransaction: TransactionRepresentation }>(app.getHttpServer())
         .query(newTransactionQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
@@ -63,6 +57,7 @@ describe('Transaction test', () => {
       expect(data?.createTransaction.name).toEqual(transactionName);
       expect(data?.createTransaction.amount).toEqual(transactionAmount);
       expect(data?.createTransaction.timestamp).toEqual(transactionTime);
+      expect(data?.createTransaction.id).toBeTruthy();
     });
   });
 });

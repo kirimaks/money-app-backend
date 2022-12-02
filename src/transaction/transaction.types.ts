@@ -1,11 +1,14 @@
+type Timestamp = string;
+
 export type TransactionRepresentation = {
   name: string;
   amount: number;
-  timestamp: string;
+  timestamp: number;
+  id: string;
 };
 
 export type CreateTransactionInput = {
   name: string;
   amount: number;
-  timestamp: string;
+  timestamp: Timestamp;
 };
