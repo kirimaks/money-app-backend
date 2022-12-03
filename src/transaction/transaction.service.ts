@@ -25,7 +25,7 @@ export class TransactionService {
       });
 
       const timestamp = new Date(parseInt(createTransactionInput.timestamp));
-      const amount = createTransactionInput.amount * 100;
+      const amount = Math.round(createTransactionInput.amount * 100);
 
       const resp = await this.prisma.transaction.create({
         data: {
