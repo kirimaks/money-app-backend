@@ -7,6 +7,10 @@ type TransactionResponse {
   id: String!
 }
 
+type Query {
+  transaction(id:String!): TransactionResponse!
+}
+
 type Mutation {
   createTransaction(name:String! amount:Float! timestamp:Timestamp!): TransactionResponse!
 }

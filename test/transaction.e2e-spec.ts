@@ -33,10 +33,11 @@ describe('Transaction test', () => {
     await app.init();
   });
 
-  describe('Create transaction', () => {
+  describe('Create and get transaction', () => {
     const transactionName = crypto.randomBytes(8).toString('hex');
     const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
     const transactionTime = new Date().getTime();
+    let transactionId:string;
 
     test('New transaction', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -58,6 +59,33 @@ describe('Transaction test', () => {
       expect(data?.createTransaction.amount).toEqual(transactionAmount);
       expect(data?.createTransaction.timestamp).toEqual(transactionTime);
       expect(data?.createTransaction.id).toBeTruthy();
+
+      if (data && isString(data?.createTransaction.id)) {
+        transactionId = data?.createTransaction.id;
+      }
+    });
+
+    test('Get Transaction', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      expect(transactionId).toBeTruthy();
+
+      const getTransactionQuery = gql`
+        query {
+          transaction(id: "${transactionId}") {
+            name amount timestamp id
+          }
+        }
+      `;
+
+      const { data } = await request<{ transaction: TransactionRepresentation }>(app.getHttpServer())
+        .query(getTransactionQuery)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
+
+      expect(data?.transaction.name).toEqual(transactionName);
+      expect(data?.transaction.amount).toEqual(transactionAmount);
+      expect(data?.transaction.timestamp).toEqual(transactionTime);
+      expect(data?.transaction.id).toEqual(transactionId);
     });
   });
 });

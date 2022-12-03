@@ -47,8 +47,8 @@ CREATE TABLE "MoneySource" (
 CREATE TABLE "Transaction" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "amount" BIGINT NOT NULL,
-    "timestamp" TIMESTAMP(3) NOT NULL,
+    "amount_cents" BIGINT NOT NULL,
+    "utc_timestamp" TIMESTAMP(3) NOT NULL,
     "accountId" TEXT NOT NULL,
     "categoryId" TEXT,
     "userId" TEXT,
@@ -65,13 +65,16 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE INDEX "Category_accountId_idx" ON "Category"("accountId");
 
 -- CreateIndex
-CREATE INDEX "Transaction_accountId_categoryId_timestamp_idx" ON "Transaction"("accountId", "categoryId", "timestamp");
+CREATE INDEX "Transaction_accountId_categoryId_utc_timestamp_idx" ON "Transaction"("accountId", "categoryId", "utc_timestamp");
 
 -- CreateIndex
-CREATE INDEX "Transaction_accountId_timestamp_idx" ON "Transaction"("accountId", "timestamp");
+CREATE INDEX "Transaction_accountId_utc_timestamp_idx" ON "Transaction"("accountId", "utc_timestamp");
 
 -- CreateIndex
-CREATE INDEX "Transaction_accountId_budgetId_timestamp_idx" ON "Transaction"("accountId", "budgetId", "timestamp");
+CREATE INDEX "Transaction_accountId_budgetId_utc_timestamp_idx" ON "Transaction"("accountId", "budgetId", "utc_timestamp");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Transaction_accountId_id_key" ON "Transaction"("accountId", "id");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_accountId_fkey" FOREIGN KEY ("accountId") REFERENCES "Account"("id") ON DELETE CASCADE ON UPDATE CASCADE;

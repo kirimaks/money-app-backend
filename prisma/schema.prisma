@@ -71,6 +71,7 @@ model Transaction {
   sourceId String?
   source   MoneySource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
 
+  @@unique(fields: [accountId, id], name: "transaction_id_by_account")
   @@index([accountId, categoryId, utc_timestamp])
   @@index([accountId, utc_timestamp])
   @@index([accountId, budgetId, utc_timestamp])

@@ -1,11 +1,20 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
-import { UserNotFound } from '../errors/user';
+import { UserNotFound } from '../errors/user'; // TODO: UserNotFoundError
+import { TransactionNotFoundError } from '../errors/transaction';
 
-import type { TransactionRepresentation, CreateTransactionInput  } from './transaction.types';
+import type { TransactionRepresentation, CreateTransactionInput, Transaction } from './transaction.types';
 
+
+function transactionResponse(transaction:Transaction):TransactionRepresentation {
+  return {
+    id: transaction.id,
+    name: transaction.name,
+    amount: Number(transaction.amount_cents) / 100,
+    timestamp: transaction.utc_timestamp.getTime(),
+  }
+}
 
 @Injectable()
 export class TransactionService {
@@ -27,7 +36,7 @@ export class TransactionService {
       const timestamp = new Date(parseInt(createTransactionInput.timestamp));
       const amount = Math.round(createTransactionInput.amount * 100);
 
-      const resp = await this.prisma.transaction.create({
+      const transaction = await this.prisma.transaction.create({
         data: {
           name: createTransactionInput.name,
           amount_cents: amount,
@@ -45,16 +54,41 @@ export class TransactionService {
         }
       });
 
-      return {
-        id: resp.id,
-        name: resp.name,
-        amount: Number(resp.amount_cents) / 100,
-        timestamp: resp.utc_timestamp.getTime(),
-      }
+      return transactionResponse(transaction);
 
     } catch(error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFound('User not found');
+      }
+
+      this.logger.error(error);
+
+      throw error;
+    }
+  }
+
+  async getTransaction(userId: string, transactionId:string): Promise<TransactionRepresentation> {
+    try {
+      const user = await this.prisma.user.findUniqueOrThrow({
+        where: {
+          id: userId
+        }
+      });
+
+      const transaction = await this.prisma.transaction.findUniqueOrThrow({
+        where: {
+          transaction_id_by_account: {
+            accountId: user.accountId,
+            id: transactionId,
+          }
+        }
+      });
+
+      return transactionResponse(transaction);
+
+    } catch(error) {
+      if (error instanceof Prisma.NotFoundError) {
+        throw new TransactionNotFoundError('Transaction not found');
       }
 
       this.logger.error(error);
