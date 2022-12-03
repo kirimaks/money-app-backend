@@ -8,16 +8,16 @@ import { INestApplication } from '@nestjs/common';
 
 import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
-import { getRandomEmail, getRandomPassword, signUpTool, signInTool } from './tools/auth';
-import { 
-  SIGN_UP_OK_MESSAGE, SIGN_IN_OK_MESSAGE
-} from '../src/auth/auth.constants';
+import {
+  getRandomEmail,
+  getRandomPassword,
+  signUpTool,
+  signInTool,
+} from './tools/auth';
 import { isString } from '../src/errors/typeguards';
 import { TransactionModule } from '../src/transaction/transaction.module';
 
-import type { SignUpOK, SignInOK } from '../src/auth/auth.types';
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
-
 
 describe('Transaction test', () => {
   let app: INestApplication;
@@ -37,7 +37,7 @@ describe('Transaction test', () => {
     const transactionName = crypto.randomBytes(8).toString('hex');
     const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
     const transactionTime = new Date().getTime();
-    let transactionId:string;
+    let transactionId: string;
 
     test('New transaction', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -50,7 +50,9 @@ describe('Transaction test', () => {
           }
         }
       `;
-      const { data } = await request<{ createTransaction: TransactionRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createTransaction: TransactionRepresentation;
+      }>(app.getHttpServer())
         .query(newTransactionQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -77,7 +79,9 @@ describe('Transaction test', () => {
         }
       `;
 
-      const { data } = await request<{ transaction: TransactionRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        transaction: TransactionRepresentation;
+      }>(app.getHttpServer())
         .query(getTransactionQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();

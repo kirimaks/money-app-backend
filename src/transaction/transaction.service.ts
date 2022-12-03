@@ -4,16 +4,21 @@ import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFound } from '../errors/user'; // TODO: UserNotFoundError
 import { TransactionNotFoundError } from '../errors/transaction';
 
-import type { TransactionRepresentation, CreateTransactionInput, Transaction } from './transaction.types';
+import type {
+  TransactionRepresentation,
+  CreateTransactionInput,
+  Transaction,
+} from './transaction.types';
 
-
-function transactionResponse(transaction:Transaction):TransactionRepresentation {
+function transactionResponse(
+  transaction: Transaction,
+): TransactionRepresentation {
   return {
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     timestamp: transaction.utc_timestamp.getTime(),
-  }
+  };
 }
 
 @Injectable()
@@ -21,16 +26,19 @@ export class TransactionService {
   private readonly prisma: PrismaClientService;
   private readonly logger: Logger;
 
-  constructor(prisma: PrismaClientService, logger:Logger) {
+  constructor(prisma: PrismaClientService, logger: Logger) {
     this.prisma = prisma;
     this.logger = logger;
   }
-  async createTransaction(userId:string, createTransactionInput:CreateTransactionInput): Promise<TransactionRepresentation> {
+  async createTransaction(
+    userId: string,
+    createTransactionInput: CreateTransactionInput,
+  ): Promise<TransactionRepresentation> {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
         where: {
           id: userId,
-        }
+        },
       });
 
       const timestamp = new Date(parseInt(createTransactionInput.timestamp));
@@ -41,22 +49,21 @@ export class TransactionService {
           name: createTransactionInput.name,
           amount_cents: amount,
           utc_timestamp: timestamp, // TODO: validate as Date
-          account: { 
+          account: {
             connect: {
-              id: user.accountId
-            }
+              id: user.accountId,
+            },
           },
           user: {
             connect: {
-              id: user.id
-            }
-          }
-        }
+              id: user.id,
+            },
+          },
+        },
       });
 
       return transactionResponse(transaction);
-
-    } catch(error) {
+    } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFound('User not found');
       }
@@ -67,12 +74,15 @@ export class TransactionService {
     }
   }
 
-  async getTransaction(userId: string, transactionId:string): Promise<TransactionRepresentation> {
+  async getTransaction(
+    userId: string,
+    transactionId: string,
+  ): Promise<TransactionRepresentation> {
     try {
       const user = await this.prisma.user.findUniqueOrThrow({
         where: {
-          id: userId
-        }
+          id: userId,
+        },
       });
 
       const transaction = await this.prisma.transaction.findUniqueOrThrow({
@@ -80,13 +90,12 @@ export class TransactionService {
           transaction_id_by_account: {
             accountId: user.accountId,
             id: transactionId,
-          }
-        }
+          },
+        },
       });
 
       return transactionResponse(transaction);
-
-    } catch(error) {
+    } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new TransactionNotFoundError('Transaction not found');
       }

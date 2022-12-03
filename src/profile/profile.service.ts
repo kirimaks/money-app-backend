@@ -21,8 +21,8 @@ export class ProfileService {
         id: userId,
       },
       include: {
-        account: true
-      }
+        account: true,
+      },
     });
 
     return {
@@ -33,7 +33,7 @@ export class ProfileService {
       },
       account: {
         name: resp.account.name,
-      }
+      },
     };
   }
 
@@ -48,8 +48,8 @@ export class ProfileService {
         },
         data: updateProfileInput,
         include: {
-          account: true
-        }
+          account: true,
+        },
       });
 
       return {
@@ -59,8 +59,8 @@ export class ProfileService {
           lastName: resp.lastName,
         },
         account: {
-          name: resp.account.name
-        }
+          name: resp.account.name,
+        },
       };
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {

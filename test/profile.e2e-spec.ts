@@ -7,16 +7,14 @@ import gql from 'graphql-tag';
 import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
 import {
-  SIGN_UP_OK_MESSAGE,
-  SIGN_IN_OK_MESSAGE,
-} from '../src/auth/auth.constants';
-import { getRandomEmail, getRandomPassword, signUpTool, signInTool } from './tools/auth';
+  getRandomEmail,
+  getRandomPassword,
+  signUpTool,
+  signInTool,
+} from './tools/auth';
 import { ProfileModule } from '../src/profile/profile.module';
-import { isString } from '../src/errors/typeguards';
 
-import type { SignUpOK, SignInOK } from '../src/auth/auth.types';
 import type { ProfileRepresentation } from '../src/profile/profile.types';
-
 
 describe('Profile test', () => {
   const testEmail = getRandomEmail();
@@ -36,7 +34,14 @@ describe('Profile test', () => {
     app = moduleRef.createNestApplication();
     await app.init();
 
-    await signUpTool(app, testEmail, testPassword, testFirstName, testLastName, testAccountName);
+    await signUpTool(
+      app,
+      testEmail,
+      testPassword,
+      testFirstName,
+      testLastName,
+      testAccountName,
+    );
     jwtToken = await signInTool(app, testEmail, testPassword);
   });
 

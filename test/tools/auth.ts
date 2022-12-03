@@ -8,7 +8,6 @@ import { isString } from '../../src/errors/typeguards';
 
 import type { SignUpOK, SignInOK } from '../../src/auth/auth.types';
 
-
 export function getRandomEmail() {
   return [
     crypto.randomBytes(8).toString('hex'),
@@ -26,9 +25,13 @@ export function getRandomPassword() {
 }
 
 export async function signUpTool(
-  app:INestApplication, email:string, password:string, 
-  firstName='', lastName='', accountName=''
-):Promise<void>{
+  app: INestApplication,
+  email: string,
+  password: string,
+  firstName = '',
+  lastName = '',
+  accountName = '',
+): Promise<void> {
   const signUpQuery = gql`
     mutation {
       signUp(
@@ -42,11 +45,14 @@ export async function signUpTool(
 
   const httpServer = app.getHttpServer();
 
-  await request<{ singUp: SignUpOK }>(httpServer)
-    .query(signUpQuery);
+  await request<{ singUp: SignUpOK }>(httpServer).query(signUpQuery);
 }
 
-export async function signInTool(app:INestApplication, email:string, password:string):Promise<string> {
+export async function signInTool(
+  app: INestApplication,
+  email: string,
+  password: string,
+): Promise<string> {
   const signInQuery = gql`
     mutation {
       signIn(email: "${email}" password: "${password}") {
@@ -57,8 +63,9 @@ export async function signInTool(app:INestApplication, email:string, password:st
 
   const httpServer = app.getHttpServer();
 
-  const { data } = await request<{ signIn: SignInOK }>(httpServer)
-    .query(signInQuery);
+  const { data } = await request<{ signIn: SignInOK }>(httpServer).query(
+    signInQuery,
+  );
 
   const token = data?.signIn?.jwt_token;
 

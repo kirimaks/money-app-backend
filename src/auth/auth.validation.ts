@@ -51,7 +51,6 @@ export const signUpBodySchema = Zod.object({
   }),
 
   accountName: Zod.string().max(NAME_MAX_LENGTH).default(''),
-
 }).refine((data) => data.password === data.confirm, {
   message: "Passwords don't match",
   path: ['confirm'],

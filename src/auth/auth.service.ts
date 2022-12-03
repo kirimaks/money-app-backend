@@ -59,7 +59,6 @@ export class AuthService {
       }
 
       throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);
-
     } catch (error) {
       if (error instanceof AuthError) {
         throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);
