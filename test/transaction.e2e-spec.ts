@@ -112,6 +112,35 @@ describe('Transaction test', () => {
       } else {
         throw new Error('Received wrong error');
       }
+    });
+
+    test('Trying to get transaction from another account', async () => {
+      const email = getRandomEmail();
+      const password = getRandomPassword();
+
+      await signUpTool(app, email, password);
+      const jwtToken = await signInTool(app, email, password);
+
+      expect(transactionId).toBeTruthy();
+      expect(jwtToken).toBeTruthy();
+
+      const getTransactionQuery = gql`
+        query {
+          transaction(id: "${transactionId}") {
+            name amount timestamp id
+          }
+        }
+      `;
+      const { errors } = await request(app.getHttpServer())
+        .query(getTransactionQuery)
+        .set('Authorization', `Bearer ${jwtToken}`);
+
+      if (errors && errors.length > 0) {
+        const errorText = errors[0].message;
+        expect(errorText).toEqual(TRANSACTION_NOT_FOUND_ERROR);
+      } else {
+        throw new Error('Received wrong error');
+      }
 
     });
   });
@@ -140,6 +169,4 @@ describe('Transaction test', () => {
       }
     });
   });
-
-  // describe('Getting transaction from another account');
 });
