@@ -17,8 +17,10 @@ import {
 import { isString } from '../src/errors/typeguards';
 import { TransactionModule } from '../src/transaction/transaction.module';
 import { TRANSACTION_NOT_FOUND_ERROR, AUTHORIZATION_ERROR } from '../src/errors/constants';
+import { WRONG_ERROR_TEXT } from './constants';
 
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
+
 
 describe('Transaction test', () => {
   let app: INestApplication;
@@ -110,7 +112,7 @@ describe('Transaction test', () => {
         const errorText = errors[0].message;
         expect(errorText).toEqual(AUTHORIZATION_ERROR);
       } else {
-        throw new Error('Received wrong error');
+        throw new Error(WRONG_ERROR_TEXT);
       }
     });
 
@@ -139,7 +141,7 @@ describe('Transaction test', () => {
         const errorText = errors[0].message;
         expect(errorText).toEqual(TRANSACTION_NOT_FOUND_ERROR);
       } else {
-        throw new Error('Received wrong error');
+        throw new Error(WRONG_ERROR_TEXT);
       }
 
     });
@@ -165,7 +167,7 @@ describe('Transaction test', () => {
         expect(errorText).toEqual(TRANSACTION_NOT_FOUND_ERROR);
 
       } else {
-        throw new Error('Received wrong error');
+        throw new Error(WRONG_ERROR_TEXT);
       }
     });
   });
