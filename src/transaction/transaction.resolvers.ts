@@ -9,6 +9,7 @@ import {
 import {
   INTERNAL_SERVER_ERROR,
   TRANSACTION_NOT_FOUND_ERROR,
+  USER_NOT_FOUND_ERROR
 } from '../errors/constants';
 import { TransactionService } from './transaction.service';
 import { ZodPipe } from '../pipes/zod.pipe';
@@ -18,6 +19,7 @@ import {
 } from './transaction.validation';
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TransactionNotFoundError } from '../errors/transaction';
+import { UserNotFoundError } from '../errors/user';
 
 import type {
   TransactionRepresentation,
@@ -50,6 +52,10 @@ export class TransactionResolver {
         transactionId,
       );
     } catch (error) {
+      if (error instanceof TransactionNotFoundError) {
+        throw new NotFoundException(TRANSACTION_NOT_FOUND_ERROR);
+      }
+
       this.logger.error(error);
     }
 
@@ -69,8 +75,8 @@ export class TransactionResolver {
         createTransactionInput,
       );
     } catch (error) {
-      if (error instanceof TransactionNotFoundError) {
-        throw new NotFoundException(TRANSACTION_NOT_FOUND_ERROR);
+      if (error instanceof UserNotFoundError) {
+        throw new NotFoundException(USER_NOT_FOUND_ERROR);
       }
       this.logger.error(error);
     }

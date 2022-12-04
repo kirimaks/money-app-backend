@@ -1,7 +1,7 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
-import { UserNotFound } from '../errors/user'; // TODO: UserNotFoundError
+import { UserNotFoundError } from '../errors/user';
 import { TransactionNotFoundError } from '../errors/transaction';
 
 import type {
@@ -65,7 +65,7 @@ export class TransactionService {
       return transactionResponse(transaction);
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
-        throw new UserNotFound('User not found');
+        throw new UserNotFoundError('User not found');
       }
 
       this.logger.error(error);
@@ -95,6 +95,7 @@ export class TransactionService {
       });
 
       return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new TransactionNotFoundError('Transaction not found');

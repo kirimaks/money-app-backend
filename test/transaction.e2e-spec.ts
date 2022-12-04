@@ -16,6 +16,7 @@ import {
 } from './tools/auth';
 import { isString } from '../src/errors/typeguards';
 import { TransactionModule } from '../src/transaction/transaction.module';
+import { TRANSACTION_NOT_FOUND_ERROR } from '../src/errors/constants';
 
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
@@ -92,4 +93,32 @@ describe('Transaction test', () => {
       expect(data?.transaction.id).toEqual(transactionId);
     });
   });
+
+  describe('Getting missing transaction', () => {
+    test('Missing transaction', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+
+      const getTransactionQuery = gql`
+        query {
+          transaction(id: "1234") {
+            name amount timestamp id
+          }
+        }
+      `;
+      const { errors } = await request(app.getHttpServer())
+        .query(getTransactionQuery)
+        .set('Authorization', `Bearer ${jwtToken}`);
+
+      if (errors && errors.length > 0) {
+        const errorText = errors[0].message;
+        expect(errorText).toEqual(TRANSACTION_NOT_FOUND_ERROR);
+
+      } else {
+        throw new Error('Received wrong error');
+      }
+    });
+  });
+
+  // describe('Transaction auth', () => {});
+  // describe('Getting transaction from another account');
 });
