@@ -16,7 +16,7 @@ import {
 } from './tools/auth';
 import { isString } from '../src/errors/typeguards';
 import { TransactionModule } from '../src/transaction/transaction.module';
-import { TRANSACTION_NOT_FOUND_ERROR } from '../src/errors/constants';
+import { TRANSACTION_NOT_FOUND_ERROR, AUTHORIZATION_ERROR } from '../src/errors/constants';
 
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
@@ -92,6 +92,28 @@ describe('Transaction test', () => {
       expect(data?.transaction.timestamp).toEqual(transactionTime);
       expect(data?.transaction.id).toEqual(transactionId);
     });
+
+    test('Auth for transactions', async () => {
+      expect(transactionId).toBeTruthy();
+
+      const getTransactionQuery = gql`
+        query {
+          transaction(id: "${transactionId}") {
+            name amount timestamp id
+          }
+        }
+      `;
+      const { errors } = await request(app.getHttpServer())
+        .query(getTransactionQuery);
+
+      if (errors && errors.length > 0) {
+        const errorText = errors[0].message;
+        expect(errorText).toEqual(AUTHORIZATION_ERROR);
+      } else {
+        throw new Error('Received wrong error');
+      }
+
+    });
   });
 
   describe('Getting missing transaction', () => {
@@ -119,6 +141,5 @@ describe('Transaction test', () => {
     });
   });
 
-  // describe('Transaction auth', () => {});
   // describe('Getting transaction from another account');
 });
