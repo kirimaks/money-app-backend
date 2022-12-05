@@ -16,11 +16,13 @@ import {
 } from './tools/auth';
 import { isString } from '../src/errors/typeguards';
 import { TransactionModule } from '../src/transaction/transaction.module';
-import { TRANSACTION_NOT_FOUND_ERROR, AUTHORIZATION_ERROR } from '../src/errors/constants';
+import {
+  TRANSACTION_NOT_FOUND_ERROR,
+  AUTHORIZATION_ERROR,
+} from '../src/errors/constants';
 import { WRONG_ERROR_TEXT } from './constants';
 
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
-
 
 describe('Transaction test', () => {
   let app: INestApplication;
@@ -105,8 +107,9 @@ describe('Transaction test', () => {
           }
         }
       `;
-      const { errors } = await request(app.getHttpServer())
-        .query(getTransactionQuery);
+      const { errors } = await request(app.getHttpServer()).query(
+        getTransactionQuery,
+      );
 
       if (errors && errors.length > 0) {
         const errorText = errors[0].message;
@@ -143,7 +146,6 @@ describe('Transaction test', () => {
       } else {
         throw new Error(WRONG_ERROR_TEXT);
       }
-
     });
   });
 
@@ -166,7 +168,6 @@ describe('Transaction test', () => {
       if (errors && errors.length > 0) {
         const errorText = errors[0].message;
         expect(errorText).toEqual(TRANSACTION_NOT_FOUND_ERROR);
-
       } else {
         throw new Error(WRONG_ERROR_TEXT);
       }

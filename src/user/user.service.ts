@@ -19,11 +19,11 @@ export class UserService {
     });
   }
 
-  async getUser(userId:string): Promise<User> {
+  async getUser(userId: string): Promise<User> {
     return await this.prisma.user.findUniqueOrThrow({
       where: {
-        id: userId
-      }
+        id: userId,
+      },
     });
   }
 }

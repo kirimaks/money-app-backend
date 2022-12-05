@@ -9,7 +9,7 @@ import {
 import {
   INTERNAL_SERVER_ERROR,
   TRANSACTION_NOT_FOUND_ERROR,
-  USER_NOT_FOUND_ERROR
+  USER_NOT_FOUND_ERROR,
 } from '../errors/constants';
 import { TransactionService } from './transaction.service';
 import { ZodPipe } from '../pipes/zod.pipe';

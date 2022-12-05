@@ -23,13 +23,18 @@ import { WRONG_ERROR_TEXT } from './constants';
 
 import type { CategoryRepresentation } from '../src/category/category.types';
 
-
 describe('Category test', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AuthModule, GraphqlModule, TransactionModule, CategoryModule, UserModule]
+      imports: [
+        AuthModule,
+        GraphqlModule,
+        TransactionModule,
+        CategoryModule,
+        UserModule,
+      ],
     }).compile();
 
     app = moduleRef.createNestApplication();
@@ -40,7 +45,7 @@ describe('Category test', () => {
     const categoryName = crypto.randomBytes(8).toString('hex');
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
-    let categoryId:string;
+    let categoryId: string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -55,7 +60,9 @@ describe('Category test', () => {
           }
         }
       `;
-      const { data } = await request<{ createCategory: CategoryRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createCategory: CategoryRepresentation;
+      }>(app.getHttpServer())
         .query(newCategoryQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -65,7 +72,6 @@ describe('Category test', () => {
 
       if (data && isString(data?.createCategory.id)) {
         categoryId = data?.createCategory.id;
-
       } else {
         throw new Error('Missing category id');
       }
@@ -80,7 +86,9 @@ describe('Category test', () => {
           }
         }
       `;
-      const { data } = await request<{ category: CategoryRepresentation }>(app.getHttpServer())
+      const { data } = await request<{ category: CategoryRepresentation }>(
+        app.getHttpServer(),
+      )
         .query(getCategoryQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -101,12 +109,11 @@ describe('Category test', () => {
       `;
       const { errors } = await request(app.getHttpServer())
         .query(getCategoryQuery)
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${jwtToken}`);
 
       if (errors && errors.length > 0) {
         const errorText = errors[0].message;
         expect(errorText).toEqual(CATEGORY_NOT_FOUND_ERROR);
-
       } else {
         throw new Error(WRONG_ERROR_TEXT);
       }

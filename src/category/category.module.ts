@@ -4,7 +4,6 @@ import { CategoryService } from './category.service';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserService } from '../user/user.service';
 
-
 @Module({
   providers: [
     Logger,
@@ -12,6 +11,6 @@ import { UserService } from '../user/user.service';
     CategoryService,
     PrismaClientService,
     UserService,
-  ]
+  ],
 })
 export class CategoryModule {}

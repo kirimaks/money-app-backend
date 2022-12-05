@@ -1,7 +1,6 @@
 import { z as Zod } from 'zod';
 import { NAME_MAX_LENGTH } from '../errors/constants';
 
-
 export const getCategorySchema = Zod.object({
   id: Zod.string().cuid(),
 });
