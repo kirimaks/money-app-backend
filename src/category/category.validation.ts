@@ -11,3 +11,4 @@ export const createCategorySchema = Zod.object({
 
 export type GetCategoryInput = Zod.infer<typeof getCategorySchema>;
 export type CreateCategoryInput = Zod.infer<typeof createCategorySchema>;
+export type NewCategoryPayload = { accountId: string } & CreateCategoryInput;

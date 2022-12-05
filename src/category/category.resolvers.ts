@@ -41,7 +41,7 @@ export class CategoryResolver {
   ): Promise<CategoryRepresentation> {
     try {
       return await this.categoryService.getCategory(
-        user.id,
+        user.accountId,
         getCategoryInput.id,
       );
     } catch (error) {
@@ -62,7 +62,8 @@ export class CategoryResolver {
     @CurrentUser() user: UserInRequest,
   ): Promise<CategoryRepresentation> {
     try {
-      return await this.categoryService.createCategory(user.id, {
+      return await this.categoryService.createCategory({
+        accountId: user.accountId,
         name: createCategoryInput.name,
       });
     } catch (error) {

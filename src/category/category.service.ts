@@ -6,7 +6,7 @@ import { CategoryNotFoundError } from '../errors/category';
 import { UserService } from '../user/user.service';
 
 import type { CategoryRepresentation } from './category.types';
-import type { CreateCategoryInput } from './category.validation';
+import type { NewCategoryPayload } from './category.validation';
 
 @Injectable()
 export class CategoryService {
@@ -24,17 +24,15 @@ export class CategoryService {
     this.userService = userService;
   }
 
-  // TODO: send accountId, remove user query
   async getCategory(
-    userId: string,
+    accountId: string,
     categoryId: string,
   ): Promise<CategoryRepresentation> {
     try {
-      const user = await this.userService.getUser(userId);
       const category = await this.prisma.category.findUniqueOrThrow({
         where: {
           category_id_by_account: {
-            accountId: user.accountId,
+            accountId: accountId,
             id: categoryId,
           },
         },
@@ -44,6 +42,7 @@ export class CategoryService {
         name: category.name,
         id: category.id,
       };
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new CategoryNotFoundError('Category not found');
@@ -56,17 +55,15 @@ export class CategoryService {
   }
 
   async createCategory(
-    userId: string,
-    payload: CreateCategoryInput,
+    payload: NewCategoryPayload,
   ): Promise<CategoryRepresentation> {
     try {
-      const user = await this.userService.getUser(userId);
       const category = await this.prisma.category.create({
         data: {
           name: payload.name,
           account: {
             connect: {
-              id: user.accountId,
+              id: payload.accountId,
             },
           },
         },
