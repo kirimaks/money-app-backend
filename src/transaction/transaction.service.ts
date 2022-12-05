@@ -9,6 +9,7 @@ import type {
   TransactionRepresentation,
   CreateTransactionInput,
   Transaction,
+  NewTransactionData
 } from './transaction.types';
 
 function transactionResponse(
@@ -33,42 +34,35 @@ export class TransactionService {
     this.logger = logger;
   }
   async createTransaction(
-    userId: string,
-    createTransactionInput: CreateTransactionInput,
+    newTransactionData: NewTransactionData
   ): Promise<TransactionRepresentation> {
     try {
-      const user = await this.prisma.user.findUniqueOrThrow({
-        where: {
-          id: userId,
-        },
-      });
-
-      const timestamp = new Date(parseInt(createTransactionInput.timestamp));
-      const amount = Math.round(createTransactionInput.amount * 100);
+      const timestamp = new Date(parseInt(newTransactionData.timestamp));
+      const amount = Math.round(newTransactionData.amount * 100);
 
       const newTransactionPayload = {
         data: {
-          name: createTransactionInput.name,
+          name: newTransactionData.name,
           amount_cents: amount,
-          utc_timestamp: timestamp, // TODO: validate as Date
+          utc_timestamp: timestamp,
           account: {
             connect: {
-              id: user.accountId,
+              id: newTransactionData.accountId,
             },
           },
           user: {
             connect: {
-              id: user.id,
+              id: newTransactionData.userId,
             },
           },
           category: {}
         },
       };
 
-      if (isString(createTransactionInput.categoryId)) {
+      if (isString(newTransactionData.categoryId)) {
         newTransactionPayload.data.category = {
           connect: {
-            id: createTransactionInput.categoryId
+            id: newTransactionData.categoryId
           }
         };
       }
@@ -89,26 +83,21 @@ export class TransactionService {
   }
 
   async getTransaction(
-    userId: string,
+    accountId: string,
     transactionId: string,
   ): Promise<TransactionRepresentation> {
     try {
-      const user = await this.prisma.user.findUniqueOrThrow({
-        where: {
-          id: userId,
-        },
-      });
-
       const transaction = await this.prisma.transaction.findUniqueOrThrow({
         where: {
           transaction_id_by_account: {
-            accountId: user.accountId,
+            accountId: accountId,
             id: transactionId,
           },
         },
       });
 
       return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new TransactionNotFoundError('Transaction not found');

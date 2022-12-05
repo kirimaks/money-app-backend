@@ -26,3 +26,8 @@ export type Transaction = {
   utc_timestamp: Date;
   categoryId: null | string;
 };
+
+export type NewTransactionData = {
+  userId: string;
+  accountId: string;
+} & CreateTransactionInput;

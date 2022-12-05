@@ -48,8 +48,7 @@ export class TransactionResolver {
     try {
       const transactionId = getTransactionInput.id;
       return await this.transactionService.getTransaction(
-        user.id,
-        transactionId,
+        user.accountId, transactionId,
       );
     } catch (error) {
       if (error instanceof TransactionNotFoundError) {
@@ -70,10 +69,11 @@ export class TransactionResolver {
     @CurrentUser() user: UserInRequest,
   ): Promise<TransactionRepresentation> {
     try {
-      return await this.transactionService.createTransaction(
-        user.id,
-        createTransactionInput,
-      );
+      return await this.transactionService.createTransaction({
+        userId: user.id,
+        accountId: user.accountId,
+        ...createTransactionInput
+      });
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException(USER_NOT_FOUND_ERROR);
