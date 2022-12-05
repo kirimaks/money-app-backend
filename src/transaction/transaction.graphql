@@ -5,6 +5,7 @@ type TransactionResponse {
   amount: Float!
   timestamp: Timestamp!
   id: String!
+  categoryId: String
 }
 
 type Query {
@@ -12,5 +13,5 @@ type Query {
 }
 
 type Mutation {
-  createTransaction(name:String! amount:Float! timestamp:Timestamp!): TransactionResponse!
+  createTransaction(name:String! amount:Float! timestamp:Timestamp! categoryId:String): TransactionResponse!
 }

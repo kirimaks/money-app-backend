@@ -22,6 +22,7 @@ import { CATEGORY_NOT_FOUND_ERROR } from '../src/errors/constants';
 import { WRONG_ERROR_TEXT } from './constants';
 
 import type { CategoryRepresentation } from '../src/category/category.types';
+import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
 describe('Category test', () => {
   let app: INestApplication;
@@ -60,9 +61,7 @@ describe('Category test', () => {
           }
         }
       `;
-      const { data } = await request<{
-        createCategory: CategoryRepresentation;
-      }>(app.getHttpServer())
+      const { data } = await request<{ createCategory: CategoryRepresentation }>(app.getHttpServer())
         .query(newCategoryQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -116,6 +115,90 @@ describe('Category test', () => {
         expect(errorText).toEqual(CATEGORY_NOT_FOUND_ERROR);
       } else {
         throw new Error(WRONG_ERROR_TEXT);
+      }
+    });
+  });
+});
+
+describe('Create transaction with category', () => {
+  let app:INestApplication;
+
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        AuthModule,
+        GraphqlModule,
+        TransactionModule,
+        CategoryModule,
+        UserModule,
+      ],
+    }).compile();
+
+    app = moduleRef.createNestApplication();
+    await app.init();
+  });
+
+  describe('Create transaction with category', () => {
+    const categoryName = crypto.randomBytes(8).toString('hex');
+    const testEmail = getRandomEmail();
+    const testPassword = getRandomPassword();
+    let categoryId:string;
+
+    test('Sign up', async () => {
+      await signUpTool(app, testEmail, testPassword);
+    });
+
+    test('Create new category', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const newCategoryQuery = gql`
+        mutation {
+          createCategory(name: "${categoryName}") {
+            id
+          }
+        }
+      `;
+
+      const { data } = await request<{ createCategory: CategoryRepresentation }>(app.getHttpServer())
+        .query(newCategoryQuery)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
+
+      expect(data?.createCategory.id).toBeTruthy();
+      
+      if (data && isString(data?.createCategory.id)) {
+        categoryId = data?.createCategory.id;
+      } else {
+        throw new Error('Missing category id');
+      }
+    });
+
+    test('Create transaction with category', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const transactionName = crypto.randomBytes(8).toString('hex');
+      const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
+      const transactionTime = new Date().getTime();
+      let transactionId:string;
+
+      const newTransactionQuery = gql`
+        mutation {
+          createTransaction(
+            name: "${transactionName}" amount: ${transactionAmount} 
+            timestamp: "${transactionTime}" categoryId: "${categoryId}"
+          ) {
+            name amount timestamp id categoryId
+          }
+        }
+      `;
+
+      const { data } = await request<{ createTransaction: TransactionRepresentation }>(app.getHttpServer())
+        .query(newTransactionQuery)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
+
+      expect(data?.createTransaction.categoryId).toEqual(categoryId);
+
+      if (data && isString(data?.createTransaction.id)) {
+        transactionId = data?.createTransaction.id;
       }
     });
   });

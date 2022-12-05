@@ -5,12 +5,14 @@ export type TransactionRepresentation = {
   amount: number;
   timestamp: number;
   id: string;
+  categoryId: string;
 };
 
 export type CreateTransactionInput = {
   name: string;
   amount: number;
   timestamp: Timestamp;
+  categoryId?: string;
 };
 
 export type GetTransactionInput = {
@@ -22,4 +24,5 @@ export type Transaction = {
   name: string;
   amount_cents: bigint;
   utc_timestamp: Date;
+  categoryId: null | string;
 };

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
 import { TransactionNotFoundError } from '../errors/transaction';
+import { isString } from '../errors/typeguards';
 
 import type {
   TransactionRepresentation,
@@ -18,6 +19,7 @@ function transactionResponse(
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     timestamp: transaction.utc_timestamp.getTime(),
+    categoryId: transaction.categoryId ?? '',
   };
 }
 
@@ -44,7 +46,7 @@ export class TransactionService {
       const timestamp = new Date(parseInt(createTransactionInput.timestamp));
       const amount = Math.round(createTransactionInput.amount * 100);
 
-      const transaction = await this.prisma.transaction.create({
+      const newTransactionPayload = {
         data: {
           name: createTransactionInput.name,
           amount_cents: amount,
@@ -59,10 +61,22 @@ export class TransactionService {
               id: user.id,
             },
           },
+          category: {}
         },
-      });
+      };
+
+      if (isString(createTransactionInput.categoryId)) {
+        newTransactionPayload.data.category = {
+          connect: {
+            id: createTransactionInput.categoryId
+          }
+        };
+      }
+
+      const transaction = await this.prisma.transaction.create(newTransactionPayload);
 
       return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');
