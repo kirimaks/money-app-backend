@@ -51,7 +51,7 @@ export class AuthService {
       if (await this.validatePassword(user.passwordHash, signInBody.password)) {
         const payload: JWTSignPayload = {
           sub: {
-            email: user.email,
+            accountId: user.accountId,
             id: user.id,
           },
         };

@@ -17,8 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   validate(payload: JWTSignPayload): UserInRequest {
     return {
-      email: payload.sub.email,
       id: payload.sub.id,
+      accountId: payload.sub.accountId,
     };
   }
 }
