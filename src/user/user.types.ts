@@ -4,6 +4,7 @@ export type User = {
   passwordHash: string;
   firstName: string;
   lastName: string;
+  accountId: string;
 };
 
 export type UserRepresentation = Pick<User, 'email' | 'firstName' | 'lastName'>;

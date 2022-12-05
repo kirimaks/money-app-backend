@@ -5,6 +5,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ProfileModule } from '../profile/profile.module';
 import { AuthModule } from '../auth/auth.module';
 import { TransactionModule } from '../transaction/transaction.module';
+import { CategoryModule } from '../category/category.module';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { TransactionModule } from '../transaction/transaction.module';
       useFactory: () => ({
         debug: true,
         playground: true,
-        include: [ProfileModule, AuthModule, TransactionModule],
+        include: [ProfileModule, AuthModule, TransactionModule, CategoryModule],
         typePaths: ['./**/*.graphql'],
       }),
     }),

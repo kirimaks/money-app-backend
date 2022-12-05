@@ -63,6 +63,7 @@ export class TransactionService {
       });
 
       return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');

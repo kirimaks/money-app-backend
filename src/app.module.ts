@@ -8,6 +8,7 @@ import { GraphqlService } from './graphql/graphql.service';
 import { GraphqlModule } from './graphql/graphql.module';
 import { ProfileModule } from './profile/profile.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TransactionModule } from './transaction/transaction.module';
     GraphqlModule,
     ProfileModule,
     TransactionModule,
+    UserModule,
   ],
   providers: [PrismaClientService, GraphqlService],
 })

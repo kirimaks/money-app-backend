@@ -36,6 +36,7 @@ model Category {
   Transaction Transaction[]
 
   @@index([accountId])
+  @@unique(fields: [accountId, id], name: "category_id_by_account")
 }
 
 model Budget {

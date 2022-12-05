@@ -4,3 +4,4 @@ export const INVALID_TIMESTAMP = 'Invalid timestamp';
 export const TRANSACTION_NOT_FOUND_ERROR = 'Transaction not found';
 export const USER_NOT_FOUND_ERROR = 'User not found';
 export const AUTHORIZATION_ERROR = 'Unauthorized';
+export const CATEGORY_NOT_FOUND_ERROR = 'Category not found';

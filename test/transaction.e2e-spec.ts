@@ -148,12 +148,13 @@ describe('Transaction test', () => {
   });
 
   describe('Getting missing transaction', () => {
+    const missingId = crypto.randomBytes(16).toString('hex').slice(0, 25);
     test('Missing transaction', async () => {
       const jwtToken = await signInTool(app, testEmail, testPassword);
 
       const getTransactionQuery = gql`
         query {
-          transaction(id: "1234") {
+          transaction(id: "${missingId}") {
             name amount timestamp id
           }
         }
