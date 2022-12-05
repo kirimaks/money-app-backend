@@ -42,7 +42,6 @@ export class CategoryService {
         name: category.name,
         id: category.id,
       };
-
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new CategoryNotFoundError('Category not found');
