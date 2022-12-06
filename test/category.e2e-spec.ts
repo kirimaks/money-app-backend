@@ -142,7 +142,13 @@ describe('Create transaction with category', () => {
     const categoryName = crypto.randomBytes(8).toString('hex');
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
+
+    const transactionName = crypto.randomBytes(8).toString('hex');
+    const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
+    const transactionTime = new Date().getTime();
+
     let categoryId:string;
+    let transactionId:string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -174,11 +180,6 @@ describe('Create transaction with category', () => {
 
     test('Create transaction with category', async () => {
       const jwtToken = await signInTool(app, testEmail, testPassword);
-      const transactionName = crypto.randomBytes(8).toString('hex');
-      const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
-      const transactionTime = new Date().getTime();
-      let transactionId:string;
-
       const newTransactionQuery = gql`
         mutation {
           createTransaction(
@@ -200,6 +201,23 @@ describe('Create transaction with category', () => {
       if (data && isString(data?.createTransaction.id)) {
         transactionId = data?.createTransaction.id;
       }
+    });
+
+    test('Make sure transaction belongs to the category', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const getTransactionQuery = gql`
+        query {
+          transaction(id: "${transactionId}") {
+            categoryId
+          }
+        }
+      `;
+      const { data } = await request<{ transaction: TransactionRepresentation }>(app.getHttpServer())
+        .query(getTransactionQuery)
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expectNoErrors();
+
+      expect(data?.transaction.categoryId).toEqual(categoryId);
     });
   });
 });
