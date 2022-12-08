@@ -13,6 +13,8 @@ model Account {
   users       User[]
   Category    Category[]
   Transaction Transaction[]
+  TagGroup    TagGroup[]
+  Tag         Tag[]
 }
 
 model User {
@@ -35,8 +37,8 @@ model Category {
 
   Transaction Transaction[]
 
-  @@index([accountId])
   @@unique(fields: [accountId, id], name: "category_id_by_account")
+  @@index([accountId])
 }
 
 model Budget {
@@ -76,4 +78,24 @@ model Transaction {
   @@index([accountId, categoryId, utc_timestamp])
   @@index([accountId, utc_timestamp])
   @@index([accountId, budgetId, utc_timestamp])
+}
+
+model TagGroup {
+  id   String @id @default(cuid())
+  name String
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  Tag       Tag[]
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String
+
+  tagGroupId String
+  tagGroup   TagGroup @relation(fields: [tagGroupId], references: [id], onDelete: Cascade)
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
