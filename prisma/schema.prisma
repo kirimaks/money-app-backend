@@ -87,6 +87,8 @@ model TagGroup {
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   Tag       Tag[]
+
+  @@unique(fields: [accountId, name], name: "group_name_by_account")
 }
 
 model Tag {
@@ -98,4 +100,6 @@ model Tag {
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [tagGroupId, name], name: "tag_name_by_group_id")
 }
