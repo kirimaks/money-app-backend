@@ -1,0 +1,8 @@
+type TagGroupResponse {
+  id: String!
+  name: String!
+}
+
+type Mutation {
+  createTagGroup(name: String!): TagGroupResponse!
+}

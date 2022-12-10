@@ -9,6 +9,7 @@ import { AuthModule } from '../src/auth/auth.module';
 import { GraphqlModule } from '../src/graphql/graphql.module';
 import { TransactionModule } from '../src/transaction/transaction.module';
 import { UserModule } from '../src/user/user.module';
+import { TagsModule } from '../src/tags/tags.module';
 
 import { getRandomEmail, getRandomPassword, signUpTool, signInTool, } from './tools/auth';
 import { getRandomString } from './tools/helpers';
@@ -27,6 +28,7 @@ describe('Testing tags', () => {
         GraphqlModule,
         TransactionModule,
         UserModule,
+        TagsModule,
       ],
     }).compile();
 

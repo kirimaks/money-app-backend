@@ -12,16 +12,13 @@ import type { NewCategoryPayload } from './category.validation';
 export class CategoryService {
   private readonly prisma: PrismaClientService;
   private readonly logger: Logger;
-  private readonly userService: UserService;
 
   constructor(
     prisma: PrismaClientService,
     logger: Logger,
-    userService: UserService,
   ) {
     this.prisma = prisma;
     this.logger = logger;
-    this.userService = userService;
   }
 
   async getCategory(
