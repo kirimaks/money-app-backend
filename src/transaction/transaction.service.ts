@@ -14,13 +14,19 @@ import type {
 function transactionResponse(
   transaction: Transaction,
 ): TransactionRepresentation {
+
   return {
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     timestamp: transaction.utc_timestamp.getTime(),
-    categoryId: transaction.categoryId ?? '',
+    categoryId: transaction.categoryId ?? '', // TODO: remove
+    tagIds: transaction.TransactionTags.map(tag => tag.tagId),
   };
+}
+
+function getNewTagsQuery(tags:string[]) {
+  return tags.map(tagId => { return { tagId: tagId } });
 }
 
 @Injectable()
@@ -35,6 +41,7 @@ export class TransactionService {
   async createTransaction(
     newTransactionData: NewTransactionData,
   ): Promise<TransactionRepresentation> {
+
     try {
       const timestamp = new Date(parseInt(newTransactionData.timestamp));
       const amount = Math.round(newTransactionData.amount * 100);
@@ -54,16 +61,30 @@ export class TransactionService {
               id: newTransactionData.userId,
             },
           },
-          category: {},
+          category: {}, // TODO: remove
+          TransactionTags: {},
+
         },
+        include: {
+          TransactionTags: true
+        }
       };
 
+      // TODO: remove
       if (isString(newTransactionData.categoryId)) {
         newTransactionPayload.data.category = {
           connect: {
             id: newTransactionData.categoryId,
           },
         };
+      }
+
+      if (newTransactionData.tagIds && newTransactionData.tagIds.length > 0) {
+        const newTagsQuery = getNewTagsQuery(newTransactionData.tagIds);
+
+        newTransactionPayload.data.TransactionTags = {
+          create: newTagsQuery,
+        }
       }
 
       const transaction = await this.prisma.transaction.create(
@@ -94,6 +115,9 @@ export class TransactionService {
             id: transactionId,
           },
         },
+        include: {
+          TransactionTags: true
+        }
       });
 
       return transactionResponse(transaction);

@@ -1,3 +1,5 @@
+import type { TransactionTags } from '../tags/tags.types';
+
 type Timestamp = string;
 
 export type TransactionRepresentation = {
@@ -6,13 +8,15 @@ export type TransactionRepresentation = {
   timestamp: number;
   id: string;
   categoryId: string;
+  tagIds: string[];
 };
 
 export type CreateTransactionInput = {
   name: string;
   amount: number;
   timestamp: Timestamp;
-  categoryId?: string;
+  categoryId?: string; // TODO: remove
+  tagIds?: string[];
 };
 
 export type GetTransactionInput = {
@@ -25,6 +29,7 @@ export type Transaction = {
   amount_cents: bigint;
   utc_timestamp: Date;
   categoryId: null | string;
+  TransactionTags: TransactionTags[];
 };
 
 export type NewTransactionData = {

@@ -18,8 +18,10 @@ import {
 import { getRandomString } from './tools/helpers';
 import { isString } from '../src/errors/typeguards';
 import { getAuthHeader } from './tools/auth';
+import { getTransactionTime, getTransactionAmount } from './tools/transactions';
 
 import type { TagRepresentation, TagGroupRepresentation } from '../src/tags/tags.types';
+import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
 
 
@@ -44,9 +46,13 @@ describe('Testing tags', () => {
   describe('Create tag group and tag', () => {
     const tagGroupName = getRandomString(8);
     const tagName = getRandomString(8);
+
+
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
+    
     let tagGroupId: string;
+    let tagId:string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -97,6 +103,39 @@ describe('Testing tags', () => {
       expect(data?.createTag.name).toEqual(tagName);
       expect(data?.createTag.tagGroupId).toEqual(tagGroupId);
       expect(data?.createTag.id).toBeTruthy();
+
+      if (data && isString(data?.createTag.id)) {
+        tagId = data?.createTag.id;
+      } else {
+        throw new Error('Missing tag id');
+      }
+    });
+
+    test('Crate transaction with tag', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+
+      const transactionName = getRandomString(8);
+      const transactionTime = getTransactionTime();
+      const transactionAmount = getTransactionAmount();
+
+      const newTransactionQuery = gql`
+        mutation {
+          createTransaction(
+            name: "${transactionName}" amount: ${transactionAmount} timestamp: "${transactionTime}" 
+            tagIds: ["${tagId}"]
+          ) {
+            id name tagIds
+          }
+        }
+      `;
+
+      const { data } = await request<{ createTransaction: TransactionRepresentation}>(app.getHttpServer())
+        .query(newTransactionQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      expect(data?.createTransaction.name).toEqual(transactionName);
+      expect(data?.createTransaction.tagIds).toContain(tagId);
     });
   });
 });

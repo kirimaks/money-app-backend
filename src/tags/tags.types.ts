@@ -19,3 +19,7 @@ export type NewTagPayload = {
   accountId: string;
   tagGroupId: string;
 }
+
+export type TransactionTags = {
+  tagId: string;
+}

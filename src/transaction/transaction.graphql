@@ -1,11 +1,12 @@
 scalar Timestamp
 
 type TransactionResponse { 
+  id: String!
   name: String!
   amount: Float!
   timestamp: Timestamp!
-  id: String!
   categoryId: String
+  tagIds: [String]
 }
 
 type Query {
@@ -13,5 +14,7 @@ type Query {
 }
 
 type Mutation {
-  createTransaction(name:String! amount:Float! timestamp:Timestamp! categoryId:String): TransactionResponse!
+  createTransaction(
+    name:String! amount:Float! timestamp:Timestamp! categoryId:String tagIds: [String]
+  ): TransactionResponse!
 }
