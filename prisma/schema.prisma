@@ -71,8 +71,9 @@ model Transaction {
   budgetId String?
   budget   Budget? @relation(fields: [budgetId], references: [id], onDelete: SetNull)
 
-  sourceId String?
-  source   MoneySource? @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  sourceId        String?
+  source          MoneySource?      @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  TransactionTags TransactionTags[]
 
   @@unique(fields: [accountId, id], name: "transaction_id_by_account")
   @@index([accountId, categoryId, utc_timestamp])
@@ -98,8 +99,19 @@ model Tag {
   tagGroupId String
   tagGroup   TagGroup @relation(fields: [tagGroupId], references: [id], onDelete: Cascade)
 
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId       String
+  account         Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  TransactionTags TransactionTags[]
 
   @@unique(fields: [tagGroupId, name], name: "tag_name_by_group_id")
+}
+
+model TransactionTags {
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  tagId String
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique(fields: [transactionId, tagId], name: "transaction_id_by_tag")
 }
