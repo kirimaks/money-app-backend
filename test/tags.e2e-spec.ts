@@ -19,7 +19,7 @@ import { getRandomString } from './tools/helpers';
 import { isString } from '../src/errors/typeguards';
 import { getAuthHeader } from './tools/auth';
 
-import type { TagGroupRepresentation } from '../src/tags/tags.types';
+import type { TagRepresentation, TagGroupRepresentation } from '../src/tags/tags.types';
 
 
 
@@ -43,6 +43,7 @@ describe('Testing tags', () => {
 
   describe('Create tag group and tag', () => {
     const tagGroupName = getRandomString(8);
+    const tagName = getRandomString(8);
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
     let tagGroupId: string;
@@ -76,6 +77,26 @@ describe('Testing tags', () => {
       } else {
         throw new Error('Missing tag group id');
       }
+    });
+
+    test('Create tag', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const newTagQuery = gql`
+        mutation {
+          createTag(name: "${tagName}" tagGroupId: "${tagGroupId}") {
+            id name tagGroupId
+          }
+        }
+      `;
+
+      const { data } = await request<{ createTag: TagRepresentation }>(app.getHttpServer())
+        .query(newTagQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      expect(data?.createTag.name).toEqual(tagName);
+      expect(data?.createTag.tagGroupId).toEqual(tagGroupId);
+      expect(data?.createTag.id).toBeTruthy();
     });
   });
 });

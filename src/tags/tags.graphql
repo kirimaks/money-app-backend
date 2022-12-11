@@ -3,6 +3,16 @@ type TagGroupResponse {
   name: String!
 }
 
+type TagResponse {
+  id: String!
+  name: String!
+  tagGroupId: String!
+}
+
 type Mutation {
   createTagGroup(name: String!): TagGroupResponse!
+}
+
+type Mutation {
+  createTag(name: String! tagGroupId: String!): TagResponse!
 }
