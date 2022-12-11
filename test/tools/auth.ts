@@ -73,5 +73,9 @@ export async function signInTool(
     return token;
   }
 
-  throw new Error('Sign in failed, empty token');
+  throw new Error(`Sign in failed, empty token: ${typeof token}`);
+}
+
+export function getAuthHeader(jwtToken:string):[string, string] {
+  return ['Authorization', `Bearer ${jwtToken}`];
 }

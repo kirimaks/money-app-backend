@@ -17,8 +17,11 @@ import {
 } from './tools/auth';
 import { getRandomString } from './tools/helpers';
 import { isString } from '../src/errors/typeguards';
+import { getAuthHeader } from './tools/auth';
 
 import type { TagGroupRepresentation } from '../src/tags/tags.types';
+
+
 
 describe('Testing tags', () => {
   let app: INestApplication;
@@ -62,7 +65,7 @@ describe('Testing tags', () => {
         createTagGroup: TagGroupRepresentation;
       }>(app.getHttpServer())
         .query(newTagGroupQuery)
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set(...getAuthHeader(jwtToken))
         .expectNoErrors();
 
       expect(data?.createTagGroup.name).toEqual(tagGroupName);
