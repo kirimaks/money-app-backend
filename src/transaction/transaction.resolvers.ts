@@ -48,7 +48,8 @@ export class TransactionResolver {
     try {
       const transactionId = getTransactionInput.id;
       return await this.transactionService.getTransaction(
-        user.accountId, transactionId,
+        user.accountId,
+        transactionId,
       );
     } catch (error) {
       if (error instanceof TransactionNotFoundError) {
@@ -72,7 +73,7 @@ export class TransactionResolver {
       return await this.transactionService.createTransaction({
         userId: user.id,
         accountId: user.accountId,
-        ...createTransactionInput
+        ...createTransactionInput,
       });
     } catch (error) {
       if (error instanceof UserNotFoundError) {

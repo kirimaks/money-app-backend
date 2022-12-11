@@ -61,7 +61,9 @@ describe('Category test', () => {
           }
         }
       `;
-      const { data } = await request<{ createCategory: CategoryRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createCategory: CategoryRepresentation;
+      }>(app.getHttpServer())
         .query(newCategoryQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -121,7 +123,7 @@ describe('Category test', () => {
 });
 
 describe('Create transaction with category', () => {
-  let app:INestApplication;
+  let app: INestApplication;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -147,8 +149,8 @@ describe('Create transaction with category', () => {
     const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
     const transactionTime = new Date().getTime();
 
-    let categoryId:string;
-    let transactionId:string;
+    let categoryId: string;
+    let transactionId: string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -164,13 +166,15 @@ describe('Create transaction with category', () => {
         }
       `;
 
-      const { data } = await request<{ createCategory: CategoryRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createCategory: CategoryRepresentation;
+      }>(app.getHttpServer())
         .query(newCategoryQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
 
       expect(data?.createCategory.id).toBeTruthy();
-      
+
       if (data && isString(data?.createCategory.id)) {
         categoryId = data?.createCategory.id;
       } else {
@@ -191,7 +195,9 @@ describe('Create transaction with category', () => {
         }
       `;
 
-      const { data } = await request<{ createTransaction: TransactionRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createTransaction: TransactionRepresentation;
+      }>(app.getHttpServer())
         .query(newTransactionQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -212,7 +218,9 @@ describe('Create transaction with category', () => {
           }
         }
       `;
-      const { data } = await request<{ transaction: TransactionRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        transaction: TransactionRepresentation;
+      }>(app.getHttpServer())
         .query(getTransactionQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();

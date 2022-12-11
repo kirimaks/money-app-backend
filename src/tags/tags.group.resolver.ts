@@ -1,4 +1,8 @@
-import { Logger, UseGuards, InternalServerErrorException } from '@nestjs/common';
+import {
+  Logger,
+  UseGuards,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
@@ -11,13 +15,12 @@ import type { UserInRequest } from '../user/user.types';
 import type { TagGroupRepresentation } from './tags.types';
 import type { CreateTagGroupInput } from './tags.validation';
 
-
 @Resolver('TagGroup')
 export class TagGroupResolver {
   logger: Logger;
   tagsService: TagsService;
 
-  constructor(logger:Logger, tagsService:TagsService) {
+  constructor(logger: Logger, tagsService: TagsService) {
     this.logger = logger;
     this.tagsService = tagsService;
   }
@@ -28,13 +31,13 @@ export class TagGroupResolver {
     @Args(new ZodPipe(createTagGroupSchema))
     createTagGroupInput: CreateTagGroupInput,
     @CurrentUser() user: UserInRequest,
-  ):Promise<TagGroupRepresentation> {
+  ): Promise<TagGroupRepresentation> {
     try {
       return await this.tagsService.createTagGroup({
         name: createTagGroupInput.name,
         accountId: user.accountId,
       });
-    } catch(error) {
+    } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
     }

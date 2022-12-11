@@ -7,9 +7,8 @@ import { isString } from '../errors/typeguards';
 
 import type {
   TransactionRepresentation,
-  CreateTransactionInput,
   Transaction,
-  NewTransactionData
+  NewTransactionData,
 } from './transaction.types';
 
 function transactionResponse(
@@ -34,7 +33,7 @@ export class TransactionService {
     this.logger = logger;
   }
   async createTransaction(
-    newTransactionData: NewTransactionData
+    newTransactionData: NewTransactionData,
   ): Promise<TransactionRepresentation> {
     try {
       const timestamp = new Date(parseInt(newTransactionData.timestamp));
@@ -55,22 +54,23 @@ export class TransactionService {
               id: newTransactionData.userId,
             },
           },
-          category: {}
+          category: {},
         },
       };
 
       if (isString(newTransactionData.categoryId)) {
         newTransactionPayload.data.category = {
           connect: {
-            id: newTransactionData.categoryId
-          }
+            id: newTransactionData.categoryId,
+          },
         };
       }
 
-      const transaction = await this.prisma.transaction.create(newTransactionPayload);
+      const transaction = await this.prisma.transaction.create(
+        newTransactionPayload,
+      );
 
       return transactionResponse(transaction);
-
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');
@@ -97,7 +97,6 @@ export class TransactionService {
       });
 
       return transactionResponse(transaction);
-
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new TransactionNotFoundError('Transaction not found');

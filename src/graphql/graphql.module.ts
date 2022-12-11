@@ -15,7 +15,13 @@ import { TagsModule } from '../tags/tags.module';
       useFactory: () => ({
         debug: true,
         playground: true,
-        include: [ProfileModule, AuthModule, TransactionModule, CategoryModule, TagsModule],
+        include: [
+          ProfileModule,
+          AuthModule,
+          TransactionModule,
+          CategoryModule,
+          TagsModule,
+        ],
         typePaths: ['./**/*.graphql'],
       }),
     }),

@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { CategoryNotFoundError } from '../errors/category';
-import { UserService } from '../user/user.service';
 
 import type { CategoryRepresentation } from './category.types';
 import type { NewCategoryPayload } from './category.validation';
@@ -13,10 +12,7 @@ export class CategoryService {
   private readonly prisma: PrismaClientService;
   private readonly logger: Logger;
 
-  constructor(
-    prisma: PrismaClientService,
-    logger: Logger,
-  ) {
+  constructor(prisma: PrismaClientService, logger: Logger) {
     this.prisma = prisma;
     this.logger = logger;
   }

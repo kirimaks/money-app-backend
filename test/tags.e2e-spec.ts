@@ -1,5 +1,3 @@
-
-
 import gql from 'graphql-tag';
 import request from 'supertest-graphql';
 import { Test } from '@nestjs/testing';
@@ -11,12 +9,16 @@ import { TransactionModule } from '../src/transaction/transaction.module';
 import { UserModule } from '../src/user/user.module';
 import { TagsModule } from '../src/tags/tags.module';
 
-import { getRandomEmail, getRandomPassword, signUpTool, signInTool, } from './tools/auth';
+import {
+  getRandomEmail,
+  getRandomPassword,
+  signUpTool,
+  signInTool,
+} from './tools/auth';
 import { getRandomString } from './tools/helpers';
 import { isString } from '../src/errors/typeguards';
 
 import type { TagGroupRepresentation } from '../src/tags/tags.types';
-
 
 describe('Testing tags', () => {
   let app: INestApplication;
@@ -40,7 +42,7 @@ describe('Testing tags', () => {
     const tagGroupName = getRandomString(8);
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
-    let tagGroupId:string;
+    let tagGroupId: string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -56,7 +58,9 @@ describe('Testing tags', () => {
         }
       `;
 
-      const { data } = await request<{ createTagGroup: TagGroupRepresentation }>(app.getHttpServer())
+      const { data } = await request<{
+        createTagGroup: TagGroupRepresentation;
+      }>(app.getHttpServer())
         .query(newTagGroupQuery)
         .set('Authorization', `Bearer ${jwtToken}`)
         .expectNoErrors();
@@ -66,11 +70,9 @@ describe('Testing tags', () => {
 
       if (data && isString(data?.createTagGroup.id)) {
         tagGroupId = data?.createTagGroup.id;
-
       } else {
         throw new Error('Missing tag group id');
       }
-
     });
   });
 });

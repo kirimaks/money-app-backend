@@ -6,6 +6,12 @@ import { TagGroupResolver } from './tags.group.resolver';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 
 @Module({
-  providers: [Logger, PrismaClientService, TagsResolver, TagsService, TagGroupResolver]
+  providers: [
+    Logger,
+    PrismaClientService,
+    TagsResolver,
+    TagsService,
+    TagGroupResolver,
+  ],
 })
 export class TagsModule {}
