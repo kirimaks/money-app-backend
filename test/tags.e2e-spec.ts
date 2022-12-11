@@ -19,10 +19,12 @@ import { getRandomString } from './tools/helpers';
 import { isString } from '../src/errors/typeguards';
 import { getAuthHeader } from './tools/auth';
 import { getTransactionTime, getTransactionAmount } from './tools/transactions';
+import { createTransaction } from './tools/transactions';
 
-import type { TagRepresentation, TagGroupRepresentation } from '../src/tags/tags.types';
-import type { TransactionRepresentation } from '../src/transaction/transaction.types';
-
+import type {
+  TagRepresentation,
+  TagGroupRepresentation,
+} from '../src/tags/tags.types';
 
 
 describe('Testing tags', () => {
@@ -47,12 +49,11 @@ describe('Testing tags', () => {
     const tagGroupName = getRandomString(8);
     const tagName = getRandomString(8);
 
-
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
-    
+
     let tagGroupId: string;
-    let tagId:string;
+    let tagId: string;
 
     test('Sign up', async () => {
       await signUpTool(app, testEmail, testPassword);
@@ -95,7 +96,9 @@ describe('Testing tags', () => {
         }
       `;
 
-      const { data } = await request<{ createTag: TagRepresentation }>(app.getHttpServer())
+      const { data } = await request<{ createTag: TagRepresentation }>(
+        app.getHttpServer(),
+      )
         .query(newTagQuery)
         .set(...getAuthHeader(jwtToken))
         .expectNoErrors();
@@ -118,24 +121,17 @@ describe('Testing tags', () => {
       const transactionTime = getTransactionTime();
       const transactionAmount = getTransactionAmount();
 
-      const newTransactionQuery = gql`
-        mutation {
-          createTransaction(
-            name: "${transactionName}" amount: ${transactionAmount} timestamp: "${transactionTime}" 
-            tagIds: ["${tagId}"]
-          ) {
-            id name tagIds
-          }
-        }
-      `;
+      const transaction = await createTransaction(
+        app,
+        jwtToken,
+        transactionName,
+        transactionTime,
+        transactionAmount,
+        [tagId],
+      );
 
-      const { data } = await request<{ createTransaction: TransactionRepresentation}>(app.getHttpServer())
-        .query(newTransactionQuery)
-        .set(...getAuthHeader(jwtToken))
-        .expectNoErrors();
-
-      expect(data?.createTransaction.name).toEqual(transactionName);
-      expect(data?.createTransaction.tagIds).toContain(tagId);
+      expect(transaction.name).toEqual(transactionName);
+      expect(transaction.tagIds).toContain(tagId);
     });
   });
 });

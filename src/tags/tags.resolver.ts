@@ -1,4 +1,8 @@
-import { Logger, UseGuards, InternalServerErrorException } from '@nestjs/common';
+import {
+  Logger,
+  UseGuards,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
@@ -26,15 +30,15 @@ export class TagsResolver {
   async createTag(
     @Args(new ZodPipe(createTagSchema))
     createTagInput: CreateTagInput,
-    @CurrentUser() user: UserInRequest
-  ):Promise<TagRepresentation> {
+    @CurrentUser() user: UserInRequest,
+  ): Promise<TagRepresentation> {
     try {
       return await this.tagsService.createTag({
         name: createTagInput.name,
         tagGroupId: createTagInput.tagGroupId,
         accountId: user.accountId,
       });
-    } catch(error) {
+    } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
     }

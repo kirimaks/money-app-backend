@@ -2,7 +2,12 @@ import { Logger, Injectable } from '@nestjs/common';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 
-import type { TagGroupRepresentation, NewTagGroupPayload, NewTagPayload, TagRepresentation } from './tags.types';
+import type {
+  TagGroupRepresentation,
+  NewTagGroupPayload,
+  NewTagPayload,
+  TagRepresentation,
+} from './tags.types';
 
 @Injectable()
 export class TagsService {
@@ -39,9 +44,7 @@ export class TagsService {
     }
   }
 
-  async createTag(
-    payload: NewTagPayload
-  ): Promise<TagRepresentation> {
+  async createTag(payload: NewTagPayload): Promise<TagRepresentation> {
     try {
       const tag = await this.prisma.tag.create({
         data: {
@@ -49,14 +52,14 @@ export class TagsService {
           account: {
             connect: {
               id: payload.accountId,
-            }
+            },
           },
           tagGroup: {
             connect: {
               id: payload.tagGroupId,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return {
@@ -64,8 +67,7 @@ export class TagsService {
         id: tag.id,
         tagGroupId: tag.tagGroupId,
       };
-
-    } catch(error) {
+    } catch (error) {
       this.logger.error(error);
       throw error;
     }

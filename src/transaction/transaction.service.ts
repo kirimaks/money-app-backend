@@ -14,19 +14,20 @@ import type {
 function transactionResponse(
   transaction: Transaction,
 ): TransactionRepresentation {
-
   return {
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     timestamp: transaction.utc_timestamp.getTime(),
     categoryId: transaction.categoryId ?? '', // TODO: remove
-    tagIds: transaction.TransactionTags.map(tag => tag.tagId),
+    tagIds: transaction.TransactionTags.map((tag) => tag.tagId),
   };
 }
 
-function getNewTagsQuery(tags:string[]) {
-  return tags.map(tagId => { return { tagId: tagId } });
+function getNewTagsQuery(tags: string[]) {
+  return tags.map((tagId) => {
+    return { tagId: tagId };
+  });
 }
 
 @Injectable()
@@ -41,7 +42,6 @@ export class TransactionService {
   async createTransaction(
     newTransactionData: NewTransactionData,
   ): Promise<TransactionRepresentation> {
-
     try {
       const timestamp = new Date(parseInt(newTransactionData.timestamp));
       const amount = Math.round(newTransactionData.amount * 100);
@@ -63,11 +63,10 @@ export class TransactionService {
           },
           category: {}, // TODO: remove
           TransactionTags: {},
-
         },
         include: {
-          TransactionTags: true
-        }
+          TransactionTags: true,
+        },
       };
 
       // TODO: remove
@@ -84,7 +83,7 @@ export class TransactionService {
 
         newTransactionPayload.data.TransactionTags = {
           create: newTagsQuery,
-        }
+        };
       }
 
       const transaction = await this.prisma.transaction.create(
@@ -116,8 +115,8 @@ export class TransactionService {
           },
         },
         include: {
-          TransactionTags: true
-        }
+          TransactionTags: true,
+        },
       });
 
       return transactionResponse(transaction);

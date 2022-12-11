@@ -18,8 +18,8 @@ export type NewTagPayload = {
   name: string;
   accountId: string;
   tagGroupId: string;
-}
+};
 
 export type TransactionTags = {
   tagId: string;
-}
+};
