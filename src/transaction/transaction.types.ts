@@ -1,4 +1,5 @@
 import type { TransactionTags } from '../tags/tags.types';
+import type { UpdateTransactionInput } from './transaction.validation';
 
 type Timestamp = string;
 
@@ -11,6 +12,7 @@ export type TransactionRepresentation = {
   tagIds: string[];
 };
 
+// TODO: infer from Zod
 export type CreateTransactionInput = {
   name: string;
   amount: number;
@@ -36,3 +38,7 @@ export type NewTransactionData = {
   userId: string;
   accountId: string;
 } & CreateTransactionInput;
+
+export type UpdateTransactionData = {
+  accountId: string;
+} & UpdateTransactionInput;

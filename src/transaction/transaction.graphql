@@ -17,4 +17,6 @@ type Mutation {
   createTransaction(
     name:String! amount:Float! timestamp:Timestamp! categoryId:String tagIds: [String]
   ): TransactionResponse!
+
+  updateTransaction( transactionId: String!  tagIds: [String]): TransactionResponse!
 }

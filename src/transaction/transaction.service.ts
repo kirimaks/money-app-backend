@@ -9,6 +9,7 @@ import type {
   TransactionRepresentation,
   Transaction,
   NewTransactionData,
+  UpdateTransactionData,
 } from './transaction.types';
 
 function transactionResponse(
@@ -125,6 +126,46 @@ export class TransactionService {
         throw new TransactionNotFoundError('Transaction not found');
       }
 
+      this.logger.error(error);
+
+      throw error;
+    }
+  }
+
+  async updateTransaction(
+    updateTransactionData: UpdateTransactionData,
+  ): Promise<TransactionRepresentation> {
+    try {
+      const updateQuery = {
+        where: {
+          transaction_id_by_account: {
+            accountId: updateTransactionData.accountId,
+            id: updateTransactionData.transactionId,
+          },
+        },
+        data: {},
+        include: {
+          TransactionTags: true,
+        },
+      };
+
+      if (
+        updateTransactionData.tagIds &&
+        updateTransactionData.tagIds.length > 0
+      ) {
+        const newTagsQuery = getNewTagsQuery(updateTransactionData.tagIds);
+
+        updateQuery.data = {
+          TransactionTags: {
+            create: newTagsQuery,
+          },
+        };
+      }
+
+      const transaction = await this.prisma.transaction.update(updateQuery);
+
+      return transactionResponse(transaction);
+    } catch (error) {
       this.logger.error(error);
 
       throw error;

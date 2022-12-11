@@ -15,3 +15,10 @@ export const createTransactionSchema = Zod.object({
 export const getTransactionSchema = Zod.object({
   id: Zod.string(),
 });
+
+export const updateTransactionSchema = Zod.object({
+  transactionId: Zod.string(),
+  tagIds: Zod.optional(Zod.array(Zod.string())),
+});
+
+export type UpdateTransactionInput = Zod.infer<typeof updateTransactionSchema>;

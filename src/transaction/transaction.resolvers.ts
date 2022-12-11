@@ -16,6 +16,7 @@ import { ZodPipe } from '../pipes/zod.pipe';
 import {
   createTransactionSchema,
   getTransactionSchema,
+  updateTransactionSchema,
 } from './transaction.validation';
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TransactionNotFoundError } from '../errors/transaction';
@@ -27,6 +28,7 @@ import type {
   GetTransactionInput,
 } from './transaction.types';
 import type { UserInRequest } from '../user/user.types';
+import type { UpdateTransactionInput } from './transaction.validation';
 
 @Resolver('Transaction')
 export class TransactionResolver {
@@ -78,6 +80,28 @@ export class TransactionResolver {
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException(USER_NOT_FOUND_ERROR);
+      }
+      this.logger.error(error);
+    }
+
+    throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+  }
+
+  @Mutation()
+  @UseGuards(GQLJwtAuthGuard)
+  async updateTransaction(
+    @Args(new ZodPipe(updateTransactionSchema))
+    updateTransactionInput: UpdateTransactionInput,
+    @CurrentUser() user: UserInRequest,
+  ): Promise<TransactionRepresentation> {
+    try {
+      return await this.transactionService.updateTransaction({
+        accountId: user.accountId,
+        ...updateTransactionInput,
+      });
+    } catch (error) {
+      if (error instanceof TransactionNotFoundError) {
+        throw new NotFoundException(TRANSACTION_NOT_FOUND_ERROR);
       }
       this.logger.error(error);
     }
