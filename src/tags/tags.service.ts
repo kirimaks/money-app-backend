@@ -1,12 +1,14 @@
 import { Logger, Injectable } from '@nestjs/common';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
+import { DEFAULT_TAGS } from './tags.default';
 
 import type {
   TagGroupRepresentation,
   NewTagGroupPayload,
   NewTagPayload,
   TagRepresentation,
+  Tag,
 } from './tags.types';
 
 @Injectable()
@@ -71,5 +73,50 @@ export class TagsService {
       this.logger.error(error);
       throw error;
     }
+  }
+
+  async accountTags(accountId: string): Promise<TagGroupRepresentation[]> {
+    try {
+      return await this.prisma.tagGroup.findMany({
+        where: {
+          accountId: accountId,
+        },
+        include: {
+          tags: true,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async createDefaultTags(accountId: string): Promise<void> {
+    const newTagQueries = [];
+
+    for (const tagGroup of DEFAULT_TAGS) {
+      newTagQueries.push({
+        name: tagGroup.groupName,
+        accountId: accountId,
+        tags: {
+          create: tagGroup.tags.map((tag: Tag) => {
+            return {
+              name: tag.name,
+              accountId: accountId,
+            };
+          }),
+        },
+      });
+    }
+
+    const queries = newTagQueries.map((queryData) => {
+      return this.prisma.tagGroup.create({
+        data: queryData,
+      });
+    });
+
+    await Promise.all(queries);
+
+    this.logger.debug('Default tags created');
   }
 }

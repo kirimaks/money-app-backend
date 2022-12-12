@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -86,7 +87,7 @@ model TagGroup {
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  Tag       Tag[]
+  tags      Tag[]
 
   @@unique(fields: [accountId, name], name: "group_name_by_account")
 }

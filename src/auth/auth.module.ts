@@ -9,6 +9,7 @@ import { JwtStrategy } from './auth.jwt.strategy';
 import { AuthResolver } from './auth.resolvers';
 import { AccountService } from '../account/account.service';
 import { UserService } from '../user/user.service';
+import { TagsService } from '../tags/tags.service';
 
 @Module({
   controllers: [AuthController],
@@ -27,6 +28,7 @@ import { UserService } from '../user/user.service';
     AuthResolver,
     AccountService,
     UserService,
+    TagsService,
   ],
 })
 export class AuthModule {}

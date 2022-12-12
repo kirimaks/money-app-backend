@@ -5,6 +5,7 @@ import { PasswordTool } from '../auth/auth.hashing';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { getErrorMessage } from '../errors/tools';
 import { EmailExistsError } from '../auth/auth.errors';
+import { TagsService } from '../tags/tags.service';
 
 import type { NewAccountPayload, Account } from '../account/account.types';
 
@@ -13,16 +14,22 @@ export class AccountService {
   private readonly prisma: PrismaClientService;
   private readonly logger: Logger;
   private readonly passwordTool: PasswordTool;
+  private readonly tagsService: TagsService;
 
-  constructor(prisma: PrismaClientService, logger: Logger) {
+  constructor(
+    prisma: PrismaClientService,
+    logger: Logger,
+    tagsService: TagsService,
+  ) {
     this.prisma = prisma;
     this.logger = logger;
     this.passwordTool = new PasswordTool();
+    this.tagsService = tagsService;
   }
 
   async createAccount(newAccount: NewAccountPayload): Promise<Account> {
     try {
-      return await this.prisma.account.create({
+      const account = await this.prisma.account.create({
         data: {
           name: newAccount.accountName,
           users: {
@@ -40,6 +47,10 @@ export class AccountService {
           users: true,
         },
       });
+
+      await this.tagsService.createDefaultTags(account.id);
+
+      return account;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {

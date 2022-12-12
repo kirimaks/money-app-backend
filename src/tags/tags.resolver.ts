@@ -3,7 +3,7 @@ import {
   UseGuards,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { Resolver, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TagsService } from './tags.service';
@@ -13,7 +13,7 @@ import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 
 import type { UserInRequest } from '../user/user.types';
 import type { CreateTagInput } from './tags.validation';
-import type { TagRepresentation } from './tags.types';
+import type { TagRepresentation, TagGroupRepresentation } from './tags.types';
 
 @Resolver('Tag')
 export class TagsResolver {
@@ -38,6 +38,19 @@ export class TagsResolver {
         tagGroupId: createTagInput.tagGroupId,
         accountId: user.accountId,
       });
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Query()
+  @UseGuards(GQLJwtAuthGuard)
+  async accountTags(
+    @CurrentUser() user: UserInRequest,
+  ): Promise<TagGroupRepresentation[]> {
+    try {
+      return await this.tagsService.accountTags(user.accountId);
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);

@@ -1,6 +1,7 @@
 type TagGroupResponse {
   id: String!
   name: String!
+  tags: [TagResponse!]
 }
 
 type TagResponse {
@@ -15,4 +16,8 @@ type Mutation {
 
 type Mutation {
   createTag(name: String! tagGroupId: String!): TagResponse!
+}
+
+type Query {
+  accountTags: [TagGroupResponse!]
 }

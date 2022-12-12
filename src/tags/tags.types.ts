@@ -23,3 +23,16 @@ export type NewTagPayload = {
 export type TransactionTags = {
   tagId: string;
 };
+
+export type AccountTags = {
+  id: string; // TODO
+};
+
+export type TagGroup = {
+  groupName: string;
+  tags: Tag[];
+};
+
+export type Tag = {
+  name: string;
+};
