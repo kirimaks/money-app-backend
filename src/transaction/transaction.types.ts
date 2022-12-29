@@ -42,3 +42,9 @@ export type NewTransactionData = {
 export type UpdateTransactionData = {
   accountId: string;
 } & UpdateTransactionInput;
+
+export type LatestTransactionsByDay = {
+  totalAmount: string;
+  date: string;
+  transactions: Transaction[];
+};

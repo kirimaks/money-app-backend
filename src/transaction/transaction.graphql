@@ -9,8 +9,15 @@ type TransactionResponse {
   tagIds: [String]
 }
 
+type TransactionsByDaySummary {
+  date: String!
+  totalAmount: Float!
+  transactions: [TransactionResponse]!
+}
+
 type Query {
   transaction(id:String!): TransactionResponse!
+  latestTransactions: [TransactionsByDaySummary!]
 }
 
 type Mutation {
