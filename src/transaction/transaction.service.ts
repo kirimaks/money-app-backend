@@ -1,5 +1,7 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import dayjs from 'dayjs'
+
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
 import { TransactionNotFoundError } from '../errors/transaction';
@@ -10,6 +12,7 @@ import type {
   Transaction,
   NewTransactionData,
   UpdateTransactionData,
+  LatestTransactionsByDay
 } from './transaction.types';
 
 function transactionResponse(
@@ -29,6 +32,21 @@ function getNewTagsQuery(tags: string[]) {
   return tags.map((tagId) => {
     return { tagId: tagId };
   });
+}
+
+function showData(responseBuff:any) {
+  console.log(
+    JSON.stringify(
+      responseBuff, (key, value) => {
+        if (typeof value === 'bigint') {
+          return value.toString();
+
+        } else {
+          return value;
+        }
+      }, 2
+    )
+  );
 }
 
 @Injectable()
@@ -170,5 +188,52 @@ export class TransactionService {
 
       throw error;
     }
+  }
+
+  async getLatestTransactions(accountId: string):Promise<LatestTransactionsByDay[]> {
+    const monthStart = dayjs().startOf('month');
+    const monthEnd = dayjs().endOf('month');
+
+    const responseBuff:Record<string, LatestTransactionsByDay>= {};
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        accountId: accountId,
+        utc_timestamp: {
+          gte: monthStart.toDate(),
+          lte: monthEnd.toDate(),
+        }
+      },
+      orderBy: {
+        utc_timestamp: 'desc',
+      },
+      take: 10000,
+      include: {
+        TransactionTags: true
+      }
+    });
+
+    for (const transaction of transactions) {
+      const transactionDate = dayjs(transaction.utc_timestamp).format('DD-MM-YYYY');
+
+      if (!(transactionDate in responseBuff)) {
+        if (Object.keys(responseBuff).length >= 2) {
+          break;
+
+        } else {
+          responseBuff[transactionDate] = {
+            totalAmount: 0,
+            date: transactionDate,
+            transactions: []
+          }
+        }
+      }
+
+      const transactionResp = transactionResponse(transaction);
+      responseBuff[transactionDate].totalAmount += transactionResp.amount;
+      responseBuff[transactionDate].transactions.push(transactionResp);
+    }
+
+    return Object.keys(responseBuff).map((key) => responseBuff[key]);
   }
 }

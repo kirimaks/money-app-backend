@@ -26,6 +26,7 @@ import type {
   TransactionRepresentation,
   CreateTransactionInput,
   GetTransactionInput,
+  LatestTransactionsByDay
 } from './transaction.types';
 import type { UserInRequest } from '../user/user.types';
 import type { UpdateTransactionInput } from './transaction.validation';
@@ -103,6 +104,21 @@ export class TransactionResolver {
       if (error instanceof TransactionNotFoundError) {
         throw new NotFoundException(TRANSACTION_NOT_FOUND_ERROR);
       }
+      this.logger.error(error);
+    }
+
+    throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+  }
+
+  @Query()
+  @UseGuards(GQLJwtAuthGuard)
+  async latestTransactions(
+    @CurrentUser() user: UserInRequest
+  ): Promise<LatestTransactionsByDay[]> {
+    try {
+      return await this.transactionService.getLatestTransactions(user.accountId);
+
+    } catch(error) {
       this.logger.error(error);
     }
 

@@ -44,7 +44,7 @@ export type UpdateTransactionData = {
 } & UpdateTransactionInput;
 
 export type LatestTransactionsByDay = {
-  totalAmount: string;
+  totalAmount: number;
   date: string;
-  transactions: Transaction[];
+  transactions: TransactionRepresentation[];
 };
