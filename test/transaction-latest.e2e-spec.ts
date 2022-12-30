@@ -31,7 +31,8 @@ describe('Latest transactions test', () => {
     const jwtToken = await signInTool(app, testEmail, testPassword);
 
     await createTransaction(app, jwtToken, 't1', (new Date()).getTime(), 100);
-    await createTransaction(app, jwtToken, 't1', (new Date()).getTime(), 100);
+    await createTransaction(app, jwtToken, 't2', (new Date()).getTime(), 200);
+    await createTransaction(app, jwtToken, 't3', (new Date()).getTime(), 300);
 
     const latestTransactionsQuery = gql`
       query {
@@ -49,6 +50,8 @@ describe('Latest transactions test', () => {
       .set(...getAuthHeader(jwtToken))
       .expectNoErrors();
 
-    expect(data?.latestTransactions).toHaveLength(2);
+    expect(data?.latestTransactions).toHaveLength(1);
+    expect(data?.latestTransactions[0]?.transactions).toHaveLength(3);
+    expect(data?.latestTransactions[0]?.totalAmount).toEqual(600);
   });
 });
