@@ -17,6 +17,7 @@ import {
   createTransactionSchema,
   getTransactionSchema,
   updateTransactionSchema,
+  latestTransactionsSchema
 } from './transaction.validation';
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TransactionNotFoundError } from '../errors/transaction';
@@ -24,12 +25,11 @@ import { UserNotFoundError } from '../errors/user';
 
 import type {
   TransactionRepresentation,
-  CreateTransactionInput,
   GetTransactionInput,
   LatestTransactionsByDay
 } from './transaction.types';
 import type { UserInRequest } from '../user/user.types';
-import type { UpdateTransactionInput } from './transaction.validation';
+import type { UpdateTransactionInput, LatestTransactionsInput, CreateTransactionInput } from './transaction.validation';
 
 @Resolver('Transaction')
 export class TransactionResolver {
@@ -113,10 +113,16 @@ export class TransactionResolver {
   @Query()
   @UseGuards(GQLJwtAuthGuard)
   async latestTransactions(
+    @Args(new ZodPipe(latestTransactionsSchema))
+    latestTransactionsInput: LatestTransactionsInput,
     @CurrentUser() user: UserInRequest
   ): Promise<LatestTransactionsByDay[]> {
     try {
-      return await this.transactionService.getLatestTransactions(user.accountId);
+      return await this.transactionService.getLatestTransactions({
+        accountId: user.accountId,
+        timeRangeStart: latestTransactionsInput.timeRangeStart,
+        timeRangeEnd: latestTransactionsInput.timeRangeEnd,
+      });
 
     } catch(error) {
       this.logger.error(error);

@@ -12,7 +12,8 @@ import type {
   Transaction,
   NewTransactionData,
   UpdateTransactionData,
-  LatestTransactionsByDay
+  LatestTransactionsByDay,
+  LatestTransactionsRange
 } from './transaction.types';
 
 function transactionResponse(
@@ -22,7 +23,7 @@ function transactionResponse(
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
-    timestamp: transaction.utc_timestamp.getTime(),
+    datetime: dayjs.utc(transaction.utc_timestamp).format(),
     categoryId: transaction.categoryId ?? '', // TODO: remove
     tagIds: transaction.TransactionTags.map((tag) => tag.tagId),
   };
@@ -62,14 +63,14 @@ export class TransactionService {
     newTransactionData: NewTransactionData,
   ): Promise<TransactionRepresentation> {
     try {
-      const timestamp = new Date(parseInt(newTransactionData.timestamp));
+      const datetime = new Date(newTransactionData.datetime);
       const amount = Math.round(newTransactionData.amount * 100);
 
       const newTransactionPayload = {
         data: {
           name: newTransactionData.name,
           amount_cents: amount,
-          utc_timestamp: timestamp,
+          utc_timestamp: datetime,  // TODO: rename to utc_datetime
           account: {
             connect: {
               id: newTransactionData.accountId,
@@ -110,6 +111,7 @@ export class TransactionService {
       );
 
       return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');
@@ -190,18 +192,18 @@ export class TransactionService {
     }
   }
 
-  async getLatestTransactions(accountId: string):Promise<LatestTransactionsByDay[]> {
-    const monthStart = dayjs().startOf('month');
-    const monthEnd = dayjs().endOf('month');
+  async getLatestTransactions(transactionsRange:LatestTransactionsRange):Promise<LatestTransactionsByDay[]> {
+    const timeRangeEnd = dayjs(transactionsRange.timeRangeEnd);
+    const timeRangeStart = dayjs(transactionsRange.timeRangeStart);
 
     const responseBuff:Record<string, LatestTransactionsByDay>= {};
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
-        accountId: accountId,
+        accountId: transactionsRange.accountId,
         utc_timestamp: {
-          gte: monthStart.toDate(),
-          lte: monthEnd.toDate(),
+          gte: timeRangeStart.toDate(),
+          lte: timeRangeEnd.toDate(),
         }
       },
       orderBy: {

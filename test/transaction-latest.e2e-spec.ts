@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest-graphql';
 import gql from 'graphql-tag';
-import dayjs from 'dayjs';
+import dayjs from '../src/tools/dayjs';
 
 import { getRandomEmail, getRandomPassword, signUpTool, signInTool, } from './tools/auth';
 import { AuthModule } from '../src/auth/auth.module'; import { GraphqlModule } from '../src/graphql/graphql.module';
@@ -25,19 +25,24 @@ describe('Latest transactions test', () => {
     await app.init();
   });
 
-  test('Latest transactions', async () => {
+  test('Latest transactions 1 day test', async () => {
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
+
     await signUpTool(app, testEmail, testPassword);
     const jwtToken = await signInTool(app, testEmail, testPassword);
 
-    await createTransaction(app, jwtToken, 't1', (new Date()).getTime(), 100);
-    await createTransaction(app, jwtToken, 't2', (new Date()).getTime(), 200);
-    await createTransaction(app, jwtToken, 't3', (new Date()).getTime(), 300);
+    const testTime = dayjs('2000-05-01').utc();
+    const endTime = testTime;
+    const startTime = testTime.subtract(1, 'month');
+
+    await createTransaction(app, jwtToken, 't1', endTime.subtract(3, 'hour').format(), 100);
+    await createTransaction(app, jwtToken, 't2', endTime.subtract(2, 'hour').format(), 200);
+    await createTransaction(app, jwtToken, 't3', endTime.subtract(1, 'hour').format(), 300);
 
     const latestTransactionsQuery = gql`
       query {
-        latestTransactions {
+        latestTransactions(timeRangeStart: "${startTime.format()}" timeRangeEnd: "${endTime.format()}") {
           date totalAmount 
           transactions {
             amount
@@ -56,15 +61,15 @@ describe('Latest transactions test', () => {
     expect(data?.latestTransactions[0]?.totalAmount).toEqual(600);
   });
 
-  test('Latest transactions multiple pages', async () => {
+  test('Latest transactions many days test', async () => {
     const testEmail = getRandomEmail();
     const testPassword = getRandomPassword();
     await signUpTool(app, testEmail, testPassword);
     const jwtToken = await signInTool(app, testEmail, testPassword);
 
-    const twoDaysAgo = dayjs().subtract(2, 'days').toDate().getTime();
-    const oneDayAgo = dayjs().subtract(1, 'days').toDate().getTime();
-    const today = dayjs().toDate().getTime();
+    const twoDaysAgo = dayjs('2000-01-01').utc().subtract(2, 'days').format();
+    const oneDayAgo = dayjs('2000-01-02').utc().subtract(1, 'days').format();
+    const today = dayjs('2000-01-03').utc().format();
 
     await createTransaction(app, jwtToken, '2daysAgo1', twoDaysAgo, 100);
     await createTransaction(app, jwtToken, '2daysAgo2', twoDaysAgo, 150);
@@ -78,10 +83,10 @@ describe('Latest transactions test', () => {
 
     const latestTransactionsQuery = gql`
       query {
-        latestTransactions {
+        latestTransactions(timeRangeStart: "${oneDayAgo}" timeRangeEnd: "${today}") {
           date totalAmount 
-          transactions {
-            timestamp, amount
+            transactions {
+              datetime, amount
           }
         }
       }
@@ -92,12 +97,12 @@ describe('Latest transactions test', () => {
       .set(...getAuthHeader(jwtToken))
       .expectNoErrors();
 
-    expect(data?.latestTransactions).toHaveLength(2);
+      expect(data?.latestTransactions).toHaveLength(2);
 
-    expect(data?.latestTransactions[0]?.transactions).toHaveLength(2);
-    expect(data?.latestTransactions[0]?.totalAmount).toEqual(150);
+      expect(data?.latestTransactions[0]?.transactions).toHaveLength(2);
+      expect(data?.latestTransactions[0]?.totalAmount).toEqual(150);
 
-    expect(data?.latestTransactions[1]?.transactions).toHaveLength(2);
-    expect(data?.latestTransactions[1]?.totalAmount).toEqual(800);
-  });
+      expect(data?.latestTransactions[1]?.transactions).toHaveLength(2);
+      expect(data?.latestTransactions[1]?.totalAmount).toEqual(800);
+    });
 });
