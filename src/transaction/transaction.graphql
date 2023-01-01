@@ -1,10 +1,8 @@
-scalar Timestamp
-
 type TransactionResponse { 
   id: String!
   name: String!
   amount: Float!
-  timestamp: Timestamp!
+  datetime: String!
   categoryId: String
   tagIds: [String]
 }
@@ -17,12 +15,12 @@ type TransactionsByDaySummary {
 
 type Query {
   transaction(id:String!): TransactionResponse!
-  latestTransactions: [TransactionsByDaySummary!]
+  latestTransactions(timeRangeStart:String! timeRangeEnd:String!): [TransactionsByDaySummary!]
 }
 
 type Mutation {
   createTransaction(
-    name:String! amount:Float! timestamp:Timestamp! categoryId:String tagIds: [String]
+    name:String! amount:Float! datetime:String! categoryId:String tagIds: [String]
   ): TransactionResponse!
 
   updateTransaction( transactionId: String!  tagIds: [String]): TransactionResponse!

@@ -20,6 +20,7 @@ import {
 } from './tools/auth';
 import { CATEGORY_NOT_FOUND_ERROR } from '../src/errors/constants';
 import { WRONG_ERROR_TEXT } from './constants';
+import { getTransactionTime } from './tools/transactions';
 
 import type { CategoryRepresentation } from '../src/category/category.types';
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
@@ -147,7 +148,7 @@ describe('Create transaction with category', () => {
 
     const transactionName = crypto.randomBytes(8).toString('hex');
     const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
-    const transactionTime = new Date().getTime();
+    const transactionTime = getTransactionTime();
 
     let categoryId: string;
     let transactionId: string;
@@ -188,9 +189,9 @@ describe('Create transaction with category', () => {
         mutation {
           createTransaction(
             name: "${transactionName}" amount: ${transactionAmount} 
-            timestamp: "${transactionTime}" categoryId: "${categoryId}"
+            datetime: "${transactionTime}" categoryId: "${categoryId}"
           ) {
-            name amount timestamp id categoryId
+            name amount datetime id categoryId
           }
         }
       `;

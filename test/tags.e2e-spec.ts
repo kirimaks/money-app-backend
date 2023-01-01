@@ -160,7 +160,7 @@ describe('Testing tags', () => {
           updateTransaction(transactionId: "${transactionId}" tagIds: ${JSON.stringify(
         [tagId],
       )} ) {
-            id name amount timestamp tagIds
+            id name amount datetime tagIds
           }
         }
       `;

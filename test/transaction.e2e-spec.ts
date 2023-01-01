@@ -21,6 +21,7 @@ import {
   AUTHORIZATION_ERROR,
 } from '../src/errors/constants';
 import { WRONG_ERROR_TEXT } from './constants';
+import { getTransactionTime } from './tools/transactions';
 
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
@@ -41,7 +42,7 @@ describe('Transaction test', () => {
   describe('Create and get transaction', () => {
     const transactionName = crypto.randomBytes(8).toString('hex');
     const transactionAmount = parseFloat((Math.random() * 100).toFixed(2));
-    const transactionTime = new Date().getTime();
+    const transactionTime = getTransactionTime();
     let transactionId: string;
 
     test('New transaction', async () => {
@@ -50,8 +51,8 @@ describe('Transaction test', () => {
 
       const newTransactionQuery = gql`
         mutation {
-          createTransaction(name: "${transactionName}" amount: ${transactionAmount} timestamp: "${transactionTime}") {
-            name amount timestamp id
+          createTransaction(name: "${transactionName}" amount: ${transactionAmount} datetime: "${transactionTime}") {
+            name amount datetime id
           }
         }
       `;
@@ -64,7 +65,7 @@ describe('Transaction test', () => {
 
       expect(data?.createTransaction.name).toEqual(transactionName);
       expect(data?.createTransaction.amount).toEqual(transactionAmount);
-      expect(data?.createTransaction.timestamp).toEqual(transactionTime);
+      expect(data?.createTransaction.datetime).toEqual(transactionTime);
       expect(data?.createTransaction.id).toBeTruthy();
 
       if (data && isString(data?.createTransaction.id)) {
@@ -79,7 +80,7 @@ describe('Transaction test', () => {
       const getTransactionQuery = gql`
         query {
           transaction(id: "${transactionId}") {
-            name amount timestamp id
+            name amount datetime id
           }
         }
       `;
@@ -93,7 +94,7 @@ describe('Transaction test', () => {
 
       expect(data?.transaction.name).toEqual(transactionName);
       expect(data?.transaction.amount).toEqual(transactionAmount);
-      expect(data?.transaction.timestamp).toEqual(transactionTime);
+      expect(data?.transaction.datetime).toEqual(transactionTime);
       expect(data?.transaction.id).toEqual(transactionId);
     });
 
@@ -103,7 +104,7 @@ describe('Transaction test', () => {
       const getTransactionQuery = gql`
         query {
           transaction(id: "${transactionId}") {
-            name amount timestamp id
+            name amount datetime id
           }
         }
       `;
@@ -132,7 +133,7 @@ describe('Transaction test', () => {
       const getTransactionQuery = gql`
         query {
           transaction(id: "${transactionId}") {
-            name amount timestamp id
+            name amount datetime id
           }
         }
       `;
@@ -157,7 +158,7 @@ describe('Transaction test', () => {
       const getTransactionQuery = gql`
         query {
           transaction(id: "${missingId}") {
-            name amount timestamp id
+            name amount datetime id
           }
         }
       `;

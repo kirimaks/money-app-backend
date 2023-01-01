@@ -1,16 +1,17 @@
 import { z as Zod } from 'zod';
-import { INVALID_TIMESTAMP, NAME_MAX_LENGTH } from '../errors/constants';
+import dayjs from '../tools/dayjs';
+
+import { INVALID_TIMESTAMP, NAME_MAX_LENGTH, INVALID_DATETIME, INVALID_TIME_RANGE } from '../errors/constants';
 
 export const createTransactionSchema = Zod.object({
   name: Zod.string().max(NAME_MAX_LENGTH),
   amount: Zod.number(),
-  timestamp: Zod.string().refine(
-    (val) => new Date(parseInt(val)).getTime() > 0,
-    {
-      message: INVALID_TIMESTAMP,
-    },
-  ),
+  datetime: Zod.string().datetime({ message: INVALID_DATETIME }),
+  categoryId: Zod.string().optional(),
+  tagIds: Zod.array(Zod.string()).optional(),
 });
+
+export type CreateTransactionInput = Zod.infer<typeof createTransactionSchema>;
 
 export const getTransactionSchema = Zod.object({
   id: Zod.string(),

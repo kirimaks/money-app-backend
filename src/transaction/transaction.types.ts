@@ -1,24 +1,13 @@
 import type { TransactionTags } from '../tags/tags.types';
-import type { UpdateTransactionInput } from './transaction.validation';
-
-type Timestamp = string;
+import type { UpdateTransactionInput, CreateTransactionInput } from './transaction.validation';
 
 export type TransactionRepresentation = {
   name: string;
   amount: number;
-  timestamp: number;
+  datetime: string;
   id: string;
   categoryId: string;
   tagIds: string[];
-};
-
-// TODO: infer from Zod
-export type CreateTransactionInput = {
-  name: string;
-  amount: number;
-  timestamp: Timestamp;
-  categoryId?: string; // TODO: remove
-  tagIds?: string[];
 };
 
 export type GetTransactionInput = {
@@ -47,4 +36,10 @@ export type LatestTransactionsByDay = {
   totalAmount: number;
   date: string;
   transactions: TransactionRepresentation[];
+};
+
+export type LatestTransactionsRange = {
+  accountId: string;
+  timeRangeStart: string;
+  timeRangeEnd: string;
 };

@@ -57,7 +57,7 @@ model Transaction {
   id            String   @id @default(cuid())
   name          String
   amount_cents  BigInt
-  utc_timestamp DateTime
+  utc_timestamp DateTime // rename to utc_datetime
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
