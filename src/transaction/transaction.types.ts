@@ -7,7 +7,6 @@ export type TransactionRepresentation = {
   amount: number;
   datetime: string;
   id: string;
-  categoryId: string;
   tags: Tag[];
 };
 
@@ -20,7 +19,6 @@ export type Transaction = {
   name: string;
   amount_cents: bigint;
   utc_timestamp: Date;
-  categoryId: null | string;
   TransactionTags: TransactionTags[];
 };
 

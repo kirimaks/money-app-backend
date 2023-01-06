@@ -5,7 +5,6 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ProfileModule } from '../profile/profile.module';
 import { AuthModule } from '../auth/auth.module';
 import { TransactionModule } from '../transaction/transaction.module';
-import { CategoryModule } from '../category/category.module';
 import { TagsModule } from '../tags/tags.module';
 
 @Module({
@@ -19,7 +18,6 @@ import { TagsModule } from '../tags/tags.module';
           ProfileModule,
           AuthModule,
           TransactionModule,
-          CategoryModule,
           TagsModule,
         ],
         typePaths: ['./**/*.graphql'],

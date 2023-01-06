@@ -3,7 +3,6 @@ type TransactionResponse {
   name: String!
   amount: Float!
   datetime: String!
-  categoryId: String
   tags: [TagResponse]
 }
 
@@ -20,7 +19,7 @@ type Query {
 
 type Mutation {
   createTransaction(
-    name:String! amount:Float! datetime:String! categoryId:String tagIds: [String]
+    name:String! amount:Float! datetime:String! tagIds: [String]
   ): TransactionResponse!
 
   updateTransaction( transactionId: String!  tagIds: [String]): TransactionResponse!

@@ -22,7 +22,6 @@ function transactionResponse(transaction: Transaction): TransactionRepresentatio
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     datetime: dayjs.utc(transaction.utc_timestamp).format(),
-    categoryId: transaction.categoryId ?? '', // TODO: remove
     tags: transaction.TransactionTags.map((tag) => ({ 
       id: tag.tagId, 
       name: tag.tag.name, 
@@ -83,7 +82,6 @@ export class TransactionService {
               id: newTransactionData.userId,
             },
           },
-          category: {}, // TODO: remove
           TransactionTags: {},
         },
         include: {
@@ -94,15 +92,6 @@ export class TransactionService {
           }
         },
       };
-
-      // TODO: remove
-      if (isString(newTransactionData.categoryId)) {
-        newTransactionPayload.data.category = {
-          connect: {
-            id: newTransactionData.categoryId,
-          },
-        };
-      }
 
       if (newTransactionData.tagIds && newTransactionData.tagIds.length > 0) {
         const newTagsQuery = getNewTagsQuery(newTransactionData.tagIds);

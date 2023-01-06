@@ -11,7 +11,6 @@ model Account {
   id          String        @id @default(cuid())
   name        String        @default("")
   users       User[]
-  Category    Category[]
   Transaction Transaction[]
   TagGroup    TagGroup[]
   Tag         Tag[]
@@ -26,20 +25,6 @@ model User {
   accountId    String
   account      Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
   Transaction  Transaction[]
-}
-
-// TODO: remove
-model Category {
-  id   String @id @default(cuid())
-  name String
-
-  accountId String
-  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  Transaction Transaction[]
-
-  @@unique(fields: [accountId, id], name: "category_id_by_account")
-  @@index([accountId])
 }
 
 model Budget {
@@ -63,9 +48,6 @@ model Transaction {
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-  categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
@@ -77,7 +59,6 @@ model Transaction {
   TransactionTags TransactionTags[]
 
   @@unique(fields: [accountId, id], name: "transaction_id_by_account")
-  @@index([accountId, categoryId, utc_timestamp])
   @@index([accountId, utc_timestamp])
   @@index([accountId, budgetId, utc_timestamp])
 }

@@ -7,7 +7,6 @@ export const createTransactionSchema = Zod.object({
   name: Zod.string().max(NAME_MAX_LENGTH),
   amount: Zod.number(),
   datetime: Zod.string().datetime({ message: INVALID_DATETIME }),
-  categoryId: Zod.string().optional(),
   tagIds: Zod.array(Zod.string()).optional(),
 });
 
