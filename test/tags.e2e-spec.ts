@@ -132,7 +132,9 @@ describe('Testing tags', () => {
       );
 
       expect(transaction.name).toEqual(transactionName);
-      expect(transaction.tagIds).toContain(tagId);
+      expect(transaction.tagIds).toContain(tagId); // TODO: remove
+      expect(transaction.tags[0].id).toEqual(tagId);
+      expect(transaction.tags[0].name).toEqual(tagName);
     });
 
     test('Update transaction (set tag)', async () => {

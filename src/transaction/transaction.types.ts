@@ -1,5 +1,6 @@
 import type { TransactionTags } from '../tags/tags.types';
 import type { UpdateTransactionInput, CreateTransactionInput } from './transaction.validation';
+import type { Tag } from '../tags/tags.types';
 
 export type TransactionRepresentation = {
   name: string;
@@ -8,6 +9,7 @@ export type TransactionRepresentation = {
   id: string;
   categoryId: string;
   tagIds: string[];
+  tags: Tag[];
 };
 
 export type GetTransactionInput = {

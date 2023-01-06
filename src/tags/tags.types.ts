@@ -22,6 +22,11 @@ export type NewTagPayload = {
 
 export type TransactionTags = {
   tagId: string;
+  tag: {
+    id: string;
+    name: string;
+    tagGroupId: string;
+  }
 };
 
 export type AccountTags = {
@@ -34,5 +39,11 @@ export type TagGroup = {
 };
 
 export type Tag = {
+  id: string;
+  name: string;
+  tagGroupId: string;
+};
+
+export type NewTag = {
   name: string;
 };

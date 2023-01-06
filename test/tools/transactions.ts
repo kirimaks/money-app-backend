@@ -29,6 +29,9 @@ export async function createTransaction(
         tagIds: ${JSON.stringify(tagIds)}
       ) {
         id name datetime tagIds
+        tags {
+          id name tagGroupId
+        }
       }
     }
   `;

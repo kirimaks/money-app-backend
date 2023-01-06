@@ -8,7 +8,7 @@ import type {
   NewTagGroupPayload,
   NewTagPayload,
   TagRepresentation,
-  Tag,
+  NewTag,
 } from './tags.types';
 
 @Injectable()
@@ -99,7 +99,7 @@ export class TagsService {
         name: tagGroup.groupName,
         accountId: accountId,
         tags: {
-          create: tagGroup.tags.map((tag: Tag) => {
+          create: tagGroup.tags.map((tag: NewTag) => {
             return {
               name: tag.name,
               accountId: accountId,

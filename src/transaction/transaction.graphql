@@ -5,6 +5,7 @@ type TransactionResponse {
   datetime: String!
   categoryId: String
   tagIds: [String]
+  tags: [TagResponse]
 }
 
 type TransactionsByDaySummary {

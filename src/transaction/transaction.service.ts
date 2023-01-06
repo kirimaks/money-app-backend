@@ -16,9 +16,7 @@ import type {
   LatestTransactionsRange
 } from './transaction.types';
 
-function transactionResponse(
-  transaction: Transaction,
-): TransactionRepresentation {
+function transactionResponse(transaction: Transaction): TransactionRepresentation {
   return {
     id: transaction.id,
     name: transaction.name,
@@ -26,6 +24,11 @@ function transactionResponse(
     datetime: dayjs.utc(transaction.utc_timestamp).format(),
     categoryId: transaction.categoryId ?? '', // TODO: remove
     tagIds: transaction.TransactionTags.map((tag) => tag.tagId),
+    tags: transaction.TransactionTags.map((tag) => ({ 
+      id: tag.tagId, 
+      name: tag.tag.name, 
+      tagGroupId: tag.tag.tagGroupId,
+    })),
   };
 }
 
@@ -85,7 +88,11 @@ export class TransactionService {
           TransactionTags: {},
         },
         include: {
-          TransactionTags: true,
+          TransactionTags: {
+            include: {
+              tag: true
+            }
+          }
         },
       };
 
@@ -136,7 +143,11 @@ export class TransactionService {
           },
         },
         include: {
-          TransactionTags: true,
+          TransactionTags: {
+            include: {
+              tag: true,
+            }
+          },
         },
       });
 
@@ -165,7 +176,11 @@ export class TransactionService {
         },
         data: {},
         include: {
-          TransactionTags: true,
+          TransactionTags: {
+            include: {
+              tag: true,
+            }
+          },
         },
       };
 
@@ -211,7 +226,11 @@ export class TransactionService {
       },
       take: 10000,
       include: {
-        TransactionTags: true
+        TransactionTags: {
+          include: {
+            tag: true,
+          }
+        }
       }
     });
 

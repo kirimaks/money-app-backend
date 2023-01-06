@@ -28,6 +28,7 @@ model User {
   Transaction  Transaction[]
 }
 
+// TODO: remove
 model Category {
   id   String @id @default(cuid())
   name String

@@ -53,7 +53,7 @@ describe('Testing account', () => {
         }
       `;
 
-      const { data } = await request<{ accountTags: TagGroupRepresentation }>(
+      const { data } = await request<{ accountTags: TagGroupRepresentation[] }>(
         app.getHttpServer(),
       )
         .query(accountTagsQuery)
