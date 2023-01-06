@@ -132,7 +132,6 @@ describe('Testing tags', () => {
       );
 
       expect(transaction.name).toEqual(transactionName);
-      expect(transaction.tagIds).toContain(tagId); // TODO: remove
       expect(transaction.tags[0].id).toEqual(tagId);
       expect(transaction.tags[0].name).toEqual(tagName);
     });
@@ -153,7 +152,7 @@ describe('Testing tags', () => {
       );
 
       expect(transaction.name).toEqual(transactionName);
-      expect(transaction.tagIds).toHaveLength(0);
+      expect(transaction.tags).toHaveLength(0);
       expect(transaction.id).toBeTruthy();
 
       const transactionId = transaction.id;
@@ -162,7 +161,10 @@ describe('Testing tags', () => {
           updateTransaction(transactionId: "${transactionId}" tagIds: ${JSON.stringify(
         [tagId],
       )} ) {
-            id name amount datetime tagIds
+            id name amount datetime
+            tags {
+              id
+            }
           }
         }
       `;
@@ -174,7 +176,7 @@ describe('Testing tags', () => {
         .set(...getAuthHeader(jwtToken))
         .expectNoErrors();
 
-      expect(data?.updateTransaction.tagIds).toContain(tagId);
+      expect(data?.updateTransaction.tags.map(tag => tag.id)).toContain(tagId);
     });
   });
 });

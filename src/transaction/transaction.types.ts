@@ -8,7 +8,6 @@ export type TransactionRepresentation = {
   datetime: string;
   id: string;
   categoryId: string;
-  tagIds: string[];
   tags: Tag[];
 };
 

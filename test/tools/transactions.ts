@@ -28,7 +28,7 @@ export async function createTransaction(
         name: "${name}" amount: ${amount} datetime: "${datetime}"
         tagIds: ${JSON.stringify(tagIds)}
       ) {
-        id name datetime tagIds
+        id name datetime
         tags {
           id name tagGroupId
         }

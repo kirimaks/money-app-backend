@@ -23,7 +23,6 @@ function transactionResponse(transaction: Transaction): TransactionRepresentatio
     amount: Number(transaction.amount_cents) / 100,
     datetime: dayjs.utc(transaction.utc_timestamp).format(),
     categoryId: transaction.categoryId ?? '', // TODO: remove
-    tagIds: transaction.TransactionTags.map((tag) => tag.tagId),
     tags: transaction.TransactionTags.map((tag) => ({ 
       id: tag.tagId, 
       name: tag.tag.name, 
