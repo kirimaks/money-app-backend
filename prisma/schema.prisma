@@ -43,7 +43,7 @@ model Transaction {
   id            String   @id @default(cuid())
   name          String
   amount_cents  BigInt
-  utc_timestamp DateTime // rename to utc_datetime
+  utc_datetime  DateTime @default(now())
 
   accountId String
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
@@ -59,8 +59,8 @@ model Transaction {
   TransactionTags TransactionTags[]
 
   @@unique(fields: [accountId, id], name: "transaction_id_by_account")
-  @@index([accountId, utc_timestamp])
-  @@index([accountId, budgetId, utc_timestamp])
+  @@index([accountId, utc_datetime])
+  @@index([accountId, budgetId, utc_datetime])
 }
 
 model TagGroup {

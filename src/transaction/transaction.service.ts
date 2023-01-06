@@ -21,7 +21,7 @@ function transactionResponse(transaction: Transaction): TransactionRepresentatio
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
-    datetime: dayjs.utc(transaction.utc_timestamp).format(),
+    datetime: dayjs.utc(transaction.utc_datetime).format(),
     tags: transaction.TransactionTags.map((tag) => ({ 
       id: tag.tagId, 
       name: tag.tag.name, 
@@ -71,7 +71,7 @@ export class TransactionService {
         data: {
           name: newTransactionData.name,
           amount_cents: amount,
-          utc_timestamp: datetime,  // TODO: rename to utc_datetime
+          utc_datetime: datetime,
           account: {
             connect: {
               id: newTransactionData.accountId,
@@ -204,13 +204,13 @@ export class TransactionService {
     const transactions = await this.prisma.transaction.findMany({
       where: {
         accountId: transactionsRange.accountId,
-        utc_timestamp: {
+        utc_datetime: {
           gte: timeRangeStart.toDate(),
           lte: timeRangeEnd.toDate(),
         }
       },
       orderBy: {
-        utc_timestamp: 'desc',
+        utc_datetime: 'desc',
       },
       take: 10000,
       include: {
@@ -223,7 +223,7 @@ export class TransactionService {
     });
 
     for (const transaction of transactions) {
-      const transactionDate = dayjs(transaction.utc_timestamp).format('DD-MM-YYYY');
+      const transactionDate = dayjs(transaction.utc_datetime).format('DD-MM-YYYY');
 
       if (!(transactionDate in responseBuff)) {
         if (Object.keys(responseBuff).length >= 2) {

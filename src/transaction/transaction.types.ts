@@ -18,7 +18,7 @@ export type Transaction = {
   id: string;
   name: string;
   amount_cents: bigint;
-  utc_timestamp: Date;
+  utc_datetime: Date;
   TransactionTags: TransactionTags[];
 };
 
