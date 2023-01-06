@@ -29,18 +29,6 @@ model User {
   created      DateTime      @default(now())
 }
 
-model Budget {
-  id          String        @id @default(cuid())
-  name        String
-  Transaction Transaction[]
-}
-
-model MoneySource {
-  id          String        @id @default(cuid())
-  name        String
-  Transaction Transaction[]
-}
-
 model Transaction {
   id           String   @id @default(cuid())
   name         String
@@ -53,16 +41,10 @@ model Transaction {
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  budgetId String?
-  budget   Budget? @relation(fields: [budgetId], references: [id], onDelete: SetNull)
-
-  sourceId        String?
-  source          MoneySource?      @relation(fields: [sourceId], references: [id], onDelete: SetNull)
   TransactionTags TransactionTags[]
 
   @@unique(fields: [accountId, id], name: "transaction_id_by_account")
   @@index([accountId, utc_datetime])
-  @@index([accountId, budgetId, utc_datetime])
 }
 
 model TagGroup {
