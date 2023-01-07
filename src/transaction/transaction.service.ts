@@ -223,7 +223,12 @@ export class TransactionService {
     });
 
     for (const transaction of transactions) {
-      const transactionDate = dayjs(transaction.utc_datetime).format('DD-MM-YYYY');
+      const transactionDate = dayjs(transaction.utc_datetime)
+        .set('hour', 0)
+        .set('minute', 0)
+        .set('second', 0)
+        .set('millisecond', 0)
+        .format();
 
       if (!(transactionDate in responseBuff)) {
         if (Object.keys(responseBuff).length >= 2) {
