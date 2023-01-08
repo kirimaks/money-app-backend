@@ -2,12 +2,14 @@ type TagGroupResponse {
   id: String!
   name: String!
   tags: [TagResponse!]
+  iconInfo: String!
 }
 
 type TagResponse {
   id: String!
   name: String!
   tagGroupId: String!
+  iconInfo: String!
 }
 
 type Mutation {

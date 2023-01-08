@@ -38,7 +38,9 @@ export class TagsService {
 
       return {
         name: tagGroup.name,
-        id: tagGroup.id,
+        id: tagGroup.id, 
+        iconInfo: tagGroup.iconInfo,
+        tags: [],
       };
     } catch (error) {
       this.logger.error(error);
@@ -98,11 +100,13 @@ export class TagsService {
       newTagQueries.push({
         name: tagGroup.groupName,
         accountId: accountId,
+        iconInfo: tagGroup.iconInfo,
         tags: {
           create: tagGroup.tags.map((tag: NewTag) => {
             return {
               name: tag.name,
               accountId: accountId,
+              iconInfo: tag.iconInfo,
             };
           }),
         },

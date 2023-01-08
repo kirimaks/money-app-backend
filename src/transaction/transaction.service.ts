@@ -26,6 +26,7 @@ function transactionResponse(transaction: Transaction): TransactionRepresentatio
       id: tag.tagId, 
       name: tag.tag.name, 
       tagGroupId: tag.tag.tagGroupId,
+      iconInfo: tag.tag.iconInfo,
     })),
   };
 }

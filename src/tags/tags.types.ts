@@ -1,6 +1,8 @@
 export type TagGroupRepresentation = {
   id: string;
   name: string;
+  iconInfo: string;
+  tags: Tag[];
 };
 
 export type NewTagGroupPayload = {
@@ -26,6 +28,7 @@ export type TransactionTags = {
     id: string;
     name: string;
     tagGroupId: string;
+    iconInfo: string;
   }
 };
 
@@ -35,6 +38,7 @@ export type AccountTags = {
 
 export type TagGroup = {
   groupName: string;
+  iconInfo: string;
   tags: Tag[];
 };
 
@@ -42,8 +46,19 @@ export type Tag = {
   id: string;
   name: string;
   tagGroupId: string;
+  iconInfo: string;
 };
 
 export type NewTag = {
   name: string;
+  iconInfo: string;
+};
+
+export type DefaultTagGroup = {
+  groupName: string;
+  iconInfo: string;
+  tags: {
+    name: string;
+    iconInfo: string;
+  }[]
 };
