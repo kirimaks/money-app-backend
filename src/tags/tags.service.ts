@@ -84,9 +84,17 @@ export class TagsService {
           accountId: accountId,
         },
         include: {
-          tags: true,
+          tags: {
+            orderBy: {
+              name: 'asc',
+            }
+          },
         },
+        orderBy: {
+          name: 'asc',
+        }
       });
+
     } catch (error) {
       this.logger.error(error);
       throw error;
