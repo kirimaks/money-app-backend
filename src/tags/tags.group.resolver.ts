@@ -2,6 +2,7 @@ import {
   Logger,
   UseGuards,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 
@@ -10,6 +11,8 @@ import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { TagsService } from './tags.service';
 import { createTagGroupSchema } from './tags.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
+import { TAG_GROUP_EXIST_ERROR } from './tags.constants';
+import { TagGroupExistError } from './tags.errors';
 
 import type { UserInRequest } from '../user/user.types';
 import type { TagGroupRepresentation } from './tags.types';
@@ -39,6 +42,10 @@ export class TagGroupResolver {
         iconName: createTagGroupInput.iconName,
       });
     } catch (error) {
+      if (error instanceof TagGroupExistError) {
+          throw new BadRequestException(TAG_GROUP_EXIST_ERROR);
+      }
+
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
     }

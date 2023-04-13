@@ -20,6 +20,8 @@ import { isString } from '../src/errors/typeguards';
 import { getAuthHeader } from './tools/auth';
 import { getTransactionTime, getTransactionAmount } from './tools/transactions';
 import { createTransaction } from './tools/transactions';
+import { WRONG_ERROR_TEXT } from './constants';
+import { TAG_GROUP_EXIST_ERROR } from '../src/tags/tags.constants';
 
 import type {
   TagRepresentation,
@@ -87,6 +89,28 @@ describe('Testing tags', () => {
       } else {
         throw new Error('Missing tag group id');
       }
+    });
+
+    test('Create same tag group again', async () => {
+        const jwtToken = await signInTool(app, testEmail, testPassword);
+        const newTagGroupQuery = gql`
+            mutation {
+                createTagGroup(name: "${tagGroupName}" iconName: "${tagGroupIconName}") {
+                    id name iconName
+                }
+            }
+        `;
+
+        const { errors } = await request<{ createTagGroup: TagGroupRepresentation; }>(app.getHttpServer())
+            .query(newTagGroupQuery)
+            .set(...getAuthHeader(jwtToken));
+
+        if (errors && errors.length > 0) {
+            const errorText = errors[0].message;
+            expect(errorText).toEqual(TAG_GROUP_EXIST_ERROR);
+        } else {
+            throw new Error(WRONG_ERROR_TEXT);
+        }
     });
 
     test('Create tag', async () => {

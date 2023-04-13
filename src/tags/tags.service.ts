@@ -1,7 +1,9 @@
 import { Logger, Injectable } from '@nestjs/common';
 
+import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { DEFAULT_TAGS } from './tags.default';
+import { TagGroupExistError } from './tags.errors';
 
 import type {
   TagGroupRepresentation,
@@ -44,6 +46,12 @@ export class TagsService {
         tags: [],
       };
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === 'P2002') {
+              throw new TagGroupExistError('Tag group exist');
+          }
+      }
+
       this.logger.error(error);
       throw error;
     }
