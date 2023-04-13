@@ -9,7 +9,7 @@ type TagResponse {
   id: String!
   name: String!
   tagGroupId: String!
-  iconInfo: String!
+  iconName: String!
 }
 
 type Mutation {
