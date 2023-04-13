@@ -48,6 +48,7 @@ describe('Testing tags', () => {
 
   describe('Create tag group and tag', () => {
     const tagGroupName = getRandomString(8);
+    const tagGroupIconName = getRandomString(8);
     const tagName = getRandomString(8);
 
     const testEmail = getRandomEmail();
@@ -64,8 +65,8 @@ describe('Testing tags', () => {
       const jwtToken = await signInTool(app, testEmail, testPassword);
       const newTagGroupQuery = gql`
         mutation {
-          createTagGroup(name: "${tagGroupName}") {
-            id name
+          createTagGroup(name: "${tagGroupName}" icon: "${tagGroupIconName}") {
+            id name iconInfo
           }
         }
       `;
@@ -79,6 +80,7 @@ describe('Testing tags', () => {
 
       expect(data?.createTagGroup.name).toEqual(tagGroupName);
       expect(data?.createTagGroup.id).toBeTruthy();
+      expect(data?.createTagGroup.iconInfo).toEqual(tagGroupIconName);
 
       if (data && isString(data?.createTagGroup.id)) {
         tagGroupId = data?.createTagGroup.id;

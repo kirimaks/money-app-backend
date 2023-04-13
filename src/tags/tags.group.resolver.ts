@@ -36,6 +36,7 @@ export class TagGroupResolver {
       return await this.tagsService.createTagGroup({
         name: createTagGroupInput.name,
         accountId: user.accountId,
+        icon: createTagGroupInput.icon,
       });
     } catch (error) {
       this.logger.error(error);

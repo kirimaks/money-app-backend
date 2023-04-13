@@ -13,7 +13,7 @@ type TagResponse {
 }
 
 type Mutation {
-  createTagGroup(name: String!): TagGroupResponse!
+  createTagGroup(name: String! icon: String!): TagGroupResponse!
 }
 
 type Mutation {

@@ -8,6 +8,7 @@ export type TagGroupRepresentation = {
 export type NewTagGroupPayload = {
   name: string;
   accountId: string;
+  icon: string;
 };
 
 export type TagRepresentation = {

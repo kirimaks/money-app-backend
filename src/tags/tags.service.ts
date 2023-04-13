@@ -28,6 +28,7 @@ export class TagsService {
       const tagGroup = await this.prisma.tagGroup.create({
         data: {
           name: payload.name,
+          iconInfo: payload.icon,
           account: {
             connect: {
               id: payload.accountId,
