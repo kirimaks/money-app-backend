@@ -65,8 +65,8 @@ describe('Testing tags', () => {
       const jwtToken = await signInTool(app, testEmail, testPassword);
       const newTagGroupQuery = gql`
         mutation {
-          createTagGroup(name: "${tagGroupName}" icon: "${tagGroupIconName}") {
-            id name iconInfo
+          createTagGroup(name: "${tagGroupName}" iconName: "${tagGroupIconName}") {
+            id name iconName
           }
         }
       `;
@@ -80,7 +80,7 @@ describe('Testing tags', () => {
 
       expect(data?.createTagGroup.name).toEqual(tagGroupName);
       expect(data?.createTagGroup.id).toBeTruthy();
-      expect(data?.createTagGroup.iconInfo).toEqual(tagGroupIconName);
+      expect(data?.createTagGroup.iconName).toEqual(tagGroupIconName);
 
       if (data && isString(data?.createTagGroup.id)) {
         tagGroupId = data?.createTagGroup.id;

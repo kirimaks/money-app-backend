@@ -28,7 +28,7 @@ export class TagsService {
       const tagGroup = await this.prisma.tagGroup.create({
         data: {
           name: payload.name,
-          iconInfo: payload.icon,
+          iconName: payload.iconName,
           account: {
             connect: {
               id: payload.accountId,
@@ -40,7 +40,7 @@ export class TagsService {
       return {
         name: tagGroup.name,
         id: tagGroup.id, 
-        iconInfo: tagGroup.iconInfo,
+        iconName: tagGroup.iconName,
         tags: [],
       };
     } catch (error) {
@@ -109,13 +109,13 @@ export class TagsService {
       newTagQueries.push({
         name: tagGroup.groupName,
         accountId: accountId,
-        iconInfo: tagGroup.iconInfo,
+        iconName: tagGroup.iconName,
         tags: {
           create: tagGroup.tags.map((tag: NewTag) => {
             return {
               name: tag.name,
               accountId: accountId,
-              iconInfo: tag.iconInfo,
+              iconName: tag.iconName,
             };
           }),
         },

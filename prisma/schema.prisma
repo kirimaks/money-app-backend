@@ -55,7 +55,7 @@ model TagGroup {
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
   tags      Tag[]
 
-  iconInfo String @default("fa-tags")
+  iconName String @default("fa-tags")
 
   @@unique(fields: [accountId, name], name: "group_name_by_account")
 }
@@ -71,7 +71,7 @@ model Tag {
   account         Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
   TransactionTags TransactionTags[]
 
-  iconInfo String @default("fa-tag")
+  iconName String @default("fa-tag")
 
   @@unique(fields: [tagGroupId, name], name: "tag_name_by_group_id")
 }

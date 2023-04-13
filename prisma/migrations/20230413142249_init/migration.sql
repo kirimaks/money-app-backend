@@ -37,7 +37,7 @@ CREATE TABLE "TagGroup" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "accountId" TEXT NOT NULL,
-    "iconInfo" TEXT NOT NULL DEFAULT 'fa-tags',
+    "iconName" TEXT NOT NULL DEFAULT 'fa-tags',
 
     CONSTRAINT "TagGroup_pkey" PRIMARY KEY ("id")
 );
@@ -48,7 +48,7 @@ CREATE TABLE "Tag" (
     "name" TEXT NOT NULL,
     "tagGroupId" TEXT NOT NULL,
     "accountId" TEXT NOT NULL,
-    "iconInfo" TEXT NOT NULL DEFAULT 'fa-tag',
+    "iconName" TEXT NOT NULL DEFAULT 'fa-tag',
 
     CONSTRAINT "Tag_pkey" PRIMARY KEY ("id")
 );

@@ -4,36 +4,36 @@ import type { DefaultTagGroup } from './tags.types';
 export const DEFAULT_TAGS:DefaultTagGroup[]= [
   {
     groupName: 'Food and drink', 
-    iconInfo: 'fa-utensils',
+    iconName: 'fa-utensils',
     tags: [
-      { name: 'Cafe', iconInfo: 'fa-martini-glass-citrus' }, 
-      { name: 'Restaraunts', iconInfo: 'fa-bowl-rice' }, 
-      { name: 'Supermarket', iconInfo: 'fa-cart-shopping' }
+      { name: 'Cafe', iconName: 'fa-martini-glass-citrus' }, 
+      { name: 'Restaraunts', iconName: 'fa-bowl-rice' }, 
+      { name: 'Supermarket', iconName: 'fa-cart-shopping' }
     ],
   },
   {
     groupName: 'Transport', 
-    iconInfo: 'fa-car-side',
+    iconName: 'fa-car-side',
     tags: [
-      { name: 'Gas', iconInfo: 'fa-gas-pump' }, 
-      { name: 'Maintenatnce', iconInfo: 'fa-oil-can' }
+      { name: 'Gas', iconName: 'fa-gas-pump' }, 
+      { name: 'Maintenatnce', iconName: 'fa-oil-can' }
     ],
   },
   {
     groupName: 'Bills', 
-    iconInfo: 'fa-file-lines',
+    iconName: 'fa-file-lines',
     tags: [
-      { name: 'Internet', iconInfo: 'fa-globe' }, 
-      { name: 'Water', iconInfo: 'fa-faucet-drip' }, 
-      { name: 'Electricity', iconInfo: 'fa-plug' }
+      { name: 'Internet', iconName: 'fa-globe' }, 
+      { name: 'Water', iconName: 'fa-faucet-drip' }, 
+      { name: 'Electricity', iconName: 'fa-plug' }
     ],
   },
   {
     groupName: 'Brands', 
-    iconInfo: 'fa-copyright',
+    iconName: 'fa-copyright',
     tags: [
-      { name: 'Shopee', iconInfo: 'fa-cart-plus' }, 
-      { name: 'Lotus', iconInfo: 'fa-tree' }, 
+      { name: 'Shopee', iconName: 'fa-cart-plus' }, 
+      { name: 'Lotus', iconName: 'fa-tree' }, 
     ],
   },
 ];

@@ -2,7 +2,7 @@ type TagGroupResponse {
   id: String!
   name: String!
   tags: [TagResponse!]
-  iconInfo: String!
+  iconName: String!
 }
 
 type TagResponse {
@@ -13,7 +13,7 @@ type TagResponse {
 }
 
 type Mutation {
-  createTagGroup(name: String! icon: String!): TagGroupResponse!
+  createTagGroup(name: String! iconName: String!): TagGroupResponse!
 }
 
 type Mutation {
