@@ -31,7 +31,10 @@ import type {
 import type { TransactionRepresentation } from '../src/transaction/transaction.types';
 
 describe('Testing tags', () => {
+  const testEmail = getRandomEmail();
+  const testPassword = getRandomPassword();
   let app: INestApplication;
+  let jwtToken: string;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -46,6 +49,38 @@ describe('Testing tags', () => {
 
     app = moduleRef.createNestApplication();
     await app.init();
+    await signUpTool(app, testEmail, testPassword);
+    jwtToken = await signInTool(app, testEmail, testPassword);
+  });
+
+  describe('Tag group', () => {
+      const tagGroupName = getRandomString(8);
+      const tagGroupIconName = getRandomString(8);
+      const tagName = getRandomString(8);
+
+      let tagGroupId: string;
+      let tagId: string;
+
+      test('Create tag group', async () => {
+          const jwtToken = await signInTool(app, testEmail, testPassword);
+          const newTagGroupQuery = gql`
+            mutation {
+                createTagGroup(name: "${tagGroupName}") {
+                    id name iconName
+                }
+            }
+          `;
+          const { data } = await request<{
+              createTagGroup: TagGroupRepresentation;
+          }>(app.getHttpServer())
+            .query(newTagGroupQuery)
+            .set(...getAuthHeader(jwtToken))
+            .expectNoErrors();
+
+          expect(data?.createTagGroup.name).toEqual(tagGroupName);
+          expect(data?.createTagGroup.id).toBeTruthy();
+          expect(data?.createTagGroup.iconName).toEqual('fa-tags');
+      });
   });
 
   describe('Create tag group and tag', () => {
@@ -53,15 +88,8 @@ describe('Testing tags', () => {
     const tagGroupIconName = getRandomString(8);
     const tagName = getRandomString(8);
 
-    const testEmail = getRandomEmail();
-    const testPassword = getRandomPassword();
-
     let tagGroupId: string;
     let tagId: string;
-
-    test('Sign up', async () => {
-      await signUpTool(app, testEmail, testPassword);
-    });
 
     test('Create tag group', async () => {
       const jwtToken = await signInTool(app, testEmail, testPassword);
@@ -205,4 +233,5 @@ describe('Testing tags', () => {
       expect(data?.updateTransaction.tags.map(tag => tag.id)).toContain(tagId);
     });
   });
+
 });

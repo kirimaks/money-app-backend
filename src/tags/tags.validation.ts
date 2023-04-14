@@ -4,7 +4,7 @@ import { NAME_MAX_LENGTH } from '../errors/constants';
 
 export const createTagGroupSchema = Zod.object({
   name: Zod.string().max(NAME_MAX_LENGTH),
-  iconName: Zod.string().max(100),
+  iconName: Zod.optional(Zod.string().max(100)),
 });
 
 export type CreateTagGroupInput = Zod.infer<typeof createTagGroupSchema>;
