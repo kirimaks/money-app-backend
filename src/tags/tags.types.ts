@@ -63,3 +63,7 @@ export type DefaultTagGroup = {
     iconName: string;
   }[]
 };
+
+export type DeleteTagGroupResponse = {
+  status: string;
+};

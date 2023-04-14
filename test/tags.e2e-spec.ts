@@ -21,7 +21,7 @@ import { getAuthHeader } from './tools/auth';
 import { getTransactionTime, getTransactionAmount } from './tools/transactions';
 import { createTransaction } from './tools/transactions';
 import { WRONG_ERROR_TEXT } from './constants';
-import { TAG_GROUP_EXIST_ERROR } from '../src/tags/tags.constants';
+import { TAG_GROUP_EXIST_ERROR, TAG_GROUP_NOT_FOUND_ERROR, TAG_GROUP_REMOVED } from '../src/tags/tags.constants';
 
 import type {
   TagRepresentation,
@@ -70,9 +70,8 @@ describe('Testing tags', () => {
                 }
             }
           `;
-          const { data } = await request<{
-              createTagGroup: TagGroupRepresentation;
-          }>(app.getHttpServer())
+
+          const { data } = await request<{ createTagGroup: TagGroupRepresentation; }>(app.getHttpServer())
             .query(newTagGroupQuery)
             .set(...getAuthHeader(jwtToken))
             .expectNoErrors();
@@ -80,6 +79,73 @@ describe('Testing tags', () => {
           expect(data?.createTagGroup.name).toEqual(tagGroupName);
           expect(data?.createTagGroup.id).toBeTruthy();
           expect(data?.createTagGroup.iconName).toEqual('fa-tags');
+
+          if (data && isString(data?.createTagGroup.id)) {
+            tagGroupId = data?.createTagGroup.id;
+          } else {
+            throw new Error('Missing tag group id');
+          }
+      });
+
+      test('Tag group duplicate', async () => {
+        const jwtToken = await signInTool(app, testEmail, testPassword);
+        const newTagGroupQuery = gql`
+          mutation {
+            createTagGroup(name: "${tagGroupName}") {
+              id name iconName
+            }
+          }
+        `;
+
+        const { errors } = await request<{ createTagGroup: TagGroupRepresentation; }>(app.getHttpServer())
+          .query(newTagGroupQuery)
+          .set(...getAuthHeader(jwtToken));
+
+        if (errors && errors.length > 0) {
+          const errorText = errors[0].message;
+          expect(errorText).toEqual(TAG_GROUP_EXIST_ERROR);
+        } else {
+          throw new Error(WRONG_ERROR_TEXT);
+        }
+      });
+
+      test('Remove tag group', async () => {
+        const jwtToken = await signInTool(app, testEmail, testPassword);
+        const deleteTagGroupQuery = gql`
+          mutation {
+            deleteTagGroup(tagGroupId: "${tagGroupId}") {
+              status
+            }
+          }
+        `;
+
+        const { data } = await request<{deleteTagGroup: { status: string }}>(app.getHttpServer())
+          .query(deleteTagGroupQuery)
+          .set(...getAuthHeader(jwtToken))
+          .expectNoErrors();
+
+        expect(data?.deleteTagGroup.status).toEqual(TAG_GROUP_REMOVED);
+
+      });
+
+      test('Remove missing tag group', async () => {
+        const jwtToken = await signInTool(app, testEmail, testPassword);
+        const deleteTagGroupQuery = gql`
+          mutation {
+            deleteTagGroup(tagGroupId: "hello") { status }
+          }
+        `;
+
+        const { errors } = await request(app.getHttpServer())
+          .query(deleteTagGroupQuery)
+          .set(...getAuthHeader(jwtToken));
+
+        if (errors && errors.length > 0) {
+          const errorText = errors[0].message;
+          expect(errorText).toEqual(TAG_GROUP_NOT_FOUND_ERROR);
+        } else {
+          throw new Error(WRONG_ERROR_TEXT);
+        }
       });
   });
 
@@ -117,28 +183,6 @@ describe('Testing tags', () => {
       } else {
         throw new Error('Missing tag group id');
       }
-    });
-
-    test('Create same tag group again', async () => {
-        const jwtToken = await signInTool(app, testEmail, testPassword);
-        const newTagGroupQuery = gql`
-            mutation {
-                createTagGroup(name: "${tagGroupName}" iconName: "${tagGroupIconName}") {
-                    id name iconName
-                }
-            }
-        `;
-
-        const { errors } = await request<{ createTagGroup: TagGroupRepresentation; }>(app.getHttpServer())
-            .query(newTagGroupQuery)
-            .set(...getAuthHeader(jwtToken));
-
-        if (errors && errors.length > 0) {
-            const errorText = errors[0].message;
-            expect(errorText).toEqual(TAG_GROUP_EXIST_ERROR);
-        } else {
-            throw new Error(WRONG_ERROR_TEXT);
-        }
     });
 
     test('Create tag', async () => {

@@ -58,6 +58,7 @@ model TagGroup {
   iconName String @default("fa-tags")
 
   @@unique(fields: [accountId, name], name: "group_name_by_account")
+  @@unique(fields: [accountId, id], name: "group_id_by_account")
 }
 
 model Tag {

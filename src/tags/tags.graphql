@@ -12,12 +12,20 @@ type TagResponse {
   iconName: String!
 }
 
+type DeleteTagGroupResponse {
+  status: String!
+}
+
 type Mutation {
   createTagGroup(name: String! iconName: String): TagGroupResponse!
 }
 
 type Mutation {
   createTag(name: String! tagGroupId: String!): TagResponse!
+}
+
+type Mutation {
+  deleteTagGroup(tagGroupId: String!): DeleteTagGroupResponse!
 }
 
 type Query {

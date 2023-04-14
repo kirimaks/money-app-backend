@@ -3,7 +3,8 @@ import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { DEFAULT_TAGS } from './tags.default';
-import { TagGroupExistError } from './tags.errors';
+import { TagGroupExistError, TagGroupNotFoundError } from './tags.errors';
+import { TAG_GROUP_REMOVED, TAG_GROUP_NOT_FOUND_ERROR } from './tags.constants';
 
 import type {
   TagGroupRepresentation,
@@ -11,6 +12,7 @@ import type {
   NewTagPayload,
   TagRepresentation,
   NewTag,
+  DeleteTagGroupResponse,
 } from './tags.types';
 
 @Injectable()
@@ -139,5 +141,32 @@ export class TagsService {
     await Promise.all(queries);
 
     this.logger.debug('Default tags created');
+  }
+
+  async deleteTagGroup(tagGroupId:string, accountId:string):Promise<DeleteTagGroupResponse> {
+    try {
+      const deleteTag = await this.prisma.tagGroup.delete({
+        where: {
+          group_id_by_account: {
+            id: tagGroupId,
+            accountId: accountId
+          }
+        }
+      });
+
+      return {
+        status: TAG_GROUP_REMOVED,
+      };
+
+    } catch(error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+          if (error.code === 'P2025') {
+            throw new TagGroupNotFoundError(TAG_GROUP_NOT_FOUND_ERROR);
+          }
+      }
+
+      this.logger.error(error);
+      throw error;
+    }
   }
 }

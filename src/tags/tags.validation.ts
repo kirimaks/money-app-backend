@@ -15,3 +15,8 @@ export const createTagSchema = Zod.object({
 });
 
 export type CreateTagInput = Zod.infer<typeof createTagSchema>;
+
+export const deleteTagGroupSchema = Zod.object({
+  tagGroupId: Zod.string({required_error: 'tagGroupId is required'}).max(100),
+});
+export type DeleteTagGroupInput = Zod.infer<typeof deleteTagGroupSchema>;
