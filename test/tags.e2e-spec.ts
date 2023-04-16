@@ -21,7 +21,10 @@ import { getAuthHeader } from './tools/auth';
 import { getTransactionTime, getTransactionAmount } from './tools/transactions';
 import { createTransaction } from './tools/transactions';
 import { WRONG_ERROR_TEXT } from './constants';
-import { TAG_GROUP_EXIST_ERROR, TAG_GROUP_NOT_FOUND_ERROR, TAG_GROUP_REMOVED } from '../src/tags/tags.constants';
+import { 
+  TAG_GROUP_EXIST_ERROR, TAG_GROUP_NOT_FOUND_ERROR, 
+  TAG_GROUP_REMOVED, TAG_REMOVED, TAG_NOT_FOUND_ERROR, TAG_EXIST_ERROR
+} from '../src/tags/tags.constants';
 
 import type {
   TagRepresentation,
@@ -53,13 +56,12 @@ describe('Testing tags', () => {
     jwtToken = await signInTool(app, testEmail, testPassword);
   });
 
-  describe('Tag group', () => {
+  describe('Testing tag group', () => {
       const tagGroupName = getRandomString(8);
       const tagGroupIconName = getRandomString(8);
       const tagName = getRandomString(8);
 
       let tagGroupId: string;
-      let tagId: string;
 
       test('Create tag group', async () => {
           const jwtToken = await signInTool(app, testEmail, testPassword);
@@ -147,6 +149,132 @@ describe('Testing tags', () => {
           throw new Error(WRONG_ERROR_TEXT);
         }
       });
+  });
+
+  describe('Testing Tags', () => {
+    const tagGroupName = getRandomString(8);
+    const tagName = getRandomString(8);
+
+    let tagGroupId: string;
+    let tagId: string;
+
+    test('Create tag group', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const newTagGroupQuery = gql`
+        mutation {
+          createTagGroup(name: "${tagGroupName}") {
+            id name
+          }
+        }
+      `;
+
+      const tagGroupResponse = await request<{ createTagGroup: TagGroupRepresentation }>(app.getHttpServer())
+        .query(newTagGroupQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      if (tagGroupResponse.data) {
+        expect(tagGroupResponse.data.createTagGroup.name).toEqual(tagGroupName);
+        expect(tagGroupResponse.data.createTagGroup.id).toBeTruthy();
+
+        tagGroupId = tagGroupResponse.data.createTagGroup.id;
+
+      } else {
+          throw new Error('Cannot receive graphql data');
+      }
+    });
+
+    test('Create tag', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const newTagQuery = gql`
+        mutation {
+          createTag(name: "${tagName}" tagGroupId: "${tagGroupId}") {
+            id name tagGroupId
+          }
+        }
+      `;
+
+      const tagResponse = await request<{ createTag: TagRepresentation }>(app.getHttpServer())
+        .query(newTagQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      if (tagResponse.data) {
+        expect(tagResponse.data.createTag.name).toEqual(tagName);
+        expect(tagResponse.data.createTag.tagGroupId).toEqual(tagGroupId);
+        expect(tagResponse.data.createTag.id).toBeTruthy();
+
+        tagId = tagResponse.data.createTag.id;
+
+      } else {
+        throw new Error('Cannot receive graphql data');
+      }
+    });
+
+    test('Create tag duplicate', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const newTagQuery = gql`
+        mutation {
+          createTag(name: "${tagName}" tagGroupId: "${tagGroupId}") {
+            id name tagGroupId
+          }
+        }
+      `;
+
+      const { errors } = await request(app.getHttpServer())
+        .query(newTagQuery)
+        .set(...getAuthHeader(jwtToken));
+
+      if (errors && errors.length > 0) {
+        const errorText = errors[0].message;
+        expect(errorText).toEqual(TAG_EXIST_ERROR);
+
+      } else {
+        throw new Error(WRONG_ERROR_TEXT);
+      }
+    });
+
+    test('Remove tag', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const removeTagQuery = gql`
+        mutation {
+          deleteTag(tagId: "${tagId}") {
+            status
+          }
+        }
+      `;
+
+      const { data } = await request<{ deleteTag: {status: string} }>(app.getHttpServer())
+        .query(removeTagQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      expect(data?.deleteTag.status).toEqual(TAG_REMOVED);
+    });
+
+    test('Remove missing tag', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const removeTagQuery = gql`
+        mutation {
+          deleteTag(tagId: "some-missing-id") {
+            status
+          }
+        }
+      `;
+
+      const { errors } = await request(app.getHttpServer())
+        .query(removeTagQuery)
+        .set(...getAuthHeader(jwtToken));
+
+      if (errors && errors.length > 0) {
+        const errorText = errors[0].message;
+        expect(errorText).toEqual(TAG_NOT_FOUND_ERROR);
+
+      } else {
+        throw new Error(WRONG_ERROR_TEXT);
+      }
+    });
+
   });
 
   describe('Create tag group and tag', () => {
