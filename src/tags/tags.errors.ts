@@ -17,3 +17,23 @@ export class TagGroupNotFoundError extends Error {
     this.name = 'TagGroupNotFound';
   }
 }
+
+export class TagNotFoundError extends Error {
+  message: string;
+
+  constructor(message: string) {
+    super(message);
+    this.message = message;
+    this.name = 'TagNotFoundError';
+  }
+}
+
+export class TagExistError extends Error {
+  message: string;
+
+  constructor(message: string) {
+    super(message);
+    this.message = message;
+    this.name = 'TagExistError';
+  }
+}

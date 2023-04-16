@@ -67,3 +67,7 @@ export type DefaultTagGroup = {
 export type DeleteTagGroupResponse = {
   status: string;
 };
+
+export type DeleteTagResponse = {
+  status: string;
+};

@@ -16,6 +16,10 @@ type DeleteTagGroupResponse {
   status: String!
 }
 
+type DeleteTagResponse {
+  status: String!
+}
+
 type Mutation {
   createTagGroup(name: String! iconName: String): TagGroupResponse!
 }
@@ -26,6 +30,10 @@ type Mutation {
 
 type Mutation {
   deleteTagGroup(tagGroupId: String!): DeleteTagGroupResponse!
+}
+
+type Mutation {
+  deleteTag(tagId: String!): DeleteTagResponse!
 }
 
 type Query {

@@ -3,8 +3,8 @@ import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { DEFAULT_TAGS } from './tags.default';
-import { TagGroupExistError, TagGroupNotFoundError } from './tags.errors';
-import { TAG_GROUP_REMOVED, TAG_GROUP_NOT_FOUND_ERROR } from './tags.constants';
+import { TagGroupExistError, TagGroupNotFoundError, TagNotFoundError, TagExistError } from './tags.errors';
+import { TAG_GROUP_REMOVED, TAG_GROUP_NOT_FOUND_ERROR, TAG_REMOVED, TAG_NOT_FOUND_ERROR, TAG_EXIST_ERROR } from './tags.constants';
 
 import type {
   TagGroupRepresentation,
@@ -13,6 +13,7 @@ import type {
   TagRepresentation,
   NewTag,
   DeleteTagGroupResponse,
+  DeleteTagResponse
 } from './tags.types';
 
 @Injectable()
@@ -83,6 +84,12 @@ export class TagsService {
         tagGroupId: tag.tagGroupId,
       };
     } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new TagExistError(TAG_EXIST_ERROR);
+        }
+      }
+
       this.logger.error(error);
       throw error;
     }
@@ -145,7 +152,7 @@ export class TagsService {
 
   async deleteTagGroup(tagGroupId:string, accountId:string):Promise<DeleteTagGroupResponse> {
     try {
-      const deleteTag = await this.prisma.tagGroup.delete({
+      const deleteTagGroup = await this.prisma.tagGroup.delete({
         where: {
           group_id_by_account: {
             id: tagGroupId,
@@ -165,6 +172,32 @@ export class TagsService {
           }
       }
 
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async deleteTag(tagId: string, accountId: string):Promise<DeleteTagResponse> {
+    try {
+      const deleteTag = await this.prisma.tag.delete({
+        where: {
+          tag_name_by_account: {
+            id: tagId,
+            accountId: accountId,
+          }
+        }
+      });
+
+      return {
+        status: TAG_REMOVED,
+      };
+
+    } catch(error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw new TagNotFoundError(TAG_NOT_FOUND_ERROR);
+        }
+      }
       this.logger.error(error);
       throw error;
     }

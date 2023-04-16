@@ -2,18 +2,21 @@ import {
   Logger,
   UseGuards,
   InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TagsService } from './tags.service';
-import { createTagSchema } from './tags.validation';
+import { createTagSchema, deleteTagSchema } from './tags.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
 import { INTERNAL_SERVER_ERROR } from '../errors/constants';
+import { TagNotFoundError, TagExistError } from './tags.errors';
+import { TAG_NOT_FOUND_ERROR, TAG_EXIST_ERROR } from './tags.constants';
 
 import type { UserInRequest } from '../user/user.types';
-import type { CreateTagInput } from './tags.validation';
-import type { TagRepresentation, TagGroupRepresentation } from './tags.types';
+import type { CreateTagInput, DeleteTagInput } from './tags.validation';
+import type { TagRepresentation, TagGroupRepresentation, DeleteTagResponse } from './tags.types';
 
 @Resolver('Tag')
 export class TagsResolver {
@@ -39,6 +42,29 @@ export class TagsResolver {
         accountId: user.accountId,
       });
     } catch (error) {
+      if (error instanceof TagExistError) {
+        throw new BadRequestException(TAG_EXIST_ERROR);
+      }
+
+      this.logger.error(error);
+      throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Mutation()
+  @UseGuards(GQLJwtAuthGuard)
+  async deleteTag(
+    @Args(new ZodPipe(deleteTagSchema))
+    deleteTagInput: DeleteTagInput,
+    @CurrentUser() user: UserInRequest,
+  ): Promise<DeleteTagResponse> {
+    try {
+      return await this.tagsService.deleteTag(deleteTagInput.tagId, user.accountId);
+    } catch(error) {
+      if (error instanceof TagNotFoundError) {
+        throw new BadRequestException(TAG_NOT_FOUND_ERROR);
+      }
+
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
     }
