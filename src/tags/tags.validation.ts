@@ -10,8 +10,9 @@ export const createTagGroupSchema = Zod.object({
 export type CreateTagGroupInput = Zod.infer<typeof createTagGroupSchema>;
 
 export const createTagSchema = Zod.object({
-  name: Zod.string().max(NAME_MAX_LENGTH),
-  tagGroupId: Zod.string(),
+  name: Zod.string({ required_error: 'Tag name is required' }).max(NAME_MAX_LENGTH, 'Too long'),
+  tagGroupId: Zod.string({ required_error: 'Group id is required' }).min(1, 'Tag group cannot be empty'),
+  iconName: Zod.optional(Zod.string()),
 });
 
 export type CreateTagInput = Zod.infer<typeof createTagSchema>;

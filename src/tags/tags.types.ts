@@ -15,12 +15,14 @@ export type TagRepresentation = {
   id: string;
   tagGroupId: string;
   name: string;
+  iconName: string;
 };
 
 export type NewTagPayload = {
   name: string;
   accountId: string;
   tagGroupId: string;
+  iconName?: string;
 };
 
 export type TransactionTags = {

@@ -39,6 +39,7 @@ export class TagsResolver {
       return await this.tagsService.createTag({
         name: createTagInput.name,
         tagGroupId: createTagInput.tagGroupId,
+        iconName: createTagInput.iconName,
         accountId: user.accountId,
       });
     } catch (error) {

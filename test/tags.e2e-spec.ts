@@ -275,6 +275,30 @@ describe('Testing tags', () => {
       }
     });
 
+    test('Create a tag with icon', async () => {
+      const jwtToken = await signInTool(app, testEmail, testPassword);
+      const randomName = getRandomString(8);
+      const iconName = getRandomString(8);
+      const createTagQuery = gql`
+        mutation {
+          createTag(name: "${randomName}" tagGroupId: "${tagGroupId}" iconName: "${iconName}") {
+            id name tagGroupId iconName
+          }
+        }
+      `;
+
+      const resp = await request<{ createTag: TagRepresentation }>(app.getHttpServer())
+        .query(createTagQuery)
+        .set(...getAuthHeader(jwtToken))
+        .expectNoErrors();
+
+      if (resp.data) {
+        expect(resp.data.createTag.name).toEqual(randomName);
+        expect(resp.data.createTag.iconName).toEqual(iconName);
+      } else {
+        throw new Error('Cannot receive graphql data');
+      }
+    });
   });
 
   describe('Create tag group and tag', () => {

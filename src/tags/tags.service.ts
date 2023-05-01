@@ -75,6 +75,7 @@ export class TagsService {
               id: payload.tagGroupId,
             },
           },
+          iconName: payload.iconName,
         },
       });
 
@@ -82,7 +83,9 @@ export class TagsService {
         name: tag.name,
         id: tag.id,
         tagGroupId: tag.tagGroupId,
+        iconName: tag.iconName,
       };
+
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
