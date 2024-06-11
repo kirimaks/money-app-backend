@@ -1,6 +1,6 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
@@ -13,18 +13,20 @@ import type {
   NewTransactionData,
   UpdateTransactionData,
   LatestTransactionsByDay,
-  LatestTransactionsRange
+  LatestTransactionsRange,
 } from './transaction.types';
 
-function transactionResponse(transaction: Transaction): TransactionRepresentation {
+function transactionResponse(
+  transaction: Transaction,
+): TransactionRepresentation {
   return {
     id: transaction.id,
     name: transaction.name,
     amount: Number(transaction.amount_cents) / 100,
     datetime: dayjs.utc(transaction.utc_datetime).format(),
-    tags: transaction.TransactionTags.map((tag) => ({ 
-      id: tag.tagId, 
-      name: tag.tag.name, 
+    tags: transaction.TransactionTags.map((tag) => ({
+      id: tag.tagId,
+      name: tag.tag.name,
       tagGroupId: tag.tag.tagGroupId,
       iconName: tag.tag.iconName,
     })),
@@ -37,18 +39,19 @@ function getNewTagsQuery(tags: string[]) {
   });
 }
 
-function showData(responseBuff:any) {
+function showData(responseBuff: any) {
   console.log(
     JSON.stringify(
-      responseBuff, (key, value) => {
+      responseBuff,
+      (key, value) => {
         if (typeof value === 'bigint') {
           return value.toString();
-
         } else {
           return value;
         }
-      }, 2
-    )
+      },
+      2,
+    ),
   );
 }
 
@@ -88,9 +91,9 @@ export class TransactionService {
         include: {
           TransactionTags: {
             include: {
-              tag: true
-            }
-          }
+              tag: true,
+            },
+          },
         },
       };
 
@@ -107,7 +110,6 @@ export class TransactionService {
       );
 
       return transactionResponse(transaction);
-
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');
@@ -135,7 +137,7 @@ export class TransactionService {
           TransactionTags: {
             include: {
               tag: true,
-            }
+            },
           },
         },
       });
@@ -168,7 +170,7 @@ export class TransactionService {
           TransactionTags: {
             include: {
               tag: true,
-            }
+            },
           },
         },
       };
@@ -196,11 +198,13 @@ export class TransactionService {
     }
   }
 
-  async getLatestTransactions(transactionsRange:LatestTransactionsRange):Promise<LatestTransactionsByDay[]> {
+  async getLatestTransactions(
+    transactionsRange: LatestTransactionsRange,
+  ): Promise<LatestTransactionsByDay[]> {
     const timeRangeEnd = dayjs(transactionsRange.timeRangeEnd);
     const timeRangeStart = dayjs(transactionsRange.timeRangeStart);
 
-    const responseBuff:Record<string, LatestTransactionsByDay>= {};
+    const responseBuff: Record<string, LatestTransactionsByDay> = {};
 
     const transactions = await this.prisma.transaction.findMany({
       where: {
@@ -208,7 +212,7 @@ export class TransactionService {
         utc_datetime: {
           gte: timeRangeStart.toDate(),
           lte: timeRangeEnd.toDate(),
-        }
+        },
       },
       orderBy: {
         utc_datetime: 'desc',
@@ -218,9 +222,9 @@ export class TransactionService {
         TransactionTags: {
           include: {
             tag: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     for (const transaction of transactions) {
@@ -234,13 +238,12 @@ export class TransactionService {
       if (!(transactionDate in responseBuff)) {
         if (Object.keys(responseBuff).length >= 2) {
           break;
-
         } else {
           responseBuff[transactionDate] = {
             totalAmount: 0,
             date: transactionDate,
-            transactions: []
-          }
+            transactions: [],
+          };
         }
       }
 

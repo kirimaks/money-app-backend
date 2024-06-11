@@ -3,8 +3,19 @@ import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { DEFAULT_TAGS } from './tags.default';
-import { TagGroupExistError, TagGroupNotFoundError, TagNotFoundError, TagExistError } from './tags.errors';
-import { TAG_GROUP_REMOVED, TAG_GROUP_NOT_FOUND_ERROR, TAG_REMOVED, TAG_NOT_FOUND_ERROR, TAG_EXIST_ERROR } from './tags.constants';
+import {
+  TagGroupExistError,
+  TagGroupNotFoundError,
+  TagNotFoundError,
+  TagExistError,
+} from './tags.errors';
+import {
+  TAG_GROUP_REMOVED,
+  TAG_GROUP_NOT_FOUND_ERROR,
+  TAG_REMOVED,
+  TAG_NOT_FOUND_ERROR,
+  TAG_EXIST_ERROR,
+} from './tags.constants';
 
 import type {
   TagGroupRepresentation,
@@ -13,7 +24,7 @@ import type {
   TagRepresentation,
   NewTag,
   DeleteTagGroupResponse,
-  DeleteTagResponse
+  DeleteTagResponse,
 } from './tags.types';
 
 @Injectable()
@@ -44,15 +55,15 @@ export class TagsService {
 
       return {
         name: tagGroup.name,
-        id: tagGroup.id, 
+        id: tagGroup.id,
         iconName: tagGroup.iconName,
         tags: [],
       };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2002') {
-              throw new TagGroupExistError('Tag group exist');
-          }
+        if (error.code === 'P2002') {
+          throw new TagGroupExistError('Tag group exist');
+        }
       }
 
       this.logger.error(error);
@@ -85,7 +96,6 @@ export class TagsService {
         tagGroupId: tag.tagGroupId,
         iconName: tag.iconName,
       };
-
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -108,14 +118,13 @@ export class TagsService {
           tags: {
             orderBy: {
               name: 'asc',
-            }
+            },
           },
         },
         orderBy: {
           name: 'asc',
-        }
+        },
       });
-
     } catch (error) {
       this.logger.error(error);
       throw error;
@@ -153,26 +162,28 @@ export class TagsService {
     this.logger.debug('Default tags created');
   }
 
-  async deleteTagGroup(tagGroupId:string, accountId:string):Promise<DeleteTagGroupResponse> {
+  async deleteTagGroup(
+    tagGroupId: string,
+    accountId: string,
+  ): Promise<DeleteTagGroupResponse> {
     try {
       const deleteTagGroup = await this.prisma.tagGroup.delete({
         where: {
           group_id_by_account: {
             id: tagGroupId,
-            accountId: accountId
-          }
-        }
+            accountId: accountId,
+          },
+        },
       });
 
       return {
         status: TAG_GROUP_REMOVED,
       };
-
-    } catch(error) {
+    } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-          if (error.code === 'P2025') {
-            throw new TagGroupNotFoundError(TAG_GROUP_NOT_FOUND_ERROR);
-          }
+        if (error.code === 'P2025') {
+          throw new TagGroupNotFoundError(TAG_GROUP_NOT_FOUND_ERROR);
+        }
       }
 
       this.logger.error(error);
@@ -180,22 +191,24 @@ export class TagsService {
     }
   }
 
-  async deleteTag(tagId: string, accountId: string):Promise<DeleteTagResponse> {
+  async deleteTag(
+    tagId: string,
+    accountId: string,
+  ): Promise<DeleteTagResponse> {
     try {
       const deleteTag = await this.prisma.tag.delete({
         where: {
           tag_name_by_account: {
             id: tagId,
             accountId: accountId,
-          }
-        }
+          },
+        },
       });
 
       return {
         status: TAG_REMOVED,
       };
-
-    } catch(error) {
+    } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw new TagNotFoundError(TAG_NOT_FOUND_ERROR);

@@ -6,4 +6,5 @@ export const USER_NOT_FOUND_ERROR = 'User not found';
 export const AUTHORIZATION_ERROR = 'Unauthorized';
 export const CATEGORY_NOT_FOUND_ERROR = 'Category not found';
 export const INVALID_DATETIME = 'Invalid datetime string! Must be UTC.';
-export const INVALID_TIME_RANGE = 'Range start time should be less than end time';
+export const INVALID_TIME_RANGE =
+  'Range start time should be less than end time';

@@ -16,7 +16,11 @@ import { TAG_NOT_FOUND_ERROR, TAG_EXIST_ERROR } from './tags.constants';
 
 import type { UserInRequest } from '../user/user.types';
 import type { CreateTagInput, DeleteTagInput } from './tags.validation';
-import type { TagRepresentation, TagGroupRepresentation, DeleteTagResponse } from './tags.types';
+import type {
+  TagRepresentation,
+  TagGroupRepresentation,
+  DeleteTagResponse,
+} from './tags.types';
 
 @Resolver('Tag')
 export class TagsResolver {
@@ -60,8 +64,11 @@ export class TagsResolver {
     @CurrentUser() user: UserInRequest,
   ): Promise<DeleteTagResponse> {
     try {
-      return await this.tagsService.deleteTag(deleteTagInput.tagId, user.accountId);
-    } catch(error) {
+      return await this.tagsService.deleteTag(
+        deleteTagInput.tagId,
+        user.accountId,
+      );
+    } catch (error) {
       if (error instanceof TagNotFoundError) {
         throw new BadRequestException(TAG_NOT_FOUND_ERROR);
       }

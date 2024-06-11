@@ -1,7 +1,12 @@
 import { z as Zod } from 'zod';
 import dayjs from '../tools/dayjs';
 
-import { INVALID_TIMESTAMP, NAME_MAX_LENGTH, INVALID_DATETIME, INVALID_TIME_RANGE } from '../errors/constants';
+import {
+  INVALID_TIMESTAMP,
+  NAME_MAX_LENGTH,
+  INVALID_DATETIME,
+  INVALID_TIME_RANGE,
+} from '../errors/constants';
 
 export const createTransactionSchema = Zod.object({
   name: Zod.string().max(NAME_MAX_LENGTH),
@@ -24,14 +29,16 @@ export const updateTransactionSchema = Zod.object({
 export type UpdateTransactionInput = Zod.infer<typeof updateTransactionSchema>;
 
 export const latestTransactionsSchema = Zod.object({
-  timeRangeStart: Zod.string().datetime({message: INVALID_DATETIME}),
-  timeRangeEnd: Zod.string().datetime({message: INVALID_DATETIME}),
+  timeRangeStart: Zod.string().datetime({ message: INVALID_DATETIME }),
+  timeRangeEnd: Zod.string().datetime({ message: INVALID_DATETIME }),
 }).refine(
-  (data) => dayjs(data.timeRangeStart).unix() < dayjs(data.timeRangeEnd).unix(), 
+  (data) => dayjs(data.timeRangeStart).unix() < dayjs(data.timeRangeEnd).unix(),
   {
     message: INVALID_TIME_RANGE,
     path: ['timeRangeEnd'],
-  }
+  },
 );
 
-export type LatestTransactionsInput = Zod.infer<typeof latestTransactionsSchema>;
+export type LatestTransactionsInput = Zod.infer<
+  typeof latestTransactionsSchema
+>;

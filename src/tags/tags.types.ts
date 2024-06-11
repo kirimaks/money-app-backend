@@ -32,7 +32,7 @@ export type TransactionTags = {
     name: string;
     tagGroupId: string;
     iconName: string;
-  }
+  };
 };
 
 export type AccountTags = {
@@ -63,7 +63,7 @@ export type DefaultTagGroup = {
   tags: {
     name: string;
     iconName: string;
-  }[]
+  }[];
 };
 
 export type DeleteTagGroupResponse = {

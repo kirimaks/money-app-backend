@@ -10,14 +10,23 @@ import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { TagsService } from './tags.service';
 import { ZodPipe } from '../pipes/zod.pipe';
-import { TAG_GROUP_EXIST_ERROR, TAG_GROUP_NOT_FOUND_ERROR } from './tags.constants';
+import {
+  TAG_GROUP_EXIST_ERROR,
+  TAG_GROUP_NOT_FOUND_ERROR,
+} from './tags.constants';
 import { TagGroupExistError } from './tags.errors';
 import { createTagGroupSchema, deleteTagGroupSchema } from './tags.validation';
 import { TagGroupNotFoundError } from './tags.errors';
 
 import type { UserInRequest } from '../user/user.types';
-import type { TagGroupRepresentation, DeleteTagGroupResponse } from './tags.types';
-import type { CreateTagGroupInput, DeleteTagGroupInput } from './tags.validation';
+import type {
+  TagGroupRepresentation,
+  DeleteTagGroupResponse,
+} from './tags.types';
+import type {
+  CreateTagGroupInput,
+  DeleteTagGroupInput,
+} from './tags.validation';
 
 @Resolver('TagGroup')
 export class TagGroupResolver {
@@ -44,7 +53,7 @@ export class TagGroupResolver {
       });
     } catch (error) {
       if (error instanceof TagGroupExistError) {
-          throw new BadRequestException(TAG_GROUP_EXIST_ERROR);
+        throw new BadRequestException(TAG_GROUP_EXIST_ERROR);
       }
 
       this.logger.error(error);
@@ -60,7 +69,10 @@ export class TagGroupResolver {
     @CurrentUser() user: UserInRequest,
   ): Promise<DeleteTagGroupResponse> {
     try {
-        return await this.tagsService.deleteTagGroup(deleteTagGroupInput.tagGroupId, user.accountId);
+      return await this.tagsService.deleteTagGroup(
+        deleteTagGroupInput.tagGroupId,
+        user.accountId,
+      );
     } catch (error) {
       if (error instanceof TagGroupNotFoundError) {
         throw new BadRequestException(TAG_GROUP_NOT_FOUND_ERROR);
