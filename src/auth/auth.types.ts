@@ -1,4 +1,4 @@
-import type { UserInRequest } from '../user/user.types';
+import type { UserInRequest, User } from '../user/user.types';
 
 export type JWTSignPayload = {
   sub: UserInRequest;
@@ -10,5 +10,6 @@ export type SignUpOK = {
 
 export type SignInOK = {
   message: string;
-  jwt_token: string;
+  jwtToken: string;
+  user: User;
 };

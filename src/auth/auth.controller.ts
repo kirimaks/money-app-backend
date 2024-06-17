@@ -65,10 +65,11 @@ export class AuthController {
   @UsePipes(new ZodPipe(signInBodySchema))
   async signIn(@Body() signInBody: SignInDTO) {
     try {
-      const jwtToken = await this.authService.login(signInBody);
+      const authInfo = await this.authService.login(signInBody);
       return {
         message: SIGN_IN_OK_MESSAGE,
-        jwt_token: jwtToken,
+        jwtToken: authInfo.jwtToken,
+	user: authInfo.user,
       };
     } catch (error) {
       if (error instanceof PasswordAuthError) {

@@ -13,6 +13,7 @@ import { SIGN_IN_PASSWORD_ERROR, SIGN_IN_EMAIL_ERROR } from './auth.constants';
 import type { SignUpDTO, SignInDTO } from './auth.validation';
 import type { JWTSignPayload } from './auth.types';
 import type { Account } from '../account/account.types';
+import type { User } from '../user/user.types';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +45,7 @@ export class AuthService {
     throw new AuthError('Wrong password');
   }
 
-  async login(signInBody: SignInDTO): Promise<string> {
+  async login(signInBody: SignInDTO): Promise<{jwtToken: string, user: User }> {
     try {
       const user = await this.userService.getUserByEmail(signInBody.email);
 
@@ -55,10 +56,16 @@ export class AuthService {
             id: user.id,
           },
         };
-        return this.jwtService.sign(payload);
+	const authInfo = {
+	    jwtToken: this.jwtService.sign(payload),
+	    user: user,
+	};
+
+	return authInfo;
       }
 
       throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);
+
     } catch (error) {
       if (error instanceof AuthError) {
         throw new PasswordAuthError(SIGN_IN_PASSWORD_ERROR);

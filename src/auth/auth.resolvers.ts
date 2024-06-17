@@ -61,10 +61,11 @@ export class AuthResolver {
     @Args(new ZodPipe(signInBodySchema)) signInDTO: SignInDTO,
   ): Promise<SignInOK> {
     try {
-      const jwtToken = await this.authService.login(signInDTO);
+      const authInfo = await this.authService.login(signInDTO);
       return {
         message: SIGN_IN_OK_MESSAGE,
-        jwt_token: jwtToken,
+        jwtToken: authInfo.jwtToken,
+	user: authInfo.user,
       };
     } catch (error) {
       if (error instanceof PasswordAuthError) {

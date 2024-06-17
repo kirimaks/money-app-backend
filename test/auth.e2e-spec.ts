@@ -102,9 +102,9 @@ describe('Auth test', () => {
         .then((response) => {
           expect(response.statusCode).toEqual(HttpStatus.OK);
           expect(response.body.message).toEqual(SIGN_IN_OK_MESSAGE);
-          expect(response.body.jwt_token).toBeTruthy();
+          expect(response.body.jwtToken).toBeTruthy();
 
-          jwtToken = response.body.jwt_token;
+          jwtToken = response.body.jwtToken;
         });
     });
   });

@@ -10,7 +10,8 @@ type SignUpResponse {
 
 type LogInResponse {
     message: String!
-    jwt_token: String!
+    jwtToken: String!
+    user: User!
 }
 
 type Mutation {

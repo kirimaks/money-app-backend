@@ -56,7 +56,7 @@ export async function signInTool(
   const signInQuery = gql`
     mutation {
       signIn(email: "${email}" password: "${password}") {
-        jwt_token message
+        jwtToken message
       }
     }
   `;
@@ -67,7 +67,7 @@ export async function signInTool(
     signInQuery,
   );
 
-  const token = data?.signIn?.jwt_token;
+  const token = data?.signIn?.jwtToken;
 
   if (isString(token)) {
     return token;
