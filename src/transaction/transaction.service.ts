@@ -14,6 +14,7 @@ import type {
   UpdateTransactionData,
   LatestTransactionsByDay,
   LatestTransactionsRange,
+  TransactionsRange
 } from './transaction.types';
 
 function transactionResponse(
@@ -253,5 +254,33 @@ export class TransactionService {
     }
 
     return Object.keys(responseBuff).map((key) => responseBuff[key]);
+  }
+
+  async getTransactionsByRange(transactionsRange:TransactionsRange):Promise<TransactionRepresentation[]> {
+    const timeRangeEnd = dayjs(transactionsRange.timeRangeEnd);
+    const timeRangeStart = dayjs(transactionsRange.timeRangeStart);
+
+    const transactions = await this.prisma.transaction.findMany({
+      where: {
+        accountId: transactionsRange.accountId,
+        utc_datetime: {
+          gte: timeRangeStart.toDate(),
+          lte: timeRangeEnd.toDate(),
+        },
+      },
+      orderBy: {
+        utc_datetime: 'desc',
+      },
+      take: 10000,
+      include: {
+        TransactionTags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    return transactions.map(transaction => transactionResponse(transaction));
   }
 }

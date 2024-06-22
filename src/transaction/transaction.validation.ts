@@ -42,3 +42,18 @@ export const latestTransactionsSchema = Zod.object({
 export type LatestTransactionsInput = Zod.infer<
   typeof latestTransactionsSchema
 >;
+
+export const TransactionsRangeSchema = Zod.object({
+  timeRangeStart: Zod.string().datetime({ message: INVALID_DATETIME }),
+  timeRangeEnd: Zod.string().datetime({ message: INVALID_DATETIME }),
+}).refine(
+  (data) => dayjs(data.timeRangeStart).unix() < dayjs(data.timeRangeEnd).unix(),
+  {
+    message: INVALID_TIME_RANGE,
+    path: ['timeRangeEnd'],
+  },
+);
+
+export type TransactionsRangeInput = Zod.infer<
+  typeof TransactionsRangeSchema
+>;

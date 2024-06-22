@@ -33,6 +33,7 @@ import type {
   UpdateTransactionInput,
   LatestTransactionsInput,
   CreateTransactionInput,
+  TransactionsRangeInput,
 } from './transaction.validation';
 
 @Resolver('Transaction')
@@ -133,4 +134,25 @@ export class TransactionResolver {
 
     throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
   }
+
+  @Query()
+  @UseGuards(GQLJwtAuthGuard)
+  async transactionsByRange(
+    @Args(new ZodPipe(latestTransactionsSchema))
+    transactionsRangeInput: TransactionsRangeInput,
+    @CurrentUser() user: UserInRequest,
+  ): Promise<TransactionRepresentation[]> {
+    try {
+      return await this.transactionService.getTransactionsByRange({
+        accountId: user.accountId,
+	timeRangeStart: transactionsRangeInput.timeRangeStart,
+	timeRangeEnd: transactionsRangeInput.timeRangeEnd
+      });
+    } catch(error) {
+      this.logger.error(error);
+    }
+
+    throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+  }
+
 }

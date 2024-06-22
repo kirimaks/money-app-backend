@@ -45,3 +45,9 @@ export type LatestTransactionsRange = {
   timeRangeStart: string;
   timeRangeEnd: string;
 };
+
+export type TransactionsRange = {
+  accountId: string;
+  timeRangeStart: string;
+  timeRangeEnd: string;
+};

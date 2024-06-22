@@ -15,6 +15,7 @@ type TransactionsByDaySummary {
 type Query {
   transaction(id:String!): TransactionResponse!
   latestTransactions(timeRangeStart:String! timeRangeEnd:String!): [TransactionsByDaySummary!]
+  transactionsByRange(timeRangeStart:String! timeRangeEnd:String!): [TransactionResponse!]
 }
 
 type Mutation {
