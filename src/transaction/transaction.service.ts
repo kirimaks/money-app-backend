@@ -158,15 +158,45 @@ export class TransactionService {
   async updateTransaction(
     updateTransactionData: UpdateTransactionData,
   ): Promise<TransactionRepresentation> {
+
+    const transactionId = updateTransactionData.transactionId;
+    const tagIds = updateTransactionData.tagIds ?? [];
+
+    try {
+      await this.prisma.transactionTags.deleteMany({
+        where: {
+          // accountId: updateTransactionData.accountId,
+          transactionId,
+        }
+      });
+
+    } catch(error) {
+      this.logger.error(error);
+
+      throw error;
+    }
+
+    try {
+      await this.prisma.transactionTags.createMany({
+        data: tagIds.map( tagId => ( { transactionId, tagId } ) ),
+      });
+
+    } catch(error) {
+      this.logger.error(error);
+    }
+
     try {
       const updateQuery = {
         where: {
           transaction_id_by_account: {
             accountId: updateTransactionData.accountId,
-            id: updateTransactionData.transactionId,
+            id: transactionId,
           },
         },
-        data: {},
+        data: {
+          name: updateTransactionData.name,
+          amount_cents: Math.round(updateTransactionData.amount * 100),
+        },
         include: {
           TransactionTags: {
             include: {
@@ -176,22 +206,10 @@ export class TransactionService {
         },
       };
 
-      if (
-        updateTransactionData.tagIds &&
-        updateTransactionData.tagIds.length > 0
-      ) {
-        const newTagsQuery = getNewTagsQuery(updateTransactionData.tagIds);
-
-        updateQuery.data = {
-          TransactionTags: {
-            create: newTagsQuery,
-          },
-        };
-      }
-
       const transaction = await this.prisma.transaction.update(updateQuery);
 
       return transactionResponse(transaction);
+
     } catch (error) {
       this.logger.error(error);
 

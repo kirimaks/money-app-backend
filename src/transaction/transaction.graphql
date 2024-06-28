@@ -23,5 +23,5 @@ type Mutation {
     name:String! amount:Float! datetime:String! tagIds: [String]
   ): TransactionResponse!
 
-  updateTransaction( transactionId: String!  tagIds: [String]): TransactionResponse!
+  updateTransaction(transactionId: String! name: String! amount: Float! datetime: String! tagIds: [String]): TransactionResponse!
 }

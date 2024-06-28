@@ -24,6 +24,9 @@ export const getTransactionSchema = Zod.object({
 export const updateTransactionSchema = Zod.object({
   transactionId: Zod.string(),
   tagIds: Zod.optional(Zod.array(Zod.string())),
+  name: Zod.string().max(NAME_MAX_LENGTH),
+  amount: Zod.number(),
+  datetime: Zod.string().datetime({ message: INVALID_DATETIME }),
 });
 
 export type UpdateTransactionInput = Zod.infer<typeof updateTransactionSchema>;
