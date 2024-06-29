@@ -1,6 +1,6 @@
 import { z as Zod } from 'zod';
 
-import { NAME_MAX_LENGTH } from '../errors/constants';
+import { NAME_MAX_LENGTH, INVALID_DATETIME } from '../errors/constants';
 
 export const createTagGroupSchema = Zod.object({
   name: Zod.string().max(NAME_MAX_LENGTH),
@@ -32,3 +32,9 @@ export const deleteTagSchema = Zod.object({
   tagId: Zod.string({ required_error: 'tagId is required' }).max(100),
 });
 export type DeleteTagInput = Zod.infer<typeof deleteTagSchema>;
+
+export const transactionsByTagAggregationSchema = Zod.object({
+  timeRangeStart: Zod.string().datetime({ message: INVALID_DATETIME }),
+  timeRangeEnd: Zod.string().datetime({ message: INVALID_DATETIME })
+});
+export type TransactionsByTagAggregationInput = Zod.infer<typeof transactionsByTagAggregationSchema>;

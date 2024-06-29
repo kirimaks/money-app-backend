@@ -73,3 +73,8 @@ export type DeleteTagGroupResponse = {
 export type DeleteTagResponse = {
   status: string;
 };
+
+export type TransactionsByTagAggregationRecord = {
+  tagName: string;
+  counter: number;
+};

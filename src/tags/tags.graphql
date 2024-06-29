@@ -36,6 +36,12 @@ type Mutation {
   deleteTag(tagId: String!): DeleteTagResponse!
 }
 
+type TransactionsByTagCounter {
+  tagName: String!
+  counter: Float!
+}
+
 type Query {
   accountTags: [TagGroupResponse!]
+  transactionsByTagCounters(timeRangeStart: String! timeRangeEnd: String!): [TransactionsByTagCounter!]
 }

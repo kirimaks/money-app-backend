@@ -8,7 +8,9 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TagsService } from './tags.service';
-import { createTagSchema, deleteTagSchema } from './tags.validation';
+import { 
+  createTagSchema, deleteTagSchema, transactionsByTagAggregationSchema, TransactionsByTagAggregationInput
+} from './tags.validation';
 import { ZodPipe } from '../pipes/zod.pipe';
 import { INTERNAL_SERVER_ERROR } from '../errors/constants';
 import { TagNotFoundError, TagExistError } from './tags.errors';
@@ -20,6 +22,7 @@ import type {
   TagRepresentation,
   TagGroupRepresentation,
   DeleteTagResponse,
+  TransactionsByTagAggregationRecord
 } from './tags.types';
 
 @Resolver('Tag')
@@ -86,6 +89,26 @@ export class TagsResolver {
     try {
       return await this.tagsService.accountTags(user.accountId);
     } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Query()
+  @UseGuards(GQLJwtAuthGuard)
+  async transactionsByTagCounters(
+    @Args(new ZodPipe(transactionsByTagAggregationSchema)) 
+    transactionsByTagAggregationInput: TransactionsByTagAggregationInput,
+    @CurrentUser() user: UserInRequest,
+  ): Promise<TransactionsByTagAggregationRecord[]> {
+    try {
+      return await this.tagsService.transactionsByTagAggregation(
+        user.accountId, 
+        transactionsByTagAggregationInput.timeRangeStart, 
+        transactionsByTagAggregationInput.timeRangeEnd
+      );
+
+    } catch(error) {
       this.logger.error(error);
       throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
     }

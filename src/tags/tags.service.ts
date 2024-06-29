@@ -25,6 +25,7 @@ import type {
   NewTag,
   DeleteTagGroupResponse,
   DeleteTagResponse,
+  TransactionsByTagAggregationRecord
 } from './tags.types';
 
 @Injectable()
@@ -217,5 +218,27 @@ export class TagsService {
       this.logger.error(error);
       throw error;
     }
+  }
+
+  async transactionsByTagAggregation(
+    accountId:string, 
+    timeRangeStart:string, 
+    timeRangeEnd:string
+  ):Promise<TransactionsByTagAggregationRecord[]> {
+    const resp = await this.prisma.$queryRaw<{tagName: string; counter: number}[]>`
+      SELECT 
+        tg.name AS "tagName", 
+        count(tr.id) AS counter
+      FROM "Tag" as tg 
+          INNER JOIN "TransactionTags" AS tt ON tg.id = tt."tagId" 
+            INNER JOIN "Transaction" as tr ON tr.id = tt."transactionId" 
+      WHERE tr."accountId" = ${accountId} 
+        AND tr."utc_datetime" >= ${timeRangeStart}::timestamp
+        AND tr."utc_datetime" <= ${timeRangeEnd}::timestamp
+      GROUP BY tg.id 
+      ORDER BY 2 DESC;
+    `;
+
+    return resp.map(result => ({ tagName: result.tagName, counter: Number(result.counter) }));
   }
 }

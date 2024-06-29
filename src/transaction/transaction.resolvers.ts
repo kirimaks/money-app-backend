@@ -145,8 +145,8 @@ export class TransactionResolver {
     try {
       return await this.transactionService.getTransactionsByRange({
         accountId: user.accountId,
-	timeRangeStart: transactionsRangeInput.timeRangeStart,
-	timeRangeEnd: transactionsRangeInput.timeRangeEnd
+	      timeRangeStart: transactionsRangeInput.timeRangeStart,
+	      timeRangeEnd: transactionsRangeInput.timeRangeEnd
       });
     } catch(error) {
       this.logger.error(error);
