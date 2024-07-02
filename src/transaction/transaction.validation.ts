@@ -60,3 +60,11 @@ export const TransactionsRangeSchema = Zod.object({
 export type TransactionsRangeInput = Zod.infer<
   typeof TransactionsRangeSchema
 >;
+
+export const importTransactionsSchema = Zod.object({
+  csvData: Zod.string(),
+});
+
+export type ImportTransactionsInput = Zod.infer<
+  typeof importTransactionsSchema
+>;

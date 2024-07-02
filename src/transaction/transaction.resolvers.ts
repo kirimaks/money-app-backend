@@ -18,6 +18,7 @@ import {
   getTransactionSchema,
   updateTransactionSchema,
   latestTransactionsSchema,
+  importTransactionsSchema
 } from './transaction.validation';
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TransactionNotFoundError } from '../errors/transaction';
@@ -27,6 +28,7 @@ import type {
   TransactionRepresentation,
   GetTransactionInput,
   LatestTransactionsByDay,
+  ImportTransactionsInput
 } from './transaction.types';
 import type { UserInRequest } from '../user/user.types';
 import type {
@@ -155,4 +157,14 @@ export class TransactionResolver {
     throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
   }
 
+  @Mutation()
+  @UseGuards(GQLJwtAuthGuard)
+  async importTransactions(
+    @Args(new ZodPipe(importTransactionsSchema))
+    importTransactionsInput: ImportTransactionsInput,
+    @CurrentUser() user: UserInRequest,
+  ): Promise<string> {
+    this.logger.log(importTransactionsInput.csvData);
+    return 'ok';
+  }
 }

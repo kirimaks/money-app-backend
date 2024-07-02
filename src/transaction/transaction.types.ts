@@ -51,3 +51,7 @@ export type TransactionsRange = {
   timeRangeStart: string;
   timeRangeEnd: string;
 };
+
+export type ImportTransactionsInput = {
+  csvData: string;
+};

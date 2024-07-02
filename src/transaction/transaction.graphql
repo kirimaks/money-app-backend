@@ -24,4 +24,5 @@ type Mutation {
   ): TransactionResponse!
 
   updateTransaction(transactionId: String! name: String! amount: Float! datetime: String! tagIds: [String]): TransactionResponse!
+  importTransactions(csvData: String!): String!
 }
