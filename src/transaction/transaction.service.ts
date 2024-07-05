@@ -7,6 +7,7 @@ import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
 import { TransactionNotFoundError } from '../errors/transaction';
 import { isString } from '../errors/typeguards';
+import { transactionResponse, getNewTagsQuery } from './tools';
 
 import type {
   TransactionRepresentation,
@@ -17,45 +18,6 @@ import type {
   LatestTransactionsRange,
   TransactionsRange
 } from './transaction.types';
-
-function transactionResponse(
-  transaction: Transaction,
-): TransactionRepresentation {
-  return {
-    id: transaction.id,
-    name: transaction.name,
-    amount: Number(transaction.amount_cents) / 100,
-    datetime: dayjs.utc(transaction.utc_datetime).format(),
-    tags: transaction.TransactionTags.map((tag) => ({
-      id: tag.tagId,
-      name: tag.tag.name,
-      tagGroupId: tag.tag.tagGroupId,
-      iconName: tag.tag.iconName,
-    })),
-  };
-}
-
-function getNewTagsQuery(tags: string[]) {
-  return tags.map((tagId) => {
-    return { tagId: tagId };
-  });
-}
-
-function showData(responseBuff: any) {
-  console.log(
-    JSON.stringify(
-      responseBuff,
-      (key, value) => {
-        if (typeof value === 'bigint') {
-          return value.toString();
-        } else {
-          return value;
-        }
-      },
-      2,
-    ),
-  );
-}
 
 @Injectable()
 export class TransactionService {
