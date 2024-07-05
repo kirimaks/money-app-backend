@@ -6,7 +6,7 @@ import dayjs from '../../src/tools/dayjs';
 import type { INestApplication } from '@nestjs/common';
 import type { TransactionRepresentation } from '../../src/transaction/transaction.types';
 
-export function getTransactionAmount() {
+export function getTransactionAmount():number {
   return parseFloat((Math.random() * 100).toFixed(2));
 }
 

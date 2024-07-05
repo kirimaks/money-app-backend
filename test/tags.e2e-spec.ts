@@ -421,11 +421,12 @@ describe('Testing tags', () => {
       expect(transaction.id).toBeTruthy();
 
       const transactionId = transaction.id;
+      const tagIds = JSON.stringify([tagId]);
+      const newTransactionName = getRandomString(8);
+
       const updateTransactionQuery = gql`
         mutation {
-          updateTransaction(transactionId: "${transactionId}" tagIds: ${JSON.stringify(
-        [tagId],
-      )} ) {
+          updateTransaction(transactionId: "${transactionId}" tagIds: ${tagIds} name: "${newTransactionName}" amount: ${transactionAmount} datetime: "${transaction.datetime}" ) {
             id name amount datetime
             tags {
               id
@@ -444,6 +445,8 @@ describe('Testing tags', () => {
       expect(data?.updateTransaction.tags.map((tag) => tag.id)).toContain(
         tagId,
       );
+
+      expect(data?.updateTransaction.name).toEqual(newTransactionName);
     });
   });
 });
