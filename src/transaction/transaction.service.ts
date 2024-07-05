@@ -1,6 +1,7 @@
 import { Logger, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import dayjs from 'dayjs';
+import { parse as parseCSV } from 'csv-parse';
 
 import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
@@ -300,5 +301,31 @@ export class TransactionService {
     });
 
     return transactions.map(transaction => transactionResponse(transaction));
+  }
+
+  async importCSVData(csvData:string):Promise<void> {
+    this.logger.log(csvData);
+
+    const records = await parseCSV(
+      csvData, 
+      { 
+        columns: true,
+        trim: true, 
+        delimiter: ';' 
+      }
+    );
+
+    for await (const record of records) {
+      this.logger.log(record);
+
+      const parsedTransactions = {
+        amount: record.Amount,
+        name: record.Note,
+        tag: record.Category,
+        utc_datetime: dayjs(record.Date, 'DD/MM/YYYY').utc().format(),
+      };
+
+      this.logger.debug(parsedTransactions);
+    }
   }
 }

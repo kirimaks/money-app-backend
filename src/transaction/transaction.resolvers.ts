@@ -4,6 +4,7 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 
 import {
@@ -164,7 +165,19 @@ export class TransactionResolver {
     importTransactionsInput: ImportTransactionsInput,
     @CurrentUser() user: UserInRequest,
   ): Promise<string> {
-    this.logger.log(importTransactionsInput.csvData);
-    return 'ok';
+
+    try {
+      await this.transactionService.importCSVData(importTransactionsInput.csvData);
+      return 'ok';
+
+    } catch(error) {
+      this.logger.error(error);
+
+      if (error instanceof Error) {
+        throw new BadRequestException(error.message);
+      }
+    }
+
+    throw new InternalServerErrorException(INTERNAL_SERVER_ERROR);
   }
 }
