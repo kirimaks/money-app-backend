@@ -1,3 +1,6 @@
+import { PrismaClientService } from '../prisma-client/prisma-client.service';
+
+
 export type TagGroupRepresentation = {
   id: string;
   name: string;
@@ -40,9 +43,10 @@ export type AccountTags = {
 };
 
 export type TagGroup = {
-  groupName: string;
+  id: string;
+  name: string;
   iconName: string;
-  tags: Tag[];
+  accountId: string;
 };
 
 export type Tag = {
@@ -78,3 +82,18 @@ export type TransactionsByTagAggregationRecord = {
   tagName: string;
   counter: number;
 };
+
+
+type GetTagByNameOrCreateArgs = {
+  accountId: string;
+  tagName: string;
+  prisma: PrismaClientService;
+};
+export type GetTagByNameOrCreate = (args:GetTagByNameOrCreateArgs) => Promise<Tag>;
+
+type GetTagGroupByNameOrCreateArgs = {
+  accountId: string;
+  tagGroupName: string;
+  prisma: PrismaClientService;
+};
+export type GetTagGroupByNameOrCreate = (args:GetTagGroupByNameOrCreateArgs) => Promise<TagGroup>;

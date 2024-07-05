@@ -24,6 +24,7 @@ import {
 import { GQLJwtAuthGuard, CurrentUser } from '../auth/auth.jwt.guard';
 import { TransactionNotFoundError } from '../errors/transaction';
 import { UserNotFoundError } from '../errors/user';
+import { transactionResponse } from './tools';
 
 import type {
   TransactionRepresentation,
@@ -81,11 +82,13 @@ export class TransactionResolver {
     @CurrentUser() user: UserInRequest,
   ): Promise<TransactionRepresentation> {
     try {
-      return await this.transactionService.createTransaction({
+      const transaction = await this.transactionService.createTransaction({
         userId: user.id,
         accountId: user.accountId,
         ...createTransactionInput,
       });
+      return transactionResponse(transaction);
+
     } catch (error) {
       if (error instanceof UserNotFoundError) {
         throw new NotFoundException(USER_NOT_FOUND_ERROR);
@@ -167,7 +170,7 @@ export class TransactionResolver {
   ): Promise<string> {
 
     try {
-      await this.transactionService.importCSVData(importTransactionsInput.csvData);
+      await this.transactionService.importCSVData(user, importTransactionsInput.csvData);
       return 'ok';
 
     } catch(error) {

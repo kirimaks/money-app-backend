@@ -1,3 +1,5 @@
+import { PrismaClientService } from '../prisma-client/prisma-client.service';
+
 import type { TransactionTags } from '../tags/tags.types';
 import type {
   UpdateTransactionInput,
@@ -55,3 +57,15 @@ export type TransactionsRange = {
 export type ImportTransactionsInput = {
   csvData: string;
 };
+
+export type CreateTransactionToolArgs = {
+  prisma: PrismaClientService;
+  name: string;
+  amount: number;
+  datetime: string;
+  accountId: string;
+  userId: string;
+  tagIds: string[];
+};
+
+export type CreateTransactionTool = (args:CreateTransactionToolArgs) => Promise<Transaction>;

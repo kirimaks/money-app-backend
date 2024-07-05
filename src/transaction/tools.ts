@@ -1,7 +1,7 @@
 import dayjs from '../tools/dayjs';
 
-import type { TransactionRepresentation, Transaction } from './transaction.types';
-import type { TagRepresentation, TransactionTags } from '../tags/tags.types';
+import type { TransactionRepresentation, Transaction, CreateTransactionTool } from './transaction.types';
+import type { TransactionTags } from '../tags/tags.types';
 
 
 function transactionResponse(
@@ -27,10 +27,51 @@ function getNewTagsQuery(tags: string[]) {
   });
 }
 
-/*
-async function createTransaction(name:string, amount:number, datetime:string, accountId:string, userId:string):Promise<TransactionRepresentation> {
-}
-*/
+const createTransaction:CreateTransactionTool = async ({ 
+    prisma, name, amount, datetime, accountId, userId, tagIds 
+  }):Promise<Transaction> => {
 
-// export { transactionResponse, getNewTagsQuery, showData, createTransaction }
-export { transactionResponse, getNewTagsQuery }
+      const datetimePrepared = new Date(datetime);
+      const amountPrepared = Math.round(Math.abs(amount) * 100);
+      const newTransactionPayload = {
+        data: {
+          name: name,
+          amount_cents: amountPrepared,
+          utc_datetime: datetime,
+          account: {
+            connect: {
+              id: accountId,
+            },
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+          TransactionTags: {},
+        },
+        include: {
+          TransactionTags: {
+            include: {
+              tag: true,
+            },
+          },
+        },
+      };
+
+      if (tagIds && tagIds.length > 0) {
+        const newTagsQuery = getNewTagsQuery(tagIds);
+
+        newTransactionPayload.data.TransactionTags = {
+          create: newTagsQuery,
+        };
+      }
+
+      const transaction = await prisma.transaction.create(
+        newTransactionPayload,
+      );
+
+      return transaction;
+}
+
+export { transactionResponse, createTransaction }

@@ -7,7 +7,8 @@ import { PrismaClientService } from '../prisma-client/prisma-client.service';
 import { UserNotFoundError } from '../errors/user';
 import { TransactionNotFoundError } from '../errors/transaction';
 import { isString } from '../errors/typeguards';
-import { transactionResponse, getNewTagsQuery } from './tools';
+import { transactionResponse, createTransaction } from './tools';
+import { getTagByNameOrCreate } from '../tags/tools';
 
 import type {
   TransactionRepresentation,
@@ -18,6 +19,7 @@ import type {
   LatestTransactionsRange,
   TransactionsRange
 } from './transaction.types';
+import type { UserInRequest } from '../user/user.types';
 
 @Injectable()
 export class TransactionService {
@@ -30,50 +32,19 @@ export class TransactionService {
   }
   async createTransaction(
     newTransactionData: NewTransactionData,
-  ): Promise<TransactionRepresentation> {
+  ): Promise<Transaction> {
+
     try {
-      const datetime = new Date(newTransactionData.datetime);
-      const amount = Math.round(newTransactionData.amount * 100);
+      return await createTransaction({
+        prisma: this.prisma, 
+        name: newTransactionData.name,
+        amount: newTransactionData.amount,
+        datetime: newTransactionData.datetime,
+        accountId: newTransactionData.accountId,
+        userId: newTransactionData.userId,
+        tagIds: newTransactionData.tagIds ?? []
+      });
 
-      const newTransactionPayload = {
-        data: {
-          name: newTransactionData.name,
-          amount_cents: amount,
-          utc_datetime: datetime,
-          account: {
-            connect: {
-              id: newTransactionData.accountId,
-            },
-          },
-          user: {
-            connect: {
-              id: newTransactionData.userId,
-            },
-          },
-          TransactionTags: {},
-        },
-        include: {
-          TransactionTags: {
-            include: {
-              tag: true,
-            },
-          },
-        },
-      };
-
-      if (newTransactionData.tagIds && newTransactionData.tagIds.length > 0) {
-        const newTagsQuery = getNewTagsQuery(newTransactionData.tagIds);
-
-        newTransactionPayload.data.TransactionTags = {
-          create: newTagsQuery,
-        };
-      }
-
-      const transaction = await this.prisma.transaction.create(
-        newTransactionPayload,
-      );
-
-      return transactionResponse(transaction);
     } catch (error) {
       if (error instanceof Prisma.NotFoundError) {
         throw new UserNotFoundError('User not found');
@@ -265,7 +236,7 @@ export class TransactionService {
     return transactions.map(transaction => transactionResponse(transaction));
   }
 
-  async importCSVData(csvData:string):Promise<void> {
+  async importCSVData(user:UserInRequest, csvData:string):Promise<void> {
     this.logger.log(csvData);
 
     const records = await parseCSV(
@@ -280,14 +251,32 @@ export class TransactionService {
     for await (const record of records) {
       this.logger.log(record);
 
-      const parsedTransactions = {
-        amount: record.Amount,
+      const transactionTagIds:string[] = [];
+
+      if (record.Category && record.Category.length ) {
+        const tag = await getTagByNameOrCreate({ 
+          prisma: this.prisma,
+          accountId: user.accountId, 
+          tagName: record.Category,
+        });
+        transactionTagIds.push(tag.id);
+      }
+
+      const parsedTransaction = {
         name: record.Note,
-        tag: record.Category,
-        utc_datetime: dayjs(record.Date, 'DD/MM/YYYY').utc().format(),
+        amount: record.Amount,
+        datetime: dayjs(record.Date, 'DD/MM/YYYY').utc().format(),
+        accountId: user.accountId,
+        userId: user.id,
+        tagIds: transactionTagIds,
       };
 
-      this.logger.debug(parsedTransactions);
+      this.logger.log(parsedTransaction);
+
+      await createTransaction({
+        prisma: this.prisma, 
+        ...parsedTransaction
+      });
     }
   }
 }
