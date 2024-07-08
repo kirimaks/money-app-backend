@@ -223,7 +223,7 @@ export class TransactionService {
       orderBy: {
         utc_datetime: 'desc',
       },
-      take: 10000,
+      take: parseInt(process.env.TRANSACTIONS_PAGE_SIZE ?? '50'),
       include: {
         TransactionTags: {
           include: {
